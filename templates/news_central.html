@@ -1,0 +1,1007 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 📊 Filter Section -->
+<div class="card border-0 mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="get" id="filterForm" class="row g-3">
+            <!-- Date Range Filter -->
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" 
+                       class="form-control form-control-sm" 
+                       id="start_date" 
+                       name="start_date" 
+                       value="{{ start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" 
+                       class="form-control form-control-sm" 
+                       id="end_date" 
+                       name="end_date" 
+                       value="{{ end_date }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="button" 
+                        class="btn btn-outline-secondary btn-sm me-2" 
+                        id="resetDatesBtn">
+                    <i class="fas fa-redo me-1"></i> Reset
+                </button>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-search me-1"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 📊 Stats Summary Card -->
+<div class="card border-0 mb-2 shadow-sm">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-newspaper fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ total_count }}</h5>
+                        <p class="text-muted mb-0">Total Alerts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-danger text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ critical_count }}</h5>
+                        <p class="text-muted mb-0">Critical Alerts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ high_count }}</h5>
+                        <p class="text-muted mb-0">High Alerts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ alerts_today|default:0 }}</h5>
+                        <p class="text-muted mb-0">Today's Alerts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 📰 Threat Alerts Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <!-- Search Bar -->
+        <div class="p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="flex-grow-1 me-3">
+                    <input type="text" 
+                           id="tableSearch" 
+                           class="form-control form-control-sm" 
+                           placeholder="🔍 Search in table...">
+                </div>
+                <div class="text-nowrap">
+                    <small class="text-muted">
+                        <i class="fas fa-filter me-1"></i>
+                        <strong>{{ threats|length }}</strong> records filtered
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="threatTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%;">SN</th>
+                        <th style="width: 15%;">Title</th>
+                        <th style="width: 5%;">Category</th>
+                        <th style="width: 10%;">Severity</th>
+                        <th style="width: 15%;">Content</th>
+                        <th style="width: 10%;">Source</th>
+                        <th style="width: 10%;">URL</th>
+                        <th style="width: 5%;">Image</th>
+                        <th style="width: 15%;">Created Time</th>
+                        <th style="width: 10%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for threat in threats %}
+                    <tr>
+                        <!-- Serial Number -->
+                        <td>{{ forloop.counter }}</td>
+                        
+                        <!-- Title -->
+                        <td>
+                            <div class="expandable-cell" 
+                                 data-full="{{ threat.title }}" 
+                                 data-truncated="{{ threat.title|truncatechars:30 }}">
+                                {{ threat.title|truncatechars:30 }}
+                            </div>
+                        </td>
+
+                        <!-- Category -->
+                        <td>
+                            {% if threat.category %}
+                            <span class="badge bg-info text-dark">
+                                {{ threat.category.name }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Severity -->
+                        <td>
+                            {% if threat.severity == 'critical' %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% elif threat.severity == 'high' %}
+                                <span class="badge bg-warning text-dark">High</span>
+                            {% elif threat.severity == 'medium' %}
+                                <span class="badge bg-primary">Medium</span>
+                            {% else %}
+                                <span class="badge bg-success">Low</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Content -->
+                        <td>
+                            <div class="expandable-cell" 
+                                 data-full="{{ threat.content }}" 
+                                 data-truncated="{{ threat.content|truncatewords:10 }}">
+                                {{ threat.content|truncatewords:10 }}
+                            </div>
+                        </td>
+
+                        <!-- Source -->
+                        <td>
+                            <div class="expandable-cell" 
+                                 data-full="{{ threat.source }}" 
+                                 data-truncated="{{ threat.source|truncatechars:15 }}">
+                                {{ threat.source|truncatechars:15 }}
+                            </div>
+                        </td>
+
+                        <!-- URL -->
+                        <td>
+                            {% if threat.url %}
+                            <a href="{{ threat.url }}" target="_blank" rel="noopener noreferrer" 
+                               class="text-primary text-decoration-none">
+                                <div class="expandable-cell url-cell" 
+                                     data-full="{{ threat.url }}" 
+                                     data-truncated="{{ threat.url|truncatechars:20 }}">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    {{ threat.url|truncatechars:20 }}
+                                </div>
+                            </a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Image -->
+                        <td class="text-center">
+                            {% if threat.image %}
+                            <a href="{{ threat.image.url }}" target="_blank" rel="noopener noreferrer" 
+                               title="View full image" class="image-preview-link">
+                                <img src="{{ threat.image.url }}" 
+                                     alt="Threat image" 
+                                     class="img-thumbnail rounded" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                            </a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Created Time (Nepal Time) -->
+                        <td>
+                            <div class="text-nowrap">
+                                <small class="d-block">{{ threat.created_at|date:"Y-m-d" }}</small>
+                                <small class="text-muted">{{ threat.created_at|date:"h:i A" }}</small>
+                            </div>
+                        </td>
+
+                        <!-- Like/Unlike Actions -->
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <!-- Like Button -->
+                                <button class="btn btn-outline-primary btn-sm like-btn {% if request.user in threat.users_liked.all %}active{% endif %}" 
+                                        data-alert-id="{{ threat.id }}"
+                                        data-user-liked="{% if request.user in threat.users_liked.all %}true{% else %}false{% endif %}"
+                                        title="Like">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="like-count ms-1">{{ threat.likes_count }}</span>
+                                </button>
+                                
+                                <!-- Unlike Button -->
+                                <button class="btn btn-outline-secondary btn-sm unlike-btn {% if request.user in threat.users_unliked.all %}active{% endif %}" 
+                                        data-alert-id="{{ threat.id }}"
+                                        data-user-unliked="{% if request.user in threat.users_unliked.all %}true{% else %}false{% endif %}"
+                                        title="Unlike">
+                                    <i class="fas fa-thumbs-down"></i>
+                                    <span class="unlike-count ms-1">{{ threat.unlikes_count }}</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                            No threat alerts found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 📄 Pagination -->
+        {% if threats.has_other_pages %}
+        <div class="card-footer bg-light">
+            <nav aria-label="Threat alerts pagination">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if threats.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">
+                            &laquo; First
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.previous_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">
+                            Previous
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in threats.paginator.page_range %}
+                        {% if threats.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > threats.number|add:'-3' and num < threats.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if threats.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.next_page_number }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">
+                            Next
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.paginator.num_pages }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">
+                            Last &raquo;
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="text-center text-muted mt-2">
+                Page {{ threats.number }} of {{ threats.paginator.num_pages }}
+                • Showing {{ threats.start_index }}-{{ threats.end_index }} of {{ total_count }} alerts
+                • <strong>{{ days_interval }}</strong> day{{ days_interval|pluralize }} period
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+/* Expandable Cells */
+.expandable-cell {
+    cursor: pointer;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 4px 0;
+    max-height: 3em;
+    line-height: 1.5em;
+    transition: all 0.2s ease;
+}
+
+.expandable-cell.expanded {
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: none;
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.expandable-cell:hover:not(.expanded) {
+    background-color: #f1f1f1;
+}
+
+.expandable-cell:hover:not(.expanded)::after {
+    content: " (click to expand)";
+    color: #0d6efd;
+    font-size: 0.8em;
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
+/* Stats Cards */
+.bg-primary { background-color: #0d6efd !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-info { background-color: #0dcaf0 !important; }
+
+/* Like/Unlike Buttons Facebook Style */
+.like-btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.unlike-btn.active {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.like-btn:hover:not(.active) {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.unlike-btn:hover:not(.active) {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+
+/* Button Loading State */
+.btn.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn.loading .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Image preview styling */
+.image-preview-link:hover img {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Time display */
+.text-nowrap {
+    white-space: nowrap;
+}
+
+/* Toast notifications */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    min-width: 250px;
+}
+
+/* Button disabled state */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .table th, .table td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+    
+    .btn-sm {
+        padding: 2px 5px;
+        font-size: 0.75rem;
+    }
+    
+    .expandable-cell {
+        max-height: 4.5em;
+    }
+    
+    /* Hide some columns on mobile */
+    .table th:nth-child(6), .table td:nth-child(6), /* Source */
+    .table th:nth-child(7), .table td:nth-child(7), /* URL */
+    .table th:nth-child(8), .table td:nth-child(8)  /* Image */ {
+        display: none;
+    }
+}
+</style>
+
+<!-- JavaScript Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ====================
+    // 1. RESET DATES FUNCTION
+    // ====================
+    document.getElementById('resetDatesBtn').addEventListener('click', function() {
+        document.getElementById('start_date').value = '';
+        document.getElementById('end_date').value = '';
+        document.getElementById('filterForm').submit();
+    });
+
+    // ====================
+    // 2. EXPANDABLE CELLS
+    // ====================
+    document.querySelectorAll('.expandable-cell').forEach(cell => {
+        cell.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return;
+            }
+            
+            const isExpanded = this.classList.contains('expanded');
+            
+            if (isExpanded) {
+                this.classList.remove('expanded');
+                this.textContent = this.dataset.truncated;
+            } else {
+                this.classList.add('expanded');
+                this.textContent = this.dataset.full;
+                
+                // Collapse other expanded cells in the same row
+                const row = this.closest('tr');
+                row.querySelectorAll('.expandable-cell.expanded').forEach(otherCell => {
+                    if (otherCell !== this) {
+                        otherCell.classList.remove('expanded');
+                        otherCell.textContent = otherCell.dataset.truncated;
+                    }
+                });
+            }
+        });
+    });
+
+    // ====================
+    // 3. TABLE SEARCH
+    // ====================
+    const tableSearch = document.getElementById('tableSearch');
+    if (tableSearch) {
+        let searchTimeout;
+        
+        tableSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            
+            searchTimeout = setTimeout(() => {
+                const searchValue = this.value.toLowerCase().trim();
+                const tableRows = document.querySelectorAll('#threatTable tbody tr');
+                let visibleCount = 0;
+                
+                tableRows.forEach(row => {
+                    if (row.cells.length <= 1) return;
+                    
+                    const rowText = row.textContent.toLowerCase();
+                    if (rowText.includes(searchValue) || searchValue === '') {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Update visible count display
+                const countDisplay = document.querySelector('.text-nowrap small');
+                if (countDisplay) {
+                    countDisplay.innerHTML = `<strong>${visibleCount}</strong> records filtered`;
+                }
+            }, 300);
+        });
+    }
+
+    // ====================
+    // 4. LIKE/UNLIKE FUNCTIONALITY - FIXED REAL-TIME VERSION
+    // ====================
+    function setupLikeUnlikeButtons() {
+        // Get CSRF token
+        const csrftoken = getCookie('csrftoken');
+        
+        // Handle Like button clicks
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const alertId = this.dataset.alertId;
+                const row = this.closest('tr');
+                const unlikeBtn = row.querySelector('.unlike-btn');
+                
+                // Show loading state
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+                this.classList.add('loading');
+                this.disabled = true;
+                
+                if (unlikeBtn) {
+                    unlikeBtn.disabled = true;
+                }
+                
+                try {
+                    console.log(`Sending like request for alert ${alertId}`);
+                    const response = await fetch(`/like-alert/${alertId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Like response:', data);
+                    
+                    if (data.success) {
+                        // Update like button state
+                        if (data.user_liked) {
+                            this.classList.add('active');
+                            this.setAttribute('data-user-liked', 'true');
+                        } else {
+                            this.classList.remove('active');
+                            this.setAttribute('data-user-liked', 'false');
+                        }
+                        
+                        // Update like count
+                        const likeCountSpan = this.querySelector('.like-count');
+                        if (likeCountSpan) {
+                            likeCountSpan.textContent = data.likes_count;
+                        }
+                        
+                        // Update unlike button
+                        if (unlikeBtn) {
+                            if (data.user_unliked) {
+                                unlikeBtn.classList.add('active');
+                                unlikeBtn.setAttribute('data-user-unliked', 'true');
+                            } else {
+                                unlikeBtn.classList.remove('active');
+                                unlikeBtn.setAttribute('data-user-unliked', 'false');
+                            }
+                            
+                            // Update unlike count
+                            const unlikeCountSpan = unlikeBtn.querySelector('.unlike-count');
+                            if (unlikeCountSpan) {
+                                unlikeCountSpan.textContent = data.unlikes_count;
+                            }
+                        }
+                        
+                        // Show feedback
+                        showToast(data.user_liked ? 'Liked!' : 'Like removed!', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 800);
+                    } else {
+                        showToast('Error: ' + (data.error || 'Unknown error'), 'error');
+                        console.error('Like error from server:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Like network error:', error);
+                    showToast('Network error. Please try again.', 'error');
+                } finally {
+                    // Restore button state
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('loading');
+                    this.disabled = false;
+                    
+                    if (unlikeBtn) {
+                        unlikeBtn.disabled = false;
+                    }
+                }
+            });
+        });
+        
+        // Handle Unlike button clicks
+        document.querySelectorAll('.unlike-btn').forEach(button => {
+            button.addEventListener('click', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const alertId = this.dataset.alertId;
+                const row = this.closest('tr');
+                const likeBtn = row.querySelector('.like-btn');
+                
+                // Show loading state
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+                this.classList.add('loading');
+                this.disabled = true;
+                
+                if (likeBtn) {
+                    likeBtn.disabled = true;
+                }
+                
+                try {
+                    console.log(`Sending unlike request for alert ${alertId}`);
+                    const response = await fetch(`/unlike-alert/${alertId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Unlike response:', data);
+                    
+                    if (data.success) {
+                        // Update unlike button state
+                        if (data.user_unliked) {
+                            this.classList.add('active');
+                            this.setAttribute('data-user-unliked', 'true');
+                        } else {
+                            this.classList.remove('active');
+                            this.setAttribute('data-user-unliked', 'false');
+                        }
+                        
+                        // Update unlike count
+                        const unlikeCountSpan = this.querySelector('.unlike-count');
+                        if (unlikeCountSpan) {
+                            unlikeCountSpan.textContent = data.unlikes_count;
+                        }
+                        
+                        // Update like button
+                        if (likeBtn) {
+                            if (data.user_liked) {
+                                likeBtn.classList.add('active');
+                                likeBtn.setAttribute('data-user-liked', 'true');
+                            } else {
+                                likeBtn.classList.remove('active');
+                                likeBtn.setAttribute('data-user-liked', 'false');
+                            }
+                            
+                            // Update like count
+                            const likeCountSpan = likeBtn.querySelector('.like-count');
+                            if (likeCountSpan) {
+                                likeCountSpan.textContent = data.likes_count;
+                            }
+                        }
+                        
+                        // Show feedback
+                        showToast(data.user_unliked ? 'Disliked!' : 'Dislike removed!', 'info');
+                        setTimeout(() => {
+                        location.reload();
+                        }, 800);
+                    } else {
+                        showToast('Error: ' + (data.error || 'Unknown error'), 'error');
+                        console.error('Unlike error from server:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Unlike network error:', error);
+                    showToast('Network error. Please try again.', 'error');
+                } finally {
+                    // Restore button state
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('loading');
+                    this.disabled = false;
+                    
+                    if (likeBtn) {
+                        likeBtn.disabled = false;
+                    }
+                }
+            });
+        });
+    }
+    
+    // Initialize like/unlike buttons
+    setupLikeUnlikeButtons();
+
+    // ====================
+    // 5. IMAGE PREVIEW MODAL
+    // ====================
+    document.querySelectorAll('.image-preview-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                
+                const imgSrc = this.href;
+                const modalId = 'imageModal';
+                
+                let modal = document.getElementById(modalId);
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = modalId;
+                    modal.className = 'modal fade';
+                    modal.innerHTML = `
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Image Preview</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img src="" class="img-fluid" id="modalImage">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+                
+                document.getElementById('modalImage').src = imgSrc;
+                
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+            }
+        });
+    });
+
+    // ====================
+    // 6. HELPER FUNCTIONS
+    // ====================
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showToast(message, type = 'info') {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // Create toast
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Initialize and show toast
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function () {
+            toast.remove();
+        });
+    }
+
+    // ====================
+    // 7. DEBUG AND TEST FUNCTIONS
+    // ====================
+    window.testLikeEndpoint = async function(alertId) {
+        const csrftoken = getCookie('csrftoken');
+        console.log(`Testing like endpoint for alert ${alertId}`);
+        
+        try {
+            const response = await fetch(`/like-alert/${alertId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Test like response:', data);
+            
+            if (data.success) {
+                // Find and update buttons
+                const likeBtn = document.querySelector(`.like-btn[data-alert-id="${alertId}"]`);
+                const unlikeBtn = document.querySelector(`.unlike-btn[data-alert-id="${alertId}"]`);
+                
+                if (likeBtn) {
+                    if (data.user_liked) {
+                        likeBtn.classList.add('active');
+                        likeBtn.setAttribute('data-user-liked', 'true');
+                    } else {
+                        likeBtn.classList.remove('active');
+                        likeBtn.setAttribute('data-user-liked', 'false');
+                    }
+                    
+                    const likeCountSpan = likeBtn.querySelector('.like-count');
+                    if (likeCountSpan) {
+                        likeCountSpan.textContent = data.likes_count;
+                    }
+                }
+                
+                if (unlikeBtn) {
+                    if (data.user_unliked) {
+                        unlikeBtn.classList.add('active');
+                        unlikeBtn.setAttribute('data-user-unliked', 'true');
+                    } else {
+                        unlikeBtn.classList.remove('active');
+                        unlikeBtn.setAttribute('data-user-unliked', 'false');
+                    }
+                    
+                    const unlikeCountSpan = unlikeBtn.querySelector('.unlike-count');
+                    if (unlikeCountSpan) {
+                        unlikeCountSpan.textContent = data.unlikes_count;
+                    }
+                }
+                
+                showToast('Test successful! Check console for details.', 'success');
+            }
+            return data;
+        } catch (error) {
+            console.error('Test error:', error);
+            showToast('Test failed: ' + error.message, 'error');
+        }
+    };
+    
+    window.testUnlikeEndpoint = async function(alertId) {
+        const csrftoken = getCookie('csrftoken');
+        console.log(`Testing unlike endpoint for alert ${alertId}`);
+        
+        try {
+            const response = await fetch(`/unlike-alert/${alertId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Test unlike response:', data);
+            
+            if (data.success) {
+                // Find and update buttons
+                const likeBtn = document.querySelector(`.like-btn[data-alert-id="${alertId}"]`);
+                const unlikeBtn = document.querySelector(`.unlike-btn[data-alert-id="${alertId}"]`);
+                
+                if (likeBtn) {
+                    if (data.user_liked) {
+                        likeBtn.classList.add('active');
+                        likeBtn.setAttribute('data-user-liked', 'true');
+                    } else {
+                        likeBtn.classList.remove('active');
+                        likeBtn.setAttribute('data-user-liked', 'false');
+                    }
+                    
+                    const likeCountSpan = likeBtn.querySelector('.like-count');
+                    if (likeCountSpan) {
+                        likeCountSpan.textContent = data.likes_count;
+                    }
+                }
+                
+                if (unlikeBtn) {
+                    if (data.user_unliked) {
+                        unlikeBtn.classList.add('active');
+                        unlikeBtn.setAttribute('data-user-unliked', 'true');
+                    } else {
+                        unlikeBtn.classList.remove('active');
+                        unlikeBtn.setAttribute('data-user-unliked', 'false');
+                    }
+                    
+                    const unlikeCountSpan = unlikeBtn.querySelector('.unlike-count');
+                    if (unlikeCountSpan) {
+                        unlikeCountSpan.textContent = data.unlikes_count;
+                    }
+                }
+                
+                showToast('Test successful! Check console for details.', 'success');
+            }
+            return data;
+        } catch (error) {
+            console.error('Test error:', error);
+            showToast('Test failed: ' + error.message, 'error');
+        }
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            const searchInput = document.getElementById('tableSearch');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
+        
+        if (e.key === 'Escape') {
+            const searchInput = document.getElementById('tableSearch');
+            if (searchInput && document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+            }
+        }
+    });
+
+    // ====================
+    // 8. INITIAL DEBUG LOGGING
+    // ====================
+    console.log('News Central page loaded');
+    console.log(`Found ${document.querySelectorAll('.like-btn').length} like buttons`);
+    console.log(`Found ${document.querySelectorAll('.unlike-btn').length} unlike buttons`);
+    console.log('Test functions available:');
+    console.log('- testLikeEndpoint(alertId) - Test like endpoint');
+    console.log('- testUnlikeEndpoint(alertId) - Test unlike endpoint');
+});
+</script>
+
+<!-- Add CSRF token for AJAX requests if not in base template -->
+{% if not csrf_token %}
+<script>
+// Ensure CSRF token is available
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        // Add CSRF token to page if missing
+        const csrfToken = '{{ csrf_token }}';
+        if (csrfToken) {
+            const meta = document.createElement('meta');
+            meta.name = 'csrf-token';
+            meta.content = csrfToken;
+            document.head.appendChild(meta);
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

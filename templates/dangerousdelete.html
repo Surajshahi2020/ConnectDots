@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold text-danger mb-1">
+                        <i class="fas fa-trash-alt me-2"></i>Delete Dangerous Keyword
+                    </h4>
+                    <small class="text-muted">Confirm deletion of dangerous keyword</small>
+                </div>
+                <div>
+                    <a href="{% url 'keywords_listing' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Warning Card -->
+            <div class="card border-danger shadow">
+                <div class="card-body text-center p-4">
+                    <!-- Warning Icon -->
+                    <div class="mb-4">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-4 d-inline-block">
+                            <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                        </div>
+                    </div>
+
+                    <!-- Warning Message -->
+                    <h5 class="card-title text-danger mb-3">⚠️ Warning: Permanent Deletion</h5>
+                    <p class="card-text mb-4">
+                        You are about to permanently delete the following dangerous keyword:
+                    </p>
+
+                    <!-- Keyword Details -->
+                    <div class="alert alert-warning mb-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="me-3">
+                                <i class="fas fa-exclamation-circle fa-2x"></i>
+                            </div>
+                            <div class="text-start">
+                                <h6 class="alert-heading mb-1">{{ keyword.word }}</h6>
+                                <div class="small">
+                                    <span class="badge bg-info me-2">{{ keyword.category }}</span>
+                                    <span class="badge {% if keyword.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {% if keyword.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        Created: {{ keyword.created_at|date:"M d, Y" }}
+                                        {% if keyword.created_by %}• By: {{ keyword.created_by.username }}{% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consequences Warning -->
+                    <div class="alert alert-danger mb-4 text-start">
+                        <h6 class="alert-heading"><i class="fas fa-ban me-1"></i>This action cannot be undone!</h6>
+                        <ul class="mb-0 ps-3">
+                            <li>This keyword will be permanently removed from the database</li>
+                            <li>All references to this keyword will be lost</li>
+                            <li>Any threat reports containing this keyword will no longer detect it</li>
+                            <li>This action is irreversible</li>
+                        </ul>
+                    </div>
+
+                    <!-- Confirmation Form -->
+                    <form method="POST" id="deleteKeywordForm">
+                        {% csrf_token %}
+                        
+                        <!-- Confirmation Checkbox -->
+                        <div class="form-check mb-4 text-start">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="confirmDelete" 
+                                   name="confirmDelete" 
+                                   required>
+                            <label class="form-check-label fw-medium" for="confirmDelete">
+                                I understand that this action cannot be undone and I want to permanently delete this dangerous keyword.
+                            </label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'keyword_edit' keyword.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit Instead
+                            </a>
+                            <a href="{% url 'keywords_listing' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="btn btn-danger btn-sm" 
+                                    id="deleteButton"
+                                    disabled>
+                                <i class="fas fa-trash-alt me-1"></i>Permanently Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="mt-4 text-center">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Consider deactivating the keyword instead if you might need it in the future.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 1600px;
+}
+.card {
+    border-radius: 8px;
+}
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+.bg-opacity-10 {
+    opacity: 0.1;
+}
+.form-check-input:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.alert {
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+}
+.alert-danger {
+    border-left-color: #dc3545;
+}
+.alert-warning {
+    border-left-color: #ffc107;
+}
+@media (max-width: 768px) {
+    .container { padding: 0.5rem; }
+    .card-body { padding: 1.5rem !important; }
+    h4 { font-size: 1.1rem; }
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+    .d-flex.justify-content-between > div:last-child {
+        align-self: flex-start;
+    }
+    .d-flex.justify-content-center.gap-3 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .d-flex.justify-content-center.gap-3 .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deleteKeywordForm');
+    const confirmCheckbox = document.getElementById('confirmDelete');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteKeyword = "{{ keyword.word }}";
+    
+    // Enable/disable delete button based on checkbox
+    confirmCheckbox.addEventListener('change', function() {
+        deleteButton.disabled = !this.checked;
+    });
+    
+    // Additional confirmation before submitting
+    form.addEventListener('submit', function(e) {
+        if (!confirm(`Are you absolutely sure you want to PERMANENTLY delete the keyword "${deleteKeyword}"?`)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Additional security check
+        const userInput = prompt(`Please type "DELETE ${deleteKeyword}" to confirm permanent deletion:`);
+        if (userInput !== `DELETE ${deleteKeyword}`) {
+            alert('Confirmation text did not match. Deletion cancelled.');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+        deleteButton.disabled = true;
+        
+        // Form will submit normally
+    });
+    
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.isConnected) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Edit User Card -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-edit me-2"></i>Edit User: {{ user.username }}
+                </h6>
+                <small class="text-muted">User ID: {{ user.id }} • Last updated: {{ user.updated_at|date:"Y-m-d H:i" }}</small>
+            </div>
+            <div>
+                <a href="{% url 'user_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to List
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Basic Information -->
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               value="{{ user.username }}" 
+                               required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               value="{{ user.email }}" 
+                               required>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="first_name" 
+                               name="first_name" 
+                               value="{{ user.first_name|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="last_name" 
+                               name="last_name" 
+                               value="{{ user.last_name|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="name" class="form-label">Display Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name" 
+                               value="{{ user.name|default:'' }}"
+                               maxlength="15">
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="phone" 
+                               name="phone" 
+                               value="{{ user.phone|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="unit" class="form-label">Unit/Department</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="unit" 
+                               name="unit" 
+                               value="{{ user.unit|default:'' }}">
+                    </div>
+                    
+                    <!-- Role and Rank -->
+                    <div class="col-md-6 mb-3">
+                        <label for="role" class="form-label">Role *</label>
+                        <select class="form-select" id="role" name="role" required>
+                            {% for value, label in role_choices %}
+                            <option value="{{ value }}" 
+                                    {% if user.role == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="rank" class="form-label">Rank/Position</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="rank" 
+                               name="rank" 
+                               value="{{ user.rank|default:'' }}">
+                    </div>
+                    
+                    <!-- Password (Optional) -->
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">
+                            New Password
+                            <small class="text-muted">(Leave blank to keep current password)</small>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password">
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="confirm_password" 
+                               name="confirm_password">
+                    </div>
+                    
+                    <!-- Status Switches -->
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Account Status</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- Social Media Access -->
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               role="switch"
+                                               id="social_media" 
+                                               name="social_media"
+                                               {% if user.social_media %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold" for="social_media">
+                                            <i class="fas fa-share-alt me-1"></i> Social Media Access
+                                        </label>
+                                        <div class="form-text">
+                                            Allow user to access social media features
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Is Active -->
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               role="switch"
+                                               id="is_active" 
+                                               name="is_active"
+                                               {% if user.is_active %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold" for="is_active">
+                                            <i class="fas fa-user-check me-1"></i> Account Active
+                                        </label>
+                                        <div class="form-text">
+                                            User can log in when checked. When unchecked, user account is disabled.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Is Void (Only for SuperAdmin) -->
+                                {% if request.user.role == 'SuperAdmin' %}
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               role="switch"
+                                               id="is_void" 
+                                               name="is_void"
+                                               {% if user.is_void %}checked{% endif %}
+                                               {% if user.id == request.user.id %}disabled{% endif %}>
+                                        <label class="form-check-label fw-bold" for="is_void">
+                                            <i class="fas fa-trash me-1"></i> Mark as Deleted
+                                        </label>
+                                        <div class="form-text">
+                                            {% if user.id == request.user.id %}
+                                            <span class="text-danger">You cannot mark yourself as deleted</span>
+                                            {% else %}
+                                            When checked, user is marked as deleted (soft delete). User will not appear in active lists.
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="mb-3">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-lock me-2"></i>
+                                        <strong>Delete Status:</strong> Only SuperAdmin can change deletion status.
+                                        Current status: <span class="badge {% if user.is_void %}bg-danger{% else %}bg-success{% endif %}">
+                                            {% if user.is_void %}Deleted{% else %}Active{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Password confirmation validation
+    $('#password, #confirm_password').on('keyup', function() {
+        const password = $('#password').val();
+        const confirmPassword = $('#confirm_password').val();
+        
+        if (password && confirmPassword && password !== confirmPassword) {
+            $('#confirm_password').addClass('is-invalid');
+            $('#confirm_password').next('.invalid-feedback').remove();
+            $('#confirm_password').after('<div class="invalid-feedback">Passwords do not match!</div>');
+        } else {
+            $('#confirm_password').removeClass('is-invalid');
+            $('#confirm_password').next('.invalid-feedback').remove();
+        }
+    });
+    
+    // Form validation
+    $('form').submit(function(event) {
+        const password = $('#password').val();
+        const confirmPassword = $('#confirm_password').val();
+        
+        if (password && password !== confirmPassword) {
+            event.preventDefault();
+            $('#confirm_password').addClass('is-invalid');
+            $('#confirm_password').focus();
+            return false;
+        }
+        
+        // Check if trying to delete self
+        const isVoidChecked = $('#is_void').is(':checked');
+        const isSelf = $('#is_void').prop('disabled');
+        
+        if (isVoidChecked && isSelf) {
+            event.preventDefault();
+            alert('You cannot delete yourself!');
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Real-time feedback for username and email
+    $('#username, #email').on('blur', function() {
+        const field = $(this);
+        const value = field.val();
+        const originalValue = '{{ user.username }}' || '{{ user.email }}';
+        
+        if (value !== originalValue) {
+            // You could add AJAX validation here to check for duplicates
+            field.addClass('is-valid');
+        }
+    });
+});
+</script>
+{% endblock %}

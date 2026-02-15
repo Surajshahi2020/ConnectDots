@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<script src="https://unpkg.com/leaflet.offline@latest/dist/leaflet.offline.min.js"></script>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇳🇵 Nepal Interactive Map | Marker System</title>
+    
+    <!-- Leaflet CSS & JS -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" /> -->
+    <link href="../static/css/leaflet.css" rel="stylesheet">
+
+    <!-- <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>     -->
+    <script src="../static/js/leaflet.js"></script>  <!-- Use script tag -->
+    
+    <!-- Font Awesome for icons -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+    <link href="../static/css/all.min.css" rel="stylesheet">
+
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .leaflet-container {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Floating Header */
+        .map-header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            border: 3px solid #4CAF50;
+            backdrop-filter: blur(10px);
+            min-width: 350px;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        .map-header h1 {
+            font-size: 22px;
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .map-header h1 i {
+            color: #4CAF50;
+        }
+        
+        .map-header h2 {
+            font-size: 14px;
+            margin: 8px 0 0 0;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        /* Floating Info Panel */
+        .map-info-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-size: 13px;
+            max-width: 280px;
+            border: 3px solid #2196F3;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .info-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .info-title i {
+            color: #2196F3;
+            font-size: 18px;
+        }
+        
+        .info-content {
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .info-step {
+            margin: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .step-number {
+            background: #4CAF50;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 3px solid #FF9800;
+            backdrop-filter: blur(10px);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .loading h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        /* Marker Form Styles - MODAL STYLE */
+        .marker-form-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .marker-form-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            width: 450px;
+            max-width: 90%;
+            border: 4px solid #FF9800;
+            position: relative;
+            animation: slideIn 0.4s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .form-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: color 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-modal:hover {
+            color: #e74c3c;
+            background: #f9f9f9;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .coordinates-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .coordinates-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .coordinates-row input {
+            background-color: #f8f9fa;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .location-preview {
+            font-size: 13px;
+            color: #636e72;
+            margin-top: 10px;
+            padding: 12px;
+            background: #f1f8ff;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .location-preview strong {
+            color: #2c3e50;
+        }
+        
+        .color-preview {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+        
+        /* Marker List Panel */
+        .marker-list-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
+            width: 350px;
+            max-height: 70vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 20px;
+            display: none;
+            backdrop-filter: blur(10px);
+            animation: slideInLeft 0.4s ease-out;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .panel-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-controls select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .marker-item {
+            padding: 15px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 12px;
+            border-left: 5px solid #4CAF50;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        
+        .marker-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+        }
+        
+        .marker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .marker-title {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 15px;
+            line-height: 1.4;
+            flex: 1;
+        }
+        
+        .marker-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .edit-btn {
+            color: #FF9800;
+        }
+        
+        .edit-btn:hover {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+        
+        .delete-btn {
+            color: #f44336;
+        }
+        
+        .delete-btn:hover {
+            background: #FFEBEE;
+            color: #d32f2f;
+        }
+        
+        .marker-description {
+            color: #636e72;
+            font-size: 13px;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .marker-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 10px;
+        }
+        
+        /* Updated category badge styling */
+        .marker-category {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: capitalize;
+        }
+        
+        /* Specific colors for each category type */
+        .marker-category[data-category="military_deployment"] {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .marker-category[data-category="protest"] {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .marker-category[data-category="violence_clash"] {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .marker-category[data-category="political_rally"] {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .marker-category[data-category="speech_event"] {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .marker-category[data-category="other"] {
+            background: #f5f5f5;
+            color: #616161;
+        }
+        
+        .marker-location {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .no-markers {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95a5a6;
+        }
+        
+        .no-markers i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #dfe6e9;
+        }
+        
+        /* Control Buttons */
+        .map-controls {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            border: 3px solid #2196F3;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+            transition: all 0.3s;
+            color: #2196F3;
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-btn:hover {
+            background: #2196F3;
+            color: white;
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 12px 25px rgba(33, 150, 243, 0.4);
+        }
+        
+        .control-btn.active {
+            background: #2196F3;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.5);
+        }
+        
+        .control-btn .tooltip {
+            position: absolute;
+            right: 70px;
+            background: #2c3e50;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        
+        .control-btn:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Messages */
+        .message {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .error {
+            background: #FFEBEE;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+        
+        .success {
+            background: #E8F5E9;
+            color: #2e7d32;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .warning {
+            background: #FFF3E0;
+            color: #ef6c00;
+            border-left: 4px solid #FF9800;
+        }
+        
+        /* Animations */
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+            100% { box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* CSRF Token */
+        .csrf-token {
+            display: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .map-header {
+                min-width: 300px;
+                padding: 12px 20px;
+                top: 10px;
+            }
+            
+            .marker-list-panel {
+                width: 90%;
+                left: 5%;
+                max-height: 50vh;
+            }
+            
+            .map-controls {
+                top: auto;
+                bottom: 100px;
+                flex-direction: row;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .map-info-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- CSRF Token for AJAX requests -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrfToken">
+    
+    <div class="map-container">
+        <!-- Floating Header -->
+        <div class="map-header">
+            <h1><i class="fas fa-map-marked-alt"></i> Nepal Interactive Map</h1>
+            <h2>Click anywhere to add and manage markers</h2>
+        </div>
+        
+        <!-- Map Controls - Different controls based on role -->
+        <div class="map-controls">
+             
+            <!-- View Markers Button - Both Admin and User -->
+            <button class="control-btn" id="viewMarkersBtn" title="View All Markers">
+                <i class="fas fa-list"></i>
+                <span class="tooltip">View Markers</span>
+            </button>
+            
+            <!-- Add Marker Button - Admin only -->
+            <button class="control-btn" id="addMarkerBtn" title="Add Marker Mode">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="tooltip">Add Marker</span>
+            </button>
+           
+            <!-- Refresh Button - Admin only -->
+            <button class="control-btn" id="refreshBtn" title="Refresh from Database">
+                <i class="fas fa-sync-alt"></i>
+                <span class="tooltip">Refresh</span>
+            </button>
+            
+            <!-- Clear All Button - Admin only -->
+            <button class="control-btn" id="clearMarkersBtn" title="Clear All Markers">
+                <i class="fas fa-trash"></i>
+                <span class="tooltip">Clear All</span>
+            </button>
+        </div>
+
+        <!-- The Map -->
+        <div id="map"></div>
+        
+        <!-- Info Panel -->
+        <div class="map-info-panel" id="mapInfo">
+            <div class="info-title">
+                <i class="fas fa-info-circle"></i>
+                <span>How to Use</span>
+            </div>
+            <div class="info-content">
+                <div class="info-step">
+                    <div class="step-number">1</div>
+                    <span>Click <strong>📍 Add Marker</strong> button</span>
+                </div>
+                <div class="info-step">
+                    <div class="step-number">2</div>
+                    <span>Click anywhere on the map</span>
+                </div>
+                <div class="info-step">
+                    <div class="step-number">3</div>
+                    <span>Fill the form and submit</span>
+                </div>
+                <div class="info-step">
+                    <div class="step-number">4</div>
+                    <span>Click markers to edit or delete</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Marker Form Modal -->
+        <div class="marker-form-modal" id="markerFormModal">
+            <div class="marker-form-container">
+                <div class="form-header">
+                    <h3><i class="fas fa-plus-circle"></i> Add New Marker</h3>
+                    <button class="close-modal" id="closeFormBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="markerDetailsForm">
+                    <div class="form-group">
+                        <label for="markerTitle"><i class="fas fa-heading"></i> Title *</label>
+                        <input type="text" id="markerTitle" name="title" placeholder="Enter marker title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="markerDescription"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="markerDescription" name="description" placeholder="Enter marker description (optional)"></textarea>
+                    </div>
+                    
+                    <div class="coordinates-row">
+                        <div class="form-group">
+                            <label for="markerLatitude"><i class="fas fa-globe-asia"></i> Latitude *</label>
+                            <input type="number" id="markerLatitude" name="latitude" 
+                                   step="0.000000001" min="-90" max="90" 
+                                   placeholder="e.g., 28.3949" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="markerLongitude"><i class="fas fa-globe-asia"></i> Longitude *</label>
+                            <input type="number" id="markerLongitude" name="longitude" 
+                                   step="0.000000001" min="-180" max="180" 
+                                   placeholder="e.g., 84.1240" required>
+                        </div>
+                    </div>
+                    
+                    <div id="locationPreview" class="location-preview">
+                        <i class="fas fa-map-pin"></i> Location will appear here...
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="markerCategory"><i class="fas fa-tag"></i> Category</label>
+                        <select id="markerCategory" name="category">
+                            <option value="military_deployment">🚨 Military Deployment</option>
+                            <option value="protest">✊ Protest/Rally</option>
+                            <option value="violence_clash">⚔️ Violence/Clash</option>
+                            <option value="political_rally">🏛️ Political Rally</option>
+                            <option value="speech_event">🎤 Political Speech</option>
+                            <option value="other">📌 Other Incident</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="markerColor"><i class="fas fa-palette"></i> Marker Color</label>
+                        <select id="markerColor" name="color">
+                            <option value="#FF0000"><span class="color-preview" style="background: #FF0000"></span>🔴 Red</option>
+                            <option value="#0000FF"><span class="color-preview" style="background: #0000FF"></span>🔵 Blue</option>
+                            <option value="#008000"><span class="color-preview" style="background: #008000"></span>🟢 Green</option>
+                            <option value="#FFA500"><span class="color-preview" style="background: #FFA500"></span>🟠 Orange</option>
+                            <option value="#800080"><span class="color-preview" style="background: #800080"></span>🟣 Purple</option>
+                            <option value="#FFFF00"><span class="color-preview" style="background: #FFFF00"></span>🟡 Yellow</option>
+                        </select>
+                    </div>
+                    
+                    <div id="formMessage"></div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Marker
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Edit Marker Modal -->
+        <div class="marker-form-modal" id="editMarkerModal">
+            <div class="marker-form-container">
+                <div class="form-header">
+                    <h3><i class="fas fa-edit"></i> Edit Marker</h3>
+                    <button class="close-modal" id="closeEditFormBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="editMarkerForm">
+                    <input type="hidden" id="editMarkerId">
+                    
+                    <div class="form-group">
+                        <label for="editMarkerTitle"><i class="fas fa-heading"></i> Title *</label>
+                        <input type="text" id="editMarkerTitle" name="title" placeholder="Enter marker title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarkerDescription"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="editMarkerDescription" name="description" placeholder="Enter marker description"></textarea>
+                    </div>
+                    
+                    <div class="coordinates-row">
+                        <div class="form-group">
+                            <label for="editMarkerLatitude"><i class="fas fa-globe-asia"></i> Latitude *</label>
+                            <input type="number" id="editMarkerLatitude" name="latitude" 
+                                   step="0.000001" min="-90" max="90" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editMarkerLongitude"><i class="fas fa-globe-asia"></i> Longitude *</label>
+                            <input type="number" id="editMarkerLongitude" name="longitude" 
+                                   step="0.000001" min="-180" max="180" required>
+                        </div>
+                    </div>
+                    
+                    <div id="editLocationPreview" class="location-preview">
+                        <i class="fas fa-map-pin"></i> Location preview
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarkerCategory"><i class="fas fa-tag"></i> Category</label>
+                        <select id="editMarkerCategory" name="category">
+                            <option value="military_deployment">🚨 Military Deployment</option>
+                            <option value="protest">✊ Protest/Rally</option>
+                            <option value="violence_clash">⚔️ Violence/Clash</option>
+                            <option value="political_rally">🏛️ Political Rally</option>
+                            <option value="speech_event">🎤 Political Speech</option>
+                            <option value="other">📌 Other Incident</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarkerColor"><i class="fas fa-palette"></i> Marker Color</label>
+                        <select id="editMarkerColor" name="color">
+                            <option value="#FF0000"><span class="color-preview" style="background: #FF0000"></span>🔴 Red</option>
+                            <option value="#0000FF"><span class="color-preview" style="background: #0000FF"></span>🔵 Blue</option>
+                            <option value="#008000"><span class="color-preview" style="background: #008000"></span>🟢 Green</option>
+                            <option value="#FFA500"><span class="color-preview" style="background: #FFA500"></span>🟠 Orange</option>
+                            <option value="#800080"><span class="color-preview" style="background: #800080"></span>🟣 Purple</option>
+                            <option value="#FFFF00"><span class="color-preview" style="background: #FFFF00"></span>🟡 Yellow</option>
+                        </select>
+                    </div>
+                    
+                    <div id="editFormMessage"></div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" id="cancelEditBtn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Marker
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Marker List Panel -->
+        <div class="marker-list-panel" id="markerListPanel">
+            <div class="panel-header">
+                <h3><i class="fas fa-map-pin"></i> Saved Markers</h3>
+                <button class="close-modal" id="closeMarkerListBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="filter-controls">
+                <div class="filter-row">
+                    <select id="filterCategory">
+                        <option value="all">All Categories</option>
+                        <option value="military_deployment">🚨 Military Deployment</option>
+                        <option value="protest">✊ Protest/Rally</option>
+                        <option value="violence_clash">⚔️ Violence/Clash</option>
+                        <option value="political_rally">🏛️ Political Rally</option>
+                        <option value="speech_event">🎤 Political Speech</option>
+                        <option value="other">📌 Other Incident</option>
+                    </select>
+                </div>
+               
+                <div class="filter-row">
+                    <select id="filterDate">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+
+                <div id="customDateRange" style="display: none; margin-top: 10px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #666; display: block; margin-bottom: 3px;">Start Date</label>
+                            <input type="date" id="startDate" style="width: 100%; padding: 8px; border: 2px solid #dfe6e9; border-radius: 8px; font-size: 13px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #666; display: block; margin-bottom: 3px;">End Date</label>
+                            <input type="date" id="endDate" style="width: 100%; padding: 8px; border: 2px solid #dfe6e9; border-radius: 8px; font-size: 13px;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="applyDateRange" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                        <button id="clearDateRange" style="flex: 1; background: #95a5a6; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="markerListContent">
+                <div class="no-markers">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>No markers found</p>
+                    <p style="font-size: 12px; margin-top: 5px;">Add markers to see them here</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Screen -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <h3><i class="fas fa-map"></i> Loading Nepal Map...</h3>
+            <div id="loading-status">Initializing map data...</div>
+        </div>
+    </div>
+
+    <!-- Load GeoJSON data files -->
+    <script type="text/javascript" src="{% static 'map/nepal-province.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province1-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province2-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province3-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province4-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province5-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province6-district.js' %}"></script>
+    <script type="text/javascript" src="{% static 'map/province7-district.js' %}"></script>
+
+    <script type="text/javascript">
+    // Global variables
+    let map;
+    let markers = [];
+    let markerMode = false;
+    let pendingMarkerLatLng = null;
+    let markerLayerGroup = L.layerGroup();
+    const csrfToken = document.getElementById('csrfToken').value;
+    
+    // Filter state
+    let activeFilters = {
+        category: 'all',
+        dateRange: 'all',
+        startDate: null,
+        endDate: null
+    };
+    
+    // API URLs
+    const API_URLS = {
+        create: '{% url "create_marker" %}',
+        get: '{% url "get_markers" %}',
+        delete: '{% url "delete_marker" %}',
+        delete_all: '{% url "delete_all_markers" %}',
+        update: '{% url "update-markers" %}',
+    };
+    
+    // Helper function to get display name for categories
+    function getCategoryDisplayName(categoryValue) {
+        const categoryMap = {
+            'military_deployment': '🚨 Military Deployment',
+            'protest': '✊ Protest/Rally',
+            'violence_clash': '⚔️ Violence/Clash',
+            'political_rally': '🏛️ Political Rally',
+            'speech_event': '🎤 Political Speech',
+            'other': '📌 Other Incident'
+        };
+        return categoryMap[categoryValue] || categoryValue;
+    }
+    
+    // Initialize map
+    function initializeMap() {
+        try {
+            map = L.map('map').setView([28.3949, 84.1240], 7);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add marker layer group to map
+            markerLayerGroup.addTo(map);
+            
+            // Load province data if available
+            if (typeof provinceData !== 'undefined') {
+                L.geoJson(provinceData, {
+                    style: {
+                        weight: 2,
+                        opacity: 1,
+                        color: '#FFF',
+                        fillOpacity: 0.3,
+                        fillColor: '#4CAF50'
+                    }
+                }).addTo(map);
+            }
+            
+            // Load saved markers from database
+            loadMarkersFromDB();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            document.getElementById('loading').style.display = 'none';
+            console.log('Map initialized successfully');
+            
+        } catch (error) {
+            console.error('Error initializing map:', error);
+            document.getElementById('loading').innerHTML = 
+                '<div class="error">Failed to load map: ' + error.message + '</div>';
+        }
+    }
+    
+    // Helper function to safely add event listener
+    function safeAddListener(elementId, eventType, callback) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener(eventType, callback);
+            return true;
+        }
+        return false;
+    }
+    
+    // Setup all event listeners
+    function setupEventListeners() {
+        // Map click for adding markers
+        map.on('click', function(e) {
+            if (markerMode) {
+                pendingMarkerLatLng = e.latlng;
+                showMarkerForm(e.latlng);
+            }
+        });
+        
+        // Control buttons - safely add listeners only if elements exist
+        safeAddListener('viewMarkersBtn', 'click', toggleMarkerList);
+        safeAddListener('addMarkerBtn', 'click', toggleMarkerMode);
+        safeAddListener('refreshBtn', 'click', refreshMarkers);
+        safeAddListener('clearMarkersBtn', 'click', clearAllMarkers);
+        safeAddListener('closeMarkerListBtn', 'click', toggleMarkerList);
+        
+        // Form buttons - these should always exist
+        safeAddListener('cancelBtn', 'click', hideMarkerForm);
+        safeAddListener('markerDetailsForm', 'submit', function(e) {
+            e.preventDefault();
+            saveMarkerToDB(e);
+        });
+        safeAddListener('closeFormBtn', 'click', hideMarkerForm);
+        
+        // Edit form buttons
+        safeAddListener('cancelEditBtn', 'click', hideEditForm);
+        safeAddListener('editMarkerForm', 'submit', function(e) {
+            e.preventDefault();
+            updateMarkerInDB(e);
+        });
+        safeAddListener('closeEditFormBtn', 'click', hideEditForm);
+        
+        // Coordinate inputs - update preview when changed
+        safeAddListener('markerLatitude', 'input', updateLocationPreview);
+        safeAddListener('markerLongitude', 'input', updateLocationPreview);
+        safeAddListener('editMarkerLatitude', 'input', updateEditLocationPreview);
+        safeAddListener('editMarkerLongitude', 'input', updateEditLocationPreview);
+        
+        // Filter controls
+        safeAddListener('filterCategory', 'change', function() {
+            activeFilters.category = this.value;
+            applyFilters();
+        });
+        
+        safeAddListener('filterDate', 'change', function() {
+            activeFilters.dateRange = this.value;
+            const customDateRange = document.getElementById('customDateRange');
+            
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'block';
+                // Set default dates
+                const today = new Date().toISOString().split('T')[0];
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+                
+                document.getElementById('startDate').value = thirtyDaysAgoStr;
+                document.getElementById('endDate').value = today;
+                
+                activeFilters.startDate = thirtyDaysAgoStr;
+                activeFilters.endDate = today;
+            } else {
+                customDateRange.style.display = 'none';
+                activeFilters.startDate = null;
+                activeFilters.endDate = null;
+                applyFilters();
+            }
+        });
+        
+        // Date range buttons
+        safeAddListener('applyDateRange', 'click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date cannot be after end date');
+                return;
+            }
+            
+            activeFilters.startDate = startDate;
+            activeFilters.endDate = endDate;
+            applyFilters();
+        });
+        
+        safeAddListener('clearDateRange', 'click', function() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            activeFilters.startDate = null;
+            activeFilters.endDate = null;
+            document.getElementById('filterDate').value = 'all';
+            document.getElementById('customDateRange').style.display = 'none';
+            activeFilters.dateRange = 'all';
+            applyFilters();
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (markerMode) toggleMarkerMode();
+                hideMarkerForm();
+                hideEditForm();
+                hideMarkerList();
+            }
+        });
+    }
+    
+    // Toggle marker mode
+    function toggleMarkerMode() {
+        markerMode = !markerMode;
+        const btn = document.getElementById('addMarkerBtn');
+        const info = document.getElementById('mapInfo');
+        
+        if (markerMode) {
+            btn.classList.add('active');
+            info.innerHTML = `
+                <div class="info-title">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>Marker Mode Active</span>
+                </div>
+                <div class="info-content">
+                    <div class="info-step">
+                        <div class="step-number"><i class="fas fa-mouse-pointer"></i></div>
+                        <span>Click anywhere on the map to place a marker</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            btn.classList.remove('active');
+            info.innerHTML = `
+                <div class="info-title">
+                    <i class="fas fa-info-circle"></i>
+                    <span>How to Use</span>
+                </div>
+                <div class="info-content">
+                    <div class="info-step">
+                        <div class="step-number">1</div>
+                        <span>Click <strong>📍 Add Marker</strong> button</span>
+                    </div>
+                    <div class="info-step">
+                        <div class="step-number">2</div>
+                        <span>Click anywhere on the map</span>
+                    </div>
+                    <div class="info-step">
+                        <div class="step-number">3</div>
+                        <span>Fill the form and submit</span>
+                    </div>
+                    <div class="info-step">
+                        <div class="step-number">4</div>
+                        <span>Click markers to edit or delete</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Show marker form with coordinates
+    function showMarkerForm(latlng) {
+        const modal = document.getElementById('markerFormModal');
+        
+        // Reset form values
+        document.getElementById('markerTitle').value = '';
+        document.getElementById('markerDescription').value = '';
+        document.getElementById('markerCategory').value = 'military_deployment';
+        document.getElementById('markerColor').value = '#FF0000';
+        
+        // Set coordinates
+        document.getElementById('markerLatitude').value = latlng.lat.toFixed(6);
+        document.getElementById('markerLongitude').value = latlng.lng.toFixed(6);
+        
+        // Update location preview
+        updateLocationPreview();
+        
+        // Clear previous messages
+        document.getElementById('formMessage').innerHTML = '';
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        
+        // Focus on title field
+        setTimeout(() => {
+            document.getElementById('markerTitle').focus();
+        }, 100);
+    }
+    
+    // Hide marker form
+    function hideMarkerForm() {
+        document.getElementById('markerFormModal').style.display = 'none';
+        pendingMarkerLatLng = null;
+        toggleMarkerMode(); // Turn off marker mode
+    }
+    
+    // Show edit form
+    function showEditForm(markerId) {
+        const modal = document.getElementById('editMarkerModal');
+        const marker = markers.find(m => m.id === markerId);
+        
+        if (!marker) {
+            alert('Marker not found!');
+            return;
+        }
+        
+        // Set form values from marker
+        document.getElementById('editMarkerId').value = markerId;
+        document.getElementById('editMarkerTitle').value = marker.title;
+        document.getElementById('editMarkerDescription').value = marker.description || '';
+        document.getElementById('editMarkerLatitude').value = marker.lat.toFixed(6);
+        document.getElementById('editMarkerLongitude').value = marker.lng.toFixed(6);
+        document.getElementById('editMarkerCategory').value = marker.category;
+        document.getElementById('editMarkerColor').value = marker.color;
+        
+        // Update location preview
+        updateEditLocationPreview();
+        
+        // Clear previous messages
+        document.getElementById('editFormMessage').innerHTML = '';
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        
+        // Focus on title field
+        setTimeout(() => {
+            document.getElementById('editMarkerTitle').focus();
+        }, 100);
+    }
+    
+    // Hide edit form
+    function hideEditForm() {
+        document.getElementById('editMarkerModal').style.display = 'none';
+    }
+    
+    // Update location preview
+    function updateLocationPreview() {
+        const lat = document.getElementById('markerLatitude').value;
+        const lng = document.getElementById('markerLongitude').value;
+        const preview = document.getElementById('locationPreview');
+        
+        if (lat && lng) {
+            const locationName = getNepalLocationName(parseFloat(lat), parseFloat(lng));
+            preview.innerHTML = `
+                <i class="fas fa-map-pin"></i> 
+                <strong>Location:</strong> ${lat}, ${lng}
+                ${locationName ? `<br><strong>Area:</strong> ${locationName}` : ''}
+            `;
+        } else {
+            preview.innerHTML = '<i class="fas fa-map-pin"></i> Location will appear here...';
+        }
+    }
+    
+    // Update edit location preview
+    function updateEditLocationPreview() {
+        const lat = document.getElementById('editMarkerLatitude').value;
+        const lng = document.getElementById('editMarkerLongitude').value;
+        const preview = document.getElementById('editLocationPreview');
+        
+        if (lat && lng) {
+            const locationName = getNepalLocationName(parseFloat(lat), parseFloat(lng));
+            preview.innerHTML = `
+                <i class="fas fa-map-pin"></i> 
+                <strong>Location:</strong> ${lat}, ${lng}
+                ${locationName ? `<br><strong>Area:</strong> ${locationName}` : ''}
+            `;
+        } else {
+            preview.innerHTML = '<i class="fas fa-map-pin"></i> Location preview';
+        }
+    }
+    
+    // Get approximate location name in Nepal
+    function getNepalLocationName(lat, lng) {
+        if (lat < 26.3474 || lat > 30.4470 || lng < 80.0586 || lng > 88.2010) {
+            return "Outside Nepal";
+        }
+        
+        const cities = [
+            { name: "Kathmandu", lat: 27.7172, lng: 85.3240 },
+            { name: "Pokhara", lat: 28.2096, lng: 83.9856 },
+            { name: "Biratnagar", lat: 26.4525, lng: 87.2718 },
+            { name: "Lalitpur", lat: 27.6667, lng: 85.3167 },
+            { name: "Bharatpur", lat: 27.6833, lng: 84.4333 },
+            { name: "Birgunj", lat: 27.0000, lng: 84.8667 },
+            { name: "Butwal", lat: 27.7000, lng: 83.4500 },
+            { name: "Dharan", lat: 26.8121, lng: 87.2837 },
+            { name: "Nepalgunj", lat: 28.0500, lng: 81.6167 },
+            { name: "Janakpur", lat: 26.7288, lng: 85.9342 },
+        ];
+        
+        let nearestCity = null;
+        let minDistance = Infinity;
+        
+        for (const city of cities) {
+            const distance = Math.sqrt(
+                Math.pow(city.lat - lat, 2) + Math.pow(city.lng - lng, 2)
+            );
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestCity = city;
+            }
+        }
+        
+        if (nearestCity && minDistance < 0.5) {
+            return `Near ${nearestCity.name}`;
+        }
+        
+        if (lat > 29.5) return "Northern Mountain Region";
+        if (lat > 28) return "Hill Region";
+        if (lat > 27) return "Kathmandu Valley Area";
+        return "Terai Region";
+    }
+    
+    // Save marker to database
+    async function saveMarkerToDB(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('markerTitle').value.trim();
+        const latitude = document.getElementById('markerLatitude').value.trim();
+        const longitude = document.getElementById('markerLongitude').value.trim();
+        
+        // Validate inputs
+        if (!title) {
+            showMessage('Please enter a title for the marker', 'error', 'formMessage');
+            document.getElementById('markerTitle').focus();
+            return;
+        }
+        
+        if (!latitude || !longitude) {
+            showMessage('Please enter both latitude and longitude', 'error', 'formMessage');
+            return;
+        }
+        
+        const latNum = parseFloat(latitude);
+        const lngNum = parseFloat(longitude);
+        
+        if (isNaN(latNum) || isNaN(lngNum)) {
+            showMessage('Please enter valid numbers for coordinates', 'error', 'formMessage');
+            return;
+        }
+        
+        if (latNum < -90 || latNum > 90) {
+            showMessage('Latitude must be between -90 and 90', 'error', 'formMessage');
+            document.getElementById('markerLatitude').focus();
+            return;
+        }
+        
+        if (lngNum < -180 || lngNum > 180) {
+            showMessage('Longitude must be between -180 and 180', 'error', 'formMessage');
+            document.getElementById('markerLongitude').focus();
+            return;
+        }
+        
+        const markerData = {
+            title: title,
+            description: document.getElementById('markerDescription').value.trim(),
+            category: document.getElementById('markerCategory').value,
+            color: document.getElementById('markerColor').value,
+            latitude: latNum,
+            longitude: lngNum,
+        };
+        
+        try {
+            const response = await fetch(API_URLS.create, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(markerData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('✅ Marker saved to database successfully!', 'success', 'formMessage');
+                
+                // Add the new marker to map
+                const newMarker = {
+                    id: result.marker.id,
+                    title: result.marker.title,
+                    description: result.marker.description,
+                    category: result.marker.category,
+                    color: result.marker.color,
+                    lat: parseFloat(result.marker.latitude),
+                    lng: parseFloat(result.marker.longitude),
+                    created_at: result.marker.created_at
+                };
+                
+                addMarkerToMap(newMarker);
+                
+                // Hide form and reset mode after delay
+                setTimeout(() => {
+                    hideMarkerForm();
+                    applyFilters(); // Refresh with current filters
+                }, 1500);
+            } else {
+                showMessage('❌ Error: ' + result.error, 'error', 'formMessage');
+            }
+        } catch (error) {
+            showMessage('❌ Network error: ' + error.message, 'error', 'formMessage');
+        }
+    }
+    
+    // Update marker in database
+    async function updateMarkerInDB(e) {
+        e.preventDefault();
+        
+        const markerId = parseInt(document.getElementById('editMarkerId').value);
+        const title = document.getElementById('editMarkerTitle').value.trim();
+        const latitude = document.getElementById('editMarkerLatitude').value.trim();
+        const longitude = document.getElementById('editMarkerLongitude').value.trim();
+        
+        // Validate inputs
+        if (!title) {
+            showMessage('Please enter a title for the marker', 'error', 'editFormMessage');
+            document.getElementById('editMarkerTitle').focus();
+            return;
+        }
+        
+        if (!latitude || !longitude) {
+            showMessage('Please enter both latitude and longitude', 'error', 'editFormMessage');
+            return;
+        }
+        
+        const latNum = parseFloat(latitude);
+        const lngNum = parseFloat(longitude);
+        
+        if (isNaN(latNum) || isNaN(lngNum)) {
+            showMessage('Please enter valid numbers for coordinates', 'error', 'editFormMessage');
+            return;
+        }
+        
+        if (latNum < -90 || latNum > 90) {
+            showMessage('Latitude must be between -90 and 90', 'error', 'editFormMessage');
+            document.getElementById('editMarkerLatitude').focus();
+            return;
+        }
+        
+        if (lngNum < -180 || lngNum > 180) {
+            showMessage('Longitude must be between -180 and 180', 'error', 'editFormMessage');
+            document.getElementById('editMarkerLongitude').focus();
+            return;
+        }
+        
+        const markerData = {
+            id: markerId,
+            title: title,
+            description: document.getElementById('editMarkerDescription').value.trim(),
+            category: document.getElementById('editMarkerCategory').value,
+            color: document.getElementById('editMarkerColor').value,
+            latitude: latNum,
+            longitude: lngNum,
+        };
+        
+        try {
+            const response = await fetch(API_URLS.update, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(markerData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('✅ Marker updated successfully!', 'success', 'editFormMessage');
+                
+                // Update the marker in our local array
+                const index = markers.findIndex(m => m.id === markerId);
+                if (index !== -1) {
+                    markers[index] = {
+                        ...markers[index],
+                        ...result.marker,
+                        lat: parseFloat(result.marker.latitude),
+                        lng: parseFloat(result.marker.longitude)
+                    };
+                    
+                    // Remove old marker from map
+                    markerLayerGroup.eachLayer(function(layer) {
+                        if (layer.dataId === markerId) {
+                            markerLayerGroup.removeLayer(layer);
+                        }
+                    });
+                    
+                    // Add updated marker to map
+                    addMarkerToMap(markers[index]);
+                    
+                    // Update the marker list
+                    applyFilters();
+                }
+                
+                // Hide form after delay
+                setTimeout(() => {
+                    hideEditForm();
+                }, 1500);
+            } else {
+                showMessage('❌ Error: ' + result.error, 'error', 'editFormMessage');
+            }
+        } catch (error) {
+            showMessage('❌ Network error: ' + error.message, 'error', 'editFormMessage');
+        }
+    }
+    
+    // Apply filters and load markers
+    function applyFilters() {
+        loadMarkersFromDB();
+    }
+    
+    // Load markers from database with filters
+    async function loadMarkersFromDB() {
+        try {
+            let url = API_URLS.get;
+            const params = new URLSearchParams();
+            
+            // Add category filter
+            if (activeFilters.category && activeFilters.category !== 'all') {
+                params.append('category', activeFilters.category);
+            }
+            
+            // Add date range filter
+            if (activeFilters.dateRange && activeFilters.dateRange !== 'all') {
+                params.append('date_filter', activeFilters.dateRange);
+                
+                if (activeFilters.dateRange === 'custom' && activeFilters.startDate && activeFilters.endDate) {
+                    params.append('start_date', activeFilters.startDate);
+                    params.append('end_date', activeFilters.endDate);
+                }
+            }
+            
+            const queryString = params.toString();
+            if (queryString) {
+                url += '?' + queryString;
+            }
+            
+            console.log('Loading markers with URL:', url);
+            
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (result.success) {
+                markers = result.markers;
+                markerLayerGroup.clearLayers();
+                
+                markers.forEach(markerData => {
+                    addMarkerToMap(markerData);
+                });
+                
+                console.log(`Loaded ${markers.length} markers from database`);
+                renderMarkerList();
+                
+                // Fit map to show all filtered markers
+                if (markers.length > 0) {
+                    fitMapToMarkers();
+                }
+            } else {
+                console.error('Error loading markers:', result.error);
+                alert('Error loading markers: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error loading markers:', error);
+            alert('Error loading markers: ' + error.message);
+        }
+    }
+    
+    // Fit map to show all markers
+    function fitMapToMarkers() {
+        if (markers.length === 0) return;
+        
+        const bounds = L.latLngBounds(markers.map(marker => [marker.lat, marker.lng]));
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
+    
+    // Refresh markers from database
+    async function refreshMarkers() {
+        const info = document.getElementById('mapInfo');
+        const originalHTML = info.innerHTML;
+        
+        info.innerHTML = `
+            <div class="info-title">
+                <i class="fas fa-sync-alt fa-spin"></i>
+                <span>Refreshing markers...</span>
+            </div>
+        `;
+        
+        await loadMarkersFromDB();
+        
+        info.innerHTML = `
+            <div class="info-title">
+                <i class="fas fa-check-circle"></i>
+                <span>Markers refreshed!</span>
+            </div>
+            <div class="info-content">
+                <div class="info-step">
+                    <div class="step-number">✓</div>
+                    <span>Loaded ${markers.length} markers</span>
+                </div>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            info.innerHTML = originalHTML;
+        }, 2000);
+    }
+    
+    // Add marker to map
+    function addMarkerToMap(markerData) {
+        const markerIcon = L.divIcon({
+            html: `
+                <div style="
+                    background-color: ${markerData.color};
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    border: 3px solid white;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                ">
+                    <div style="
+                        transform: rotate(45deg);
+                        color: white;
+                        font-size: 14px;
+                        font-weight: bold;
+                        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                    ">
+                        <i class="fas fa-map-pin"></i>
+                    </div>
+                </div>
+            `,
+            className: 'custom-marker',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35]
+        });
+        
+        const marker = L.marker([markerData.lat, markerData.lng], {
+            title: markerData.title,
+            icon: markerIcon
+        });
+        
+        const popupContent = `
+            <div style="min-width: 250px;">
+                <h4 style="margin:0 0 10px 0; color:${markerData.color}; border-bottom: 2px solid ${markerData.color}; padding-bottom: 5px;">
+                    <i class="fas fa-map-pin"></i> ${markerData.title}
+                </h4>
+                ${markerData.description ? `<p style="margin:10px 0; font-size:14px; color:#555;">${markerData.description}</p>` : ''}
+                <hr style="margin: 10px 0; border-color: #eee;">
+                <div style="font-size:13px; color:#666;">
+                    <div><strong><i class="fas fa-tag"></i> Category:</strong> ${getCategoryDisplayName(markerData.category)}</div>
+                    <div><strong><i class="fas fa-globe-asia"></i> Location:</strong> ${markerData.lat.toFixed(6)}, ${markerData.lng.toFixed(6)}</div>
+                    <div><strong><i class="fas fa-calendar"></i> Added:</strong> ${new Date(markerData.created_at).toLocaleString()}</div>
+                </div>
+                <hr style="margin: 10px 0; border-color: #eee;">
+                <div style="display:flex; gap:8px;">
+                    <button onclick="flyToMarker(${markerData.lat}, ${markerData.lng})" 
+                            style="flex:1; background:#2196F3; color:white; border:none; 
+                                   padding:8px; border-radius:6px; cursor:pointer; font-size:13px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <i class="fas fa-search-plus"></i> Zoom
+                    </button>
+                    <button onclick="showEditForm(${markerData.id})" 
+                            style="flex:1; background:#FF9800; color:white; border:none; 
+                                   padding:8px; border-radius:6px; cursor:pointer; font-size:13px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="deleteMarkerFromDB(${markerData.id})" 
+                            style="flex:1; background:#f44336; color:white; border:none; 
+                                   padding:8px; border-radius:6px; cursor:pointer; font-size:13px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        marker.addTo(markerLayerGroup);
+        
+        // Store reference
+        marker.dataId = markerData.id;
+    }
+    
+    // Delete marker from database
+    async function deleteMarkerFromDB(markerId) {
+        if (!confirm('Are you sure you want to delete this marker?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_URLS.delete}?id=${markerId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Remove from array
+                markers = markers.filter(m => m.id !== markerId);
+                
+                // Remove from map
+                markerLayerGroup.eachLayer(function(layer) {
+                    if (layer.dataId === markerId) {
+                        markerLayerGroup.removeLayer(layer);
+                    }
+                });
+                
+                // Update list
+                applyFilters();
+                alert('✅ Marker deleted successfully!');
+            } else {
+                alert('❌ Error deleting marker: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error deleting marker:', error);
+            alert('❌ Error deleting marker');
+        }
+    }
+    
+    // Clear all markers
+    async function clearAllMarkers() {
+        if (!confirm('⚠️ Are you sure you want to delete ALL markers? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(API_URLS.delete_all, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                markers = [];
+                markerLayerGroup.clearLayers();
+                clearFilters();
+                alert(`✅ ${result.message}`);
+            } else {
+                alert('❌ Error: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error deleting all markers:', error);
+            alert('❌ Error deleting all markers');
+        }
+    }
+    
+    // Clear all filters
+    function clearFilters() {
+        document.getElementById('filterCategory').value = 'all';
+        document.getElementById('filterDate').value = 'all';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('customDateRange').style.display = 'none';
+        
+        activeFilters = {
+            category: 'all',
+            dateRange: 'all',
+            startDate: null,
+            endDate: null
+        };
+        
+        loadMarkersFromDB();
+    }
+    
+    // Show/hide marker list
+    function toggleMarkerList() {
+        const panel = document.getElementById('markerListPanel');
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+        } else {
+            panel.style.display = 'block';
+            renderMarkerList();
+        }
+    }
+    
+    // Hide marker list
+    function hideMarkerList() {
+        document.getElementById('markerListPanel').style.display = 'none';
+    }
+    
+    // Render marker list with filtering
+    function renderMarkerList() {
+        const container = document.getElementById('markerListContent');
+        
+        // Show active filters info
+        let filterInfo = '';
+        if (activeFilters.category !== 'all' || activeFilters.dateRange !== 'all') {
+            filterInfo = `<div style="background: #e3f2fd; padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; color: #1976D2;">
+                <i class="fas fa-filter"></i> Active Filters: `;
+            
+            const filters = [];
+            if (activeFilters.category !== 'all') {
+                filters.push(`Category: ${getCategoryDisplayName(activeFilters.category)}`);
+            }
+            if (activeFilters.dateRange !== 'all') {
+                if (activeFilters.dateRange === 'custom' && activeFilters.startDate && activeFilters.endDate) {
+                    filters.push(`Date: ${activeFilters.startDate} to ${activeFilters.endDate}`);
+                } else {
+                    filters.push(`Date: ${activeFilters.dateRange}`);
+                }
+            }
+            
+            filterInfo += filters.join(' | ') + '</div>';
+        }
+        
+        if (markers.length === 0) {
+            container.innerHTML = filterInfo + `
+                <div class="no-markers">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>No markers found</p>
+                    <p style="font-size: 12px; margin-top: 5px;">Try changing filters or add new markers</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort by date (newest first)
+        const sortedMarkers = [...markers].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        // Check if user is admin or superadmin
+        const userRole = '{{ request.session.user_role|default:"User" }}';
+        const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin';
+        
+        // Render list
+        container.innerHTML = filterInfo + sortedMarkers.map(marker => `
+            <div class="marker-item" onclick="flyToMarker(${marker.lat}, ${marker.lng})">
+                <div class="marker-header">
+                    <div class="marker-title">${marker.title}</div>
+                     ${isAdmin ? `
+                    <div class="marker-actions">
+                        <button class="action-btn edit-btn" onclick="showEditForm(${marker.id}); event.stopPropagation();" title="Edit marker">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteMarkerFromDB(${marker.id}); event.stopPropagation();" title="Delete marker">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                     ` : ''}
+                </div>
+                ${marker.description ? `<div class="marker-description">${marker.description.substring(0, 80)}${marker.description.length > 80 ? '...' : ''}</div>` : ''}
+                <div class="marker-location">${marker.lat.toFixed(6)}, ${marker.lng.toFixed(6)}</div>
+                <div class="marker-meta">
+                    <div class="marker-category" data-category="${marker.category}">
+                        ${getCategoryDisplayName(marker.category)}
+                    </div>
+                    <div style="font-size: 11px;">${new Date(marker.created_at).toLocaleDateString()}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Fly to marker location
+    function flyToMarker(lat, lng) {
+        map.flyTo([lat, lng], 13);
+        hideMarkerList();
+        
+        // Highlight the marker
+        markerLayerGroup.eachLayer(function(layer) {
+            if (Math.abs(layer.getLatLng().lat - lat) < 0.0001 && 
+                Math.abs(layer.getLatLng().lng - lng) < 0.0001) {
+                layer.openPopup();
+                
+                // Add bounce animation
+                layer.setIcon(L.divIcon({
+                    html: `
+                        <div style="
+                            background-color: ${layer.options.icon.options.html.match(/background-color: ([^;]+)/)[1]};
+                            width: 35px;
+                            height: 35px;
+                            border-radius: 50% 50% 50% 0;
+                            transform: rotate(-45deg);
+                            border: 3px solid white;
+                            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            animation: bounce 0.5s ease-in-out 3;
+                        ">
+                            <div style="
+                                transform: rotate(45deg);
+                                color: white;
+                                font-size: 16px;
+                                font-weight: bold;
+                                text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+                            ">
+                                <i class="fas fa-map-pin"></i>
+                            </div>
+                        </div>
+                    `,
+                    className: 'custom-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                }));
+                
+                // Reset icon after animation
+                setTimeout(() => {
+                    const color = layer.options.icon.options.html.match(/background-color: ([^;]+)/)[1];
+                    layer.setIcon(L.divIcon({
+                        html: `
+                            <div style="
+                                background-color: ${color};
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 50% 50% 50% 0;
+                                transform: rotate(-45deg);
+                                border: 3px solid white;
+                                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                position: relative;
+                            ">
+                                <div style="
+                                    transform: rotate(45deg);
+                                    color: white;
+                                    font-size: 14px;
+                                    font-weight: bold;
+                                    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                                ">
+                                    <i class="fas fa-map-pin"></i>
+                                </div>
+                            </div>
+                        `,
+                        className: 'custom-marker',
+                        iconSize: [35, 35],
+                        iconAnchor: [17, 35]
+                    }));
+                }, 1500);
+            }
+        });
+    }
+    
+    // Show message
+    function showMessage(message, type, elementId) {
+        const div = document.getElementById(elementId);
+        div.innerHTML = `
+            <div class="message ${type}">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            </div>
+        `;
+        
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                if (div.innerHTML.includes('success')) {
+                    div.innerHTML = '';
+                }
+            }, 3000);
+        }
+    }
+    
+    // Initialize when page loads
+    window.addEventListener('load', function() {
+        setTimeout(initializeMap, 1000);
+    });
+    </script>
+</body>
+</html>

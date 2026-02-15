@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 fw-bold mb-1 text-gray-800">
+                <i class="fas fa-images text-primary me-2"></i>Social Media Photos Gallery
+            </h2>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'list_social_media_url' %}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-list me-2"></i>Back to URL List
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-3 text-gray-700">
+                <i class="fas fa-search text-primary me-2"></i>Filter Photos
+            </h5>
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-gray-600">Personnel No</label>
+                    <input type="text" name="personnel_no" class="form-control form-control-sm" 
+                           placeholder="Search by ID" value="{{ personnel_no_filter|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-gray-600">Name</label>
+                    <input type="text" name="name" class="form-control form-control-sm" 
+                           placeholder="Search by name" value="{{ name_filter|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-gray-600">Rank</label>
+                    <input type="text" name="rank" class="form-control form-control-sm" 
+                           placeholder="Search by rank" value="{{ rank_filter|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-gray-600">Unit</label>
+                    <input type="text" name="unit" class="form-control form-control-sm" 
+                           placeholder="Search by unit" value="{{ unit_filter|default:'' }}">
+                </div>
+                <div class="col-md-12 mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        {% if personnel_no_filter or name_filter or rank_filter or unit_filter %}
+                        <a href="{% url 'photo_social_media' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times me-2"></i>Clear Filters
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Photos Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-gray-700">
+                    <i class="fas fa-table me-2"></i>Photos Gallery
+                    <span class="badge bg-primary ms-2">{{ total_urls }} profiles</span>
+                    {% if personnel_no_filter or name_filter or rank_filter or unit_filter %}
+                    <span class="badge bg-info ms-2">Filtered</span>
+                    {% endif %}
+                </h6>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%;" class="ps-4">Personnel Information</th>
+                            <th style="width: 23%;" class="text-center">Main Photo</th>
+                            <th style="width: 23%;" class="text-center">Photo 1</th>
+                            <th style="width: 24%;" class="text-center">Photo 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for url in urls %}
+                        <tr>
+                            <!-- Personnel Info -->
+                            <td class="ps-4">
+                                <div class="d-flex flex-column">
+                                    <!-- Name and ID -->
+                                    <div class="mb-2">
+                                        <h6 class="mb-1 text-primary">
+                                            <i class="fas fa-user-circle me-2"></i>
+                                            {{ url.name|default:"Unknown" }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-id-card me-1"></i>
+                                            ID: {{ url.personnel_no|default:"No ID" }}
+                                        </small>
+                                    </div>
+                                    
+                                    <!-- Status and Platform Badges -->
+                                    <div class="mb-2">
+                                        <div class="d-flex flex-wrap gap-1 mb-1">
+                                            <span class="badge bg-{% if url.status == 'found' %}success{% elif url.status == 'pending' %}warning{% elif url.status == 'not_found' %}danger{% else %}secondary{% endif %}">
+                                                <i class="fas fa-circle me-1" style="font-size: 6px;"></i>
+                                                {{ url.get_status_display }}
+                                            </span>
+                                            {% if url.platform %}
+                                            <span class="badge bg-light text-dark">
+                                                {% if url.platform == 'Facebook' %}
+                                                <i class="fab fa-facebook me-1"></i>
+                                                {% elif url.platform == 'Instagram' %}
+                                                <i class="fab fa-instagram me-1"></i>
+                                                {% elif url.platform == 'TikTok' %}
+                                                <i class="fab fa-tiktok me-1"></i>
+                                                {% elif url.platform == 'YouTube' %}
+                                                <i class="fab fa-youtube me-1"></i>
+                                                {% else %}
+                                                <i class="fas fa-link me-1"></i>
+                                                {% endif %}
+                                                {{ url.platform }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Additional Info -->
+                                    <div class="mt-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-star text-warning me-2" style="font-size: 0.8rem;"></i>
+                                            <small class="text-muted">{{ url.rank|default:"Not specified" }}</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-building text-info me-2" style="font-size: 0.8rem;"></i>
+                                            <small class="text-muted">{{ url.unit|default:"Not specified" }}</small>
+                                        </div>
+                                        <!-- Submitted Date -->
+<div class="d-flex align-items-center">
+    <i class="fas fa-calendar text-primary me-2" style="font-size: 0.8rem;"></i>
+    <small class="text-muted">{{ url.submitted_date|date:"M d, Y" }}</small>
+</div>
+
+<!-- Completed Date -->
+<div class="d-flex align-items-center">
+    <i class="fas fa-calendar text-success me-2" style="font-size: 0.8rem;"></i>
+    <small class="text-muted">{{ url.completed_date|date:"M d, Y" }}</small>
+</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Main Photo Column -->
+                            <td class="text-center">
+                                <div class="photo-column">
+                                    {% if url.photo %}
+                                    <div class="photo-container">
+                                        <a href="{{ url.photo.url }}" data-lightbox="gallery-{{ url.id }}" 
+                                           data-title="{{ url.name }} - Main Photo" class="photo-link">
+                                            <img src="{{ url.photo.url }}" 
+                                                 alt="Main photo of {{ url.name }}"
+                                                 class="img-fluid rounded shadow-sm gallery-image">
+                                        </a>
+                                        <div class="photo-label mt-2">
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-camera me-1"></i>Main Photo
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="no-photo-placeholder">
+                                        <div class="placeholder-icon">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">No main photo</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            
+                            <!-- Photo 1 Column -->
+                            <td class="text-center">
+                                <div class="photo-column">
+                                    {% if url.photo_one %}
+                                    <div class="photo-container">
+                                        <a href="{{ url.photo_one.url }}" data-lightbox="gallery-{{ url.id }}" 
+                                           data-title="{{ url.name }} - Photo 1" class="photo-link">
+                                            <img src="{{ url.photo_one.url }}" 
+                                                 alt="Photo 1 of {{ url.name }}"
+                                                 class="img-fluid rounded shadow-sm gallery-image">
+                                        </a>
+                                        <div class="photo-label mt-2">
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-image me-1"></i>Photo 1
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="no-photo-placeholder">
+                                        <div class="placeholder-icon">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">No photo 1</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            
+                            <!-- Photo 2 Column -->
+                            <td class="text-center">
+                                <div class="photo-column">
+                                    {% if url.photo_two %}
+                                    <div class="photo-container">
+                                        <a href="{{ url.photo_two.url }}" data-lightbox="gallery-{{ url.id }}" 
+                                           data-title="{{ url.name }} - Photo 2" class="photo-link">
+                                            <img src="{{ url.photo_two.url }}" 
+                                                 alt="Photo 2 of {{ url.name }}"
+                                                 class="img-fluid rounded shadow-sm gallery-image">
+                                        </a>
+                                        <div class="photo-label mt-2">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-images me-1"></i>Photo 2
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="no-photo-placeholder">
+                                        <div class="placeholder-icon">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">No photo 2</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-image fa-3x mb-3"></i>
+                                    <h5 class="mb-2">No Photos Found</h5>
+                                    <p class="mb-0">
+                                        {% if personnel_no_filter or name_filter or rank_filter or unit_filter %}
+                                        Try adjusting your filters
+                                        {% else %}
+                                        No photos uploaded yet. Upload photos from the URL list.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if urls.paginator.num_pages > 1 %}
+            <div class="card-footer bg-white border-top py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">
+                            Showing {{ urls.start_index }} to {{ urls.end_index }} of {{ urls.paginator.count }} entries
+                        </small>
+                    </div>
+                    
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if urls.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if personnel_no_filter %}&personnel_no={{ personnel_no_filter }}{% endif %}{% if name_filter %}&name={{ name_filter }}{% endif %}{% if rank_filter %}&rank={{ rank_filter }}{% endif %}{% if unit_filter %}&unit={{ unit_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.previous_page_number }}{% if personnel_no_filter %}&personnel_no={{ personnel_no_filter }}{% endif %}{% if name_filter %}&name={{ name_filter }}{% endif %}{% if rank_filter %}&rank={{ rank_filter }}{% endif %}{% if unit_filter %}&unit={{ unit_filter }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in urls.paginator.page_range %}
+                                {% if urls.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > urls.number|add:'-3' and num < urls.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if personnel_no_filter %}&personnel_no={{ personnel_no_filter }}{% endif %}{% if name_filter %}&name={{ name_filter }}{% endif %}{% if rank_filter %}&rank={{ rank_filter }}{% endif %}{% if unit_filter %}&unit={{ unit_filter }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if urls.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.next_page_number }}{% if personnel_no_filter %}&personnel_no={{ personnel_no_filter }}{% endif %}{% if name_filter %}&name={{ name_filter }}{% endif %}{% if rank_filter %}&rank={{ rank_filter }}{% endif %}{% if unit_filter %}&unit={{ unit_filter }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.paginator.num_pages }}{% if personnel_no_filter %}&personnel_no={{ personnel_no_filter }}{% endif %}{% if name_filter %}&name={{ name_filter }}{% endif %}{% if rank_filter %}&rank={{ rank_filter }}{% endif %}{% if unit_filter %}&unit={{ unit_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Lightbox CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+
+<style>
+/* Custom Styles */
+.card {
+    border-radius: 10px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.03);
+    transition: all 0.2s ease;
+}
+
+/* Photo Column Styling */
+.photo-column {
+    height: 100%;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.photo-link {
+    display: block;
+    text-align: center;
+    width: 100%;
+}
+
+.gallery-image {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    max-height: 180px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    padding: 4px;
+    background-color: #f8f9fa;
+}
+
+.gallery-image:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    border-color: #0d6efd;
+}
+
+.photo-label {
+    text-align: center;
+}
+
+.photo-label .badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    font-weight: 500;
+}
+
+/* No Photo Placeholder */
+.no-photo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    width: 100%;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.placeholder-icon {
+    font-size: 2.5rem;
+    color: #adb5bd;
+    margin-bottom: 0.5rem;
+}
+
+/* Table Styling */
+.table th {
+    font-weight: 600;
+    color: #495057;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+    padding: 1rem 0.75rem;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1.25rem 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Badge Improvements */
+.badge {
+    font-size: 0.75em;
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+}
+
+/* Lightbox customizations */
+.lb-data .lb-caption {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.lb-outerContainer {
+    border-radius: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85em;
+    }
+    
+    .gallery-image {
+        max-height: 120px !important;
+    }
+    
+    .no-photo-placeholder {
+        height: 120px;
+    }
+    
+    .table th, .table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .photo-column {
+        min-height: 150px;
+    }
+    
+    .gallery-image {
+        max-height: 100px !important;
+    }
+    
+    .no-photo-placeholder {
+        height: 100px;
+    }
+    
+    .placeholder-icon {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script>
+// Initialize lightbox
+lightbox.option({
+    'resizeDuration': 200,
+    'wrapAround': true,
+    'albumLabel': "Image %1 of %2",
+    'fadeDuration': 300,
+    'positionFromTop': 50
+});
+
+// Auto-focus search field
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="personnel_no"]');
+    if (searchInput) {
+        searchInput.focus();
+    }
+    
+    // Add click handlers for all gallery images
+    document.querySelectorAll('.gallery-image').forEach(img => {
+        img.addEventListener('click', function() {
+            // Lightbox will handle this
+        });
+    });
+});
+</script>
+{% endblock %}

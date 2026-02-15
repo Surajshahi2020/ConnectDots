@@ -1,0 +1,449 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Monitoring System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --secondary-dark: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-light-blue: #60a5fa;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #1a243f 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px 35px;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+        
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+            color: var(--text-primary);
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            color: var(--text-primary);
+        }
+        
+        .form-select {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+            color: var(--text-primary);
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            appearance: auto;
+        }
+        
+        .form-select:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            color: var(--text-primary);
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, var(--accent-blue), #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .text-danger {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2 class="form-title">Create New Account</h2>
+        
+        <form method="post" action="{% url 'signinadd' %}">
+            {% csrf_token %}
+            
+            <!-- Row 1: Username + Email -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_username" class="form-label">Username *</label>
+                    <input type="text" name="username" class="form-control" id="id_username" required>
+                    {% if form.username.errors %}<div class="text-danger">{{ form.username.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_email" class="form-label">Email *</label>
+                    <input type="email" name="email" class="form-control" id="id_email" required>
+                    {% if form.email.errors %}<div class="text-danger">{{ form.email.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <!-- Row 2: Password + Confirm Password -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_password1" class="form-label">Password *</label>
+                    <input type="password" name="password1" class="form-control" id="id_password1" required>
+                    {% if form.password1.errors %}<div class="text-danger">{{ form.password1.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_password2" class="form-label">Confirm Password *</label>
+                    <input type="password" name="password2" class="form-control" id="id_password2" required>
+                    {% if form.password2.errors %}<div class="text-danger">{{ form.password2.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <!-- Row 3: Phone + Unit -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_phone" class="form-label">Phone (Optional)</label>
+                    <input type="text" name="phone" class="form-control" id="id_phone">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_unit" class="form-label">Unit (Optional)</label>
+                    <input type="text" id="unitSearch" class="form-control mb-2" placeholder="यूनिट खोज्नुहोस्...">
+                    <select class="form-control" name="unit_id" id="unitSelect" required>
+                        <option value='74'>अति विशिष्त व्यक्ति सुरक्षा निर्देशनालय</option>
+                        <option value='27'>अनुसन्धान र विस्तार निर्देशनालय</option>
+                        <option value='58'>असवाव निर्देशनालय</option>
+                        <option value='113'>अस्थायी निबेश</option>
+                        <option value='106'>आपुर्ति तथा परिवहन गण</option>
+                        <option value='86'>आपुर्ति तथा परिवहन निर्देशनालय</option>
+                        <option value='115'>आर्टिलरी तालिम शिक्षालय</option>
+                        <option value='18'>आवास तथा विमा शाखा, कल्याणकारी योजना निर्देशनालय</option>
+                        <option value='49'>ईन्जिनियरिङ्ग विभाग</option>
+                        <option value='127'>उत्तर पश्चिम पृतना</option>
+                        <option value='124'>उपत्यका पृतना</option>
+                        <option value='91'>एम.र्इ.एस. (के.शा.)</option>
+                        <option value='90'>एम्युनिशन कार्य महाशाखा</option>
+                        <option value='68'>कलेज अफ मेडिकल पोलिटेक्निक</option>
+                        <option value='12'>कल्याणकारी योजना निर्देशनालय</option>
+                        <option value='23'>कल्याणकारी स्वास्थ्य सेवा व्यवस्थापन महाशाखा</option>
+                        <option value='21'>का. मु. प्रधान सेनापतिको कार्यालय</option>
+                        <option value='136'>काठमाडौँ-तराई मधेश द्रुतमार्ग सडक आयोजना कार्यालय</option>
+                        <option value='46'>कार्यरथीको कार्यालय</option>
+                        <option value='20'>कोष तथा लेखा नियन्त्रक महाशाखा, कल्याणकारी योजना निर्देशनालय</option>
+                        <option value='81'>गणेशदल गण</option>
+                        <option value='8'>गुणस्तर नियन्त्रण निर्देशनालय</option>
+                        <option value='94'>गुणस्तर नियन्त्रण निर्देशनालय</option>
+                        <option value='67'>चिकित्सा शास्त्र महाविद्यालय</option>
+                        <option value='98'>छापाखाना शाखा, श्रब्यदृश्य माहाशाखा, सै.ज.नि.</option>
+                        <option value='76'>जगदल गण</option>
+                        <option value='60'>जंगी असवाव खाना</option>
+                        <option value='73'>जनसम्पर्क तथा सूचना निर्देशनालय</option>
+                        <option value='64'>टु.मु. कोतखाना डिपो</option>
+                        <option value='128'>त्रिभुवन आर्मी अफिसर्स क्लब</option>
+                        <option value='144'>नं. १ युद्धकवच गुल्म</option>
+                        <option value='134'>नं. १ र्इन्टेलिजेन्स गण</option>
+                        <option value='78'>नं. १३ बाहिनी अड्रडा</option>
+                        <option value='77'>नं. १४ बाहिनी अड्रडा</option>
+                        <option value='72'>नं. १५ बाहिनी अड्डा</option>
+                        <option value='79'>नं. १६ बाहिनी अड्रडा</option>
+                        <option value='71'>नं. १७ बाहिनी अड्रडा</option>
+                        <option value='143'>नयाँ गोरख गण</option>
+                        <option value='66'>नर्सिङ्ग महाविद्यालय</option>
+                        <option value='7'>निरीक्षण निर्देशनालय</option>
+                        <option value='51'>निरीक्षण निर्देशनालय</option>
+                        <option value='50'>निरीक्षणाधिकृतको कार्यालय</option>
+                        <option value='87'>निवेश, कार्यरथी विभाग</option>
+                        <option value='36'>नीति तथा योजना निर्देशनालय</option>
+                        <option value='43'>नीति तथा योजना महाशाखा</option>
+                        <option value='105'>नेपाल क्याभलरी</option>
+                        <option value='114'>नेपाली सेना वार कलेज</option>
+                        <option value='59'>नेपाली सेना स्वास्थ्य विज्ञान संस्थान</option>
+                        <option value='118'>नेपाली सैनिक प्रतिष्ठान</option>
+                        <option value='111'>पशु बिकास तथा पशु चिकित्शा निर्देशनालय</option>
+                        <option value='61'>पश्चिम एयर बेश</option>
+                        <option value='125'>पश्चिम पृतना</option>
+                        <option value='69'>पि.एस्.ओज. कार्यालय</option>
+                        <option value='120'>पूर्वी पृतना</option>
+                        <option value='9'>प्रधान सेनापतिको कार्यालय</option>
+                        <option value='47'>प्रबन्धरथीको कार्यालय</option>
+                        <option value='56'>प्राप्ती उपशाखा, सैनिक सामग्री प्राप्ती निर्देशनालय</option>
+                        <option value='44'>फौज योजना महाशाखा</option>
+                        <option value='53'>बजेट निर्देशनालय</option>
+                        <option value='28'>बलाधिकृतको कार्यालय</option>
+                        <option value='1'>बलाध्यक्षको कार्यालय</option>
+                        <option value='135'>बहु व्यवसाय उद्योग पहिरन सामाग्री शाखा</option>
+                        <option value='83'>भर्ना छनौट निर्देशनालय</option>
+                        <option value='109'>भैरव बहान गुल्म</option>
+                        <option value='126'>मध्य पश्चिम पृतना</option>
+                        <option value='122'>मध्य पूर्वी पृतना</option>
+                        <option value='123'>मध्य पृतना</option>
+                        <option value='99'>मनोबैज्ञानिक कार्य महाशाखा</option>
+                        <option value='3'>मानव अधिकार निर्देशनालय</option>
+                        <option value='55'>मिन्हा मोजारा</option>
+                        <option value='97'>युद्ध कवच गण</option>
+                        <option value='40'>युद्धकार्य निर्देशनालय</option>
+                        <option value='29'>युद्धकार्य महानिर्देशनालय</option>
+                        <option value='19'>योजना तथा अनुसन्धान महाशाखा, कल्याणकारी योजना निर्देशनालय</option>
+                        <option value='138'>रक्षा मन्त्रालय</option>
+                        <option value='41'>रणनीतिक तथा दीर्घकालीन योजना निर्देशनालय</option>
+                        <option value='75'>राजदल गण</option>
+                        <option value='14'>राष्ट्रिय निकुञ्ज तथा बन्यजन्तु आरक्ष निर्देशनालय</option>
+                        <option value='141'>राष्ट्रिय सुरक्षा परिषदको सचिवालय</option>
+                        <option value='62'>राष्ट्रिय सेवा दल</option>
+                        <option value='104'>रेडियो तथा प्रकाशन शाखा</option>
+                        <option value='132'>र्इन्जिनियर तालिम शिक्षालय</option>
+                        <option value='129'>वन तथा पर्यावरण सुरक्षा निर्देशनालय</option>
+                        <option value='101'>विकास निर्माण कार्यदल गण १</option>
+                        <option value='102'>विकास निर्माण कार्यदल गण २</option>
+                        <option value='54'>विकास निर्माण निर्देशनालय</option>
+                        <option value='65'>विदेश उपशाखा, सैनिक सामग्री प्राप्ती निर्देशनालय</option>
+                        <option value='38'>विदेश तालिम शाखा, सैनिक तालिम निर्देशनालय, सै.ता. तथा ड.म‍.नि.</option>
+                        <option value='96'>विद्युत तथा यान्त्रिक शिक्षालय</option>
+                        <option value='95'>विद्युत तथा यान्त्रिक सेवा केन्द्र</option>
+                        <option value='11'>विद्युत तथा यान्त्रिक सेवा निर्देशनालय</option>
+                        <option value='35'>विपद व्यवस्थापन निर्देशनालय</option>
+                        <option value='137'>विशेष फौज बाहिनी</option>
+                        <option value='25'>वीरेन्द्र अस्पताल</option>
+                        <option value='84'>वेतन बृति तथा समारोह निर्देशनालय</option>
+                        <option value='33'>व्यवस्था, नीति तथा योजना महानिर्देशनालय</option>
+                        <option value='34'>शान्ति सेना संचालन निर्देशनालय</option>
+                        <option value='110'>शार्दुलजंग गुल्म</option>
+                        <option value='6'>शिकायत जाँच निर्देशनालय</option>
+                        <option value='93'>शिकायत जाँच निर्देशनालय</option>
+                        <option value='17'>शैक्षिक शाखा, कल्याणकारी योजना निर्देशनालय</option>
+                        <option value='103'>श्रब्यदृश्य शाखा</option>
+                        <option value='48'>संभाररथीको कार्यालय</option>
+                        <option value='80'>समन्वय शाखा, बलाधिकृतको कार्यालय</option>
+                        <option value='10'>समन्वय शाखा, बलाध्यक्षको कार्यालय</option>
+                        <option value='100'>समारोह श्रब्यदृश्य महाशाखा</option>
+                        <option value='130'>सर्भे महाशाखा</option>
+                        <option value='4'>सर्वोत्कृष्ट अभ्यास महाशाखा</option>
+                        <option value='92'>सर्वोत्कृष्ट अभ्यास महाशाखा</option>
+                        <option value='2'>सहायक बलाध्यक्षको कार्यालय</option>
+                        <option value='142'>साइबर सुरक्षा निर्देशनालय</option>
+                        <option value='82'>सिग्नल तालिम शिक्षालय</option>
+                        <option value='121'>सुदुर पश्चिम पृतना</option>
+                        <option value='131'>सुन्दरीजल आर्सनल कार्यालय</option>
+                        <option value='140'>सुरक्षा तथा समारोह व्यवस्था सचिवालय, उपराष्ट्रपतिको कार्यालय</option>
+                        <option value='139'>सुरक्षा तथा समारोह व्यवस्था सचिवालय, राष्ट्रपति भवन</option>
+                        <option value='22'>सूचना तथा प्रविधि महाशाखा</option>
+                        <option value='5'>सेना प्राड विवाक</option>
+                        <option value='89'>सैनिक अभिलेखालय</option>
+                        <option value='70'>सैनिक आर्थिक प्रशासन विभाग</option>
+                        <option value='133'>सैनिक आवसिय माध्यमिक बिद्यालय, भक्तपुर</option>
+                        <option value='31'>सैनिक इन्टेलिजेन्स महानिर्देशनालय</option>
+                        <option value='39'>सैनिक ईण्टेलिजेन्स बाहिनी</option>
+                        <option value='117'>सैनिक कमाण्ड तथा स्टाफ कलेज</option>
+                        <option value='116'>सैनिक केन्द्रिय पुस्तकालय</option>
+                        <option value='63'>सैनिक गठ्ठाघर डिपो</option>
+                        <option value='30'>सैनिक तालिम तथा डक्ट्रिन महानिर्देशनालय</option>
+                        <option value='24'>सैनिक पुनर्स्थापना केन्द्र</option>
+                        <option value='88'>सैनिक प्रहरी गण</option>
+                        <option value='112'>सैनिक बन्दोबस्ती शिक्षालय</option>
+                        <option value='107'>सैनिक ब्याण्ड</option>
+                        <option value='42'>सैनिक शारीरिक तालिम तथा खेलकुद केन्द्र</option>
+                        <option value='52'>सैनिक संगठन निर्देशनालय</option>
+                        <option value='108'>सैनिक संग्रहालय</option>
+                        <option value='26'>सैनिक सचिव  विभाग</option>
+                        <option value='15'>सैनिक सामग्री उत्पादन तथा यान्त्रिक सेवा महानिर्देशनालय</option>
+                        <option value='16'>सैनिक सामग्री उत्पादन निर्देशनालय</option>
+                        <option value='13'>सैनिक स्वास्थ्य महानिर्देशनालय</option>
+                        <option value='32'>सैनिक हवाई महानिर्देशनालय</option>
+                        <option value='57'>सैनिक हवाई महानिर्देशनालय,मर्मत तथा सम्भार</option>
+                        <option value='85'>स्थपति निर्देशनालय</option>
+                        <option value='37'>स्वदेश तालिम शाखा, सैनिक तालिम निर्देशनालय, सै.ता. तथा ड.म‍.नि.</option>
+                        <option value='119'>स्वास्थ्य सेवा व्यवस्थापन महाशाखा</option>
+                        <option value='45'>हतियार तथा उपकरण महाशाखा</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Row 4: Role + Rank -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_role" class="form-label">Role *</label>
+                    <select name="role" class="form-select" id="id_role" required>
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                        <option value="SuperAdmin">SuperAdmin</option>
+                    </select>
+                    {% if form.role.errors %}<div class="text-danger">{{ form.role.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_rank" class="form-label">Rank (Optional)</label>
+                    <select class="form-control" name="rank_code" required>
+                        <option value='3'>महारथी</option>
+                        <option value='5'>रथी</option>
+                        <option value='7'>उपरथी</option>
+                        <option value='9'>सहायक रथी</option>
+                        <option value='10'>आ.सहायक रथी</option>
+                        <option value='11'>महा सेनानी</option>
+                        <option value='12'>आ.महा सेनानी</option>
+                        <option value='13'>प्रमुख सेनानी</option>
+                        <option value='14'>आ. प्रमुख सेनानी</option>
+                        <option value='15'>सेनानी</option>
+                        <option value='16'>आ.सेनानी</option>
+                        <option value='17'>सह. सेनानी</option>
+                        <option value='18'>आ.सह सेनानी</option>
+                        <option value='19'>उप सेनानी</option>
+                        <option value='21'>सहायक सेनानी</option>
+                        <option value='23'>अधिकृत क्याडेट शुरु</option>
+                        <option value='24'>पदिक क्याडेट</option>
+                        <option value='25'>पदिक कर्मचारी क्याडेट</option>
+                        <option value='26'>इन्सर्भिस क्याडेट</option>
+                        <option value='27'>मानार्थ सह सेनानी</option>
+                        <option value='29'>मानार्थ उप सेनानी</option>
+                        <option value='31'>प्रमुख सुवेदार</option>
+                        <option value='33'>सिनियर सुवेदार</option>
+                        <option value='35'>सुबेदार</option>
+                        <option value='37'>जमदार</option>
+                        <option value='39'>गण कार्य हुद्बा</option>
+                        <option value='41'>गण प्रबन्ध हुद्बा</option>
+                        <option value='43'>गुल्म कार्य हुद्बा</option>
+                        <option value='45'>गुल्म प्रबन्ध हुद्बा</option>
+                        <option value='47'>हुद्बा</option>
+                        <option value='49'>अमल्दार</option>
+                        <option value='51'>प्युठ</option>
+                        <option value='53'>सिपाही</option>
+                        <option value='54'>एन.सि.ई.  पाँचौ स्तर</option>
+                        <option value='55'>सैन्य</option>
+                        <option value='56'>ए.सैन्य</option>
+                        <option value='58'>एन.सि.ई. चौथो स्तर</option>
+                        <option value='59'>कोते</option>
+                        <option value='60'>एन.सि.ई. तेस्रो स्तर</option>
+                        <option value='62'>एन.सि.ई. दोस्रो स्तर</option>
+                        <option value='63'>एन.सि.ई. प्रथम स्तर</option>
+                        <option value='77'>हुद्बा क्याडेट</option>
+                        <option value='100'>वरिष्ठ चार्टर्ड एकाउन्टेन्ट</option>
+                        <option value='101'>प्राड सहायक रथी</option>
+                        <option value='102'>शाखा अधिकृत</option>
+                        <option value='103'>सेनानी (अ.प्रा.)</option>
+                        <option value='104'>प्रमुख सेनानी (अ.प्रा.)</option>
+                        <option value='105'>नायव सुब्बा</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-register">Create Account</button>
+        </form>
+    </div>
+
+    <!-- ✅ SWEET ALERT INTEGRATION -->
+    {% include 'sweet_alert.html' %}
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const unitSelect = document.getElementById("unitSelect");
+        const unitSearch = document.getElementById("unitSearch");
+
+        if (!unitSelect || !unitSearch) {
+            console.error("Required elements not found: unitSelect or unitSearch");
+            return;
+        }
+
+        const originalOptions = Array.from(unitSelect.options);
+
+        // Filter dropdown while typing
+        unitSearch.addEventListener("keyup", function() {
+            const keyword = this.value.toLowerCase().trim();
+            unitSelect.innerHTML = "";
+            if (keyword === "") {
+                // Show all if empty
+                originalOptions.forEach(opt => unitSelect.appendChild(opt.cloneNode(true)));
+            } else {
+                originalOptions.forEach(opt => {
+                    if (opt.text.toLowerCase().includes(keyword)) {
+                        unitSelect.appendChild(opt.cloneNode(true));
+                    }
+                });
+            }
+            unitSelect.style.display = "block";
+        });
+
+        // On option selection
+        unitSelect.addEventListener("change", function() {
+            const selectedOption = this.options[this.selectedIndex];
+            unitSearch.value = selectedOption.text;
+            unitSelect.style.display = "none";
+        });
+
+        // Auto-complete on blur
+        unitSearch.addEventListener("blur", function() {
+            const typed = this.value.toLowerCase().trim();
+            if (!typed) return;
+
+            const match = originalOptions.find(opt => 
+                opt.text.toLowerCase().includes(typed)
+            );
+
+            if (match) {
+                unitSearch.value = match.text;
+                unitSelect.value = match.value;
+            }
+            unitSelect.style.display = "none";
+        });
+    });
+    </script>
+</body>
+</html>

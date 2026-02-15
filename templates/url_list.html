@@ -1,0 +1,1780 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Alert Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+            <div>{{ message|safe }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header with Batch Report Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 fw-bold mb-1 text-gray-800">
+                <i class="fas fa-link text-primary me-2"></i> Social Media URLs
+            </h2>
+            <p class="text-muted mb-0">Manage and track social media URLs with personnel information</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <!-- Clear Selection Button -->
+            <button id="clearSelectionBtn" class="btn btn-outline-danger btn-sm me-2" style="display: none;">
+                <i class="fas fa-times me-1"></i>Clear All
+            </button>
+            
+            <!-- Report Generation Button -->
+            <button id="generateReportBtn" class="btn btn-success btn-sm me-2" style="display: none;" 
+                    data-bs-toggle="modal" data-bs-target="#reportModal">
+                <i class="fas fa-file-word me-2"></i>Generate Report
+            </button>
+            
+            <a href="{% url 'add_social_media_url' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-2"></i>Add New URL
+            </a>
+        </div>
+    </div>
+
+    <!-- Selection Summary Bar -->
+    <div class="alert alert-info alert-dismissible fade show mb-3 p-3 border-0 shadow-sm" id="selectionSummary" style="display: none; background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%); border-left: 4px solid #0d6efd !important;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary rounded-circle p-2 me-3">
+                    <i class="fas fa-check-circle text-white"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 text-primary fw-bold" id="summaryText">0 items selected across all pages</h6>
+                    <small class="text-muted">Selections are saved automatically</small>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" id="viewSelectedBtn">
+                    <i class="fas fa-eye me-1"></i>View Selected
+                </button>
+                <button type="button" class="btn-close" onclick="hideSelectionSummary()"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-3 text-gray-700">
+                <i class="fas fa-filter text-primary me-2"></i>Filter URLs
+            </h5>
+            <form method="GET" class="row g-3">
+                <!-- Search -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-gray-600">Search</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 ps-0" 
+                               placeholder="URLs, remarks, personnel..." 
+                               value="{{ search_query|default:'' }}">
+                    </div>
+                </div>
+                
+                <!-- Date Range -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-gray-600">Date Range</label>
+                    <div class="input-group input-group-sm">
+                        <input type="date" name="start_date" class="form-control" 
+                               value="{{ start_date|default:'' }}"
+                               placeholder="From date">
+                        <span class="input-group-text bg-light">to</span>
+                        <input type="date" name="end_date" class="form-control" 
+                               value="{{ end_date|default:'' }}"
+                               placeholder="To date">
+                    </div>
+                </div>
+                
+                <!-- Status Filter -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-gray-600">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Status</option>
+                        {% for code, name in status_choices %}
+                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>
+                            {{ name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Platform Filter -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-gray-600">Platform</label>
+                    <select name="platform" class="form-select form-select-sm">
+                        <option value="">All Platforms</option>
+                        <option value="TikTok" {% if platform_filter == 'TikTok' %}selected{% endif %}>TikTok</option>
+                        <option value="Facebook" {% if platform_filter == 'Facebook' %}selected{% endif %}>Facebook</option>
+                        <option value="Instagram" {% if platform_filter == 'Instagram' %}selected{% endif %}>Instagram</option>
+                        <option value="YouTube" {% if platform_filter == 'YouTube' %}selected{% endif %}>YouTube</option>
+                        <option value="Other" {% if platform_filter == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                
+                <!-- Actions -->
+                <div class="col-md-12 mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        
+                        {% if search_query or start_date or end_date or status_filter %}
+                        <div>
+                            <span class="badge bg-primary me-2">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                {{ urls.paginator.count }} result(s)
+                            </span>
+                            <a href="{% url 'list_social_media_url' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-2"></i>Clear Filters
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- URLs List Card -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-gray-700">
+                    <i class="fas fa-list me-2"></i>URL List
+                    <span class="badge bg-light text-dark ms-2" id="globalSelectionCount">0</span>
+                </h6>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="selectAll">
+                    <label class="form-check-label small text-muted" for="selectAll">Select All</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>URL</th>
+                            <th>Personnel</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for url in urls %}
+                        <tr id="row-{{ url.id }}" class="{% if url.status == 'pending' %}table-warning{% elif url.status == 'found' %}table-success{% endif %}">
+                            <!-- Checkbox -->
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input url-checkbox" 
+                                           type="checkbox" 
+                                           value="{{ url.id }}"
+                                           data-url="{{ url.url }}"
+                                           data-name="{{ url.name|default:'N/A' }}"
+                                           data-personnel-no="{{ url.personnel_no|default:'N/A' }}"
+                                           data-rank="{{ url.rank|default:'N/A' }}"
+                                           data-unit="{{ url.unit|default:'N/A' }}"
+                                           data-platform="{{ url.platform|default:'N/A' }}"
+                                           data-user-id="{{ url.user_id|default:'N/A' }}"
+                                           data-description="{{ url.description|default:'N/A' }}"
+                                           data-remarks="{{ url.remarks|default:'N/A' }}">
+                                </div>
+                            </td>
+                            
+                            <!-- URL -->
+                            <td>
+                                <div class="d-flex align-items-start">
+                                    <div class="me-2">
+                                        {% if url.platform == 'Facebook' %}
+                                        <i class="fab fa-facebook text-primary"></i>
+                                        {% elif url.platform == 'Instagram' %}
+                                        <i class="fab fa-instagram text-danger"></i>
+                                        {% elif url.platform == 'TikTok' %}
+                                        <i class="fab fa-tiktok text-dark"></i>
+                                        {% elif url.platform == 'YouTube' %}
+                                        <i class="fab fa-youtube text-danger"></i>
+                                        {% else %}
+                                        <i class="fas fa-link text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <a href="{{ url.url }}" target="_blank" class="text-decoration-none text-gray-800">
+                                            {{ url.url|truncatechars:40 }}
+                                        </a>
+                                        {% if url.platform %}
+                                        <br>
+                                        <small class="text-muted">{{ url.platform }}</small>
+                                        {% endif %}
+                                        {% if url.remarks %}
+                                        <br>
+                                        <small class="text-muted" title="{{ url.remarks }}">
+                                            <i class="fas fa-comment me-1"></i>
+                                            {{ url.remarks|truncatechars:30 }}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Personnel Info -->
+                            <td>
+                                {% if url.name or url.personnel_no %}
+                                    <div>
+                                        <small class="fw-semibold">{{ url.name|default:"-" }}</small><br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-id-card me-1"></i>
+                                            {{ url.personnel_no|default:"No ID" }}
+                                        </small>
+                                        {% if url.rank %}
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-star me-1"></i>
+                                            {{ url.rank }}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="badge bg-light text-muted">No info</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Department -->
+                            <td>
+                                <span class="badge bg-light text-dark">{{ url.source_department }}</span>
+                            </td>
+                            
+                            <!-- Status -->
+                            <td>
+                                <span class="badge badge-status {% if url.status == 'pending' %}bg-warning
+                                                      {% elif url.status == 'searching' %}bg-info
+                                                      {% elif url.status == 'found' %}bg-success
+                                                      {% elif url.status == 'not_found' %}bg-danger
+                                                      {% else %}bg-secondary{% endif %}">
+                                    {{ url.get_status_display }}
+                                </span>
+                            </td>
+                            
+                            <!-- Submitted Date -->
+                            <td>
+                                <small class="text-muted">{{ url.submitted_date|date:"M d, Y" }}</small>
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li>
+                                            <a class="dropdown-item" href="#" 
+                                               data-bs-toggle="collapse" 
+                                               data-bs-target="#details{{ url.id }}">
+                                                <i class="fas fa-edit me-2 text-primary"></i>Quick Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" 
+                                               data-bs-toggle="modal" data-bs-target="#viewModal{{ url.id }}">
+                                                <i class="fas fa-eye me-2 text-info"></i>View Details
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item text-success quick-report-btn" 
+                                                    data-url-id="{{ url.id }}">
+                                                <i class="fas fa-file-word me-2"></i>Single Report
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Collapsible Edit Form -->
+                        <tr class="collapse" id="details{{ url.id }}">
+                            <td colspan="7" class="p-0">
+                                <div class="bg-light p-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-3 text-primary">
+                                                <i class="fas fa-edit me-2"></i>
+                                                Edit URL Details #{{ url.id }}
+                                            </h6>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#details{{ url.id }}">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <form method="POST" action="{% url 'update_social_media_url' url.id %}" 
+                                          class="row g-3" id="form{{ url.id }}" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Personnel No</label>
+                                            <input type="text" class="form-control form-control-sm" name="personnel_no" 
+                                                   value="{{ url.personnel_no|default:'' }}">
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Rank</label>
+                                            <input type="text" class="form-control form-control-sm" name="rank" 
+                                                   value="{{ url.rank|default:'' }}">
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Full Name</label>
+                                            <input type="text" class="form-control form-control-sm" name="name" 
+                                                   value="{{ url.name|default:'' }}">
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Unit</label>
+                                            <input type="text" class="form-control form-control-sm" name="unit" 
+                                                   value="{{ url.unit|default:'' }}">
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Status</label>
+                                            <select class="form-select form-select-sm" name="status">
+                                                {% for code, name in status_choices %}
+                                                <option value="{{ code }}" {% if url.status == code %}selected{% endif %}>
+                                                    {{ name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Platform</label>
+                                            <select class="form-select form-select-sm" name="platform">
+                                                <option value="">Select Platform</option>
+                                                <option value="TikTok" {% if url.platform == 'TikTok' %}selected{% endif %}>TikTok</option>
+                                                <option value="Facebook" {% if url.platform == 'Facebook' %}selected{% endif %}>Facebook</option>
+                                                <option value="Instagram" {% if url.platform == 'Instagram' %}selected{% endif %}>Instagram</option>
+                                                <option value="YouTube" {% if url.platform == 'YouTube' %}selected{% endif %}>YouTube</option>
+                                                <option value="Other" {% if url.platform == 'Other' %}selected{% endif %}>Other</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">User ID/Handle</label>
+                                            <input type="text" class="form-control form-control-sm" name="user_id" 
+                                                   value="{{ url.user_id|default:'' }}">
+                                        </div>
+                                        
+                                        <!-- Photo Upload Section -->
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label small fw-bold">Profile Photos</label>
+                                            <small class="text-muted d-block mb-2">You can upload up to 3 images (Max 5MB each - JPG, PNG, GIF)</small>
+                                            
+                                            <!-- Main Photo -->
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-bold">Main Photo</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="file" class="form-control" name="photo" 
+                                                               accept="image/*" id="photoInput{{ url.id }}">
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="document.getElementById('photoInput{{ url.id }}').click()">
+                                                            <i class="fas fa-upload"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    {% if url.photo %}
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="{{ url.photo.url }}" alt="Main photo" 
+                                                             class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        <div>
+                                                            <small>Current Photo</small><br>
+                                                            <div class="form-check mt-1">
+                                                                <input class="form-check-input" type="checkbox" name="remove_photo" id="removePhoto{{ url.id }}">
+                                                                <label class="form-check-label small text-danger" for="removePhoto{{ url.id }}">
+                                                                    <i class="fas fa-trash me-1"></i> Remove
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <small class="text-muted">No main photo</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div id="imagePreview{{ url.id }}" style="display: none;">
+                                                        <small class="text-success">New Image Preview:</small>
+                                                        <div id="newImagePreview{{ url.id }}"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Photo 1 -->
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-bold">Photo 1 (Optional)</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="file" class="form-control" name="photo_one" 
+                                                               accept="image/*" id="photoOneInput{{ url.id }}">
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="document.getElementById('photoOneInput{{ url.id }}').click()">
+                                                            <i class="fas fa-upload"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    {% if url.photo_one %}
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="{{ url.photo_one.url }}" alt="Photo 1" 
+                                                             class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        <div>
+                                                            <small>Photo 1</small><br>
+                                                            <div class="form-check mt-1">
+                                                                <input class="form-check-input" type="checkbox" name="remove_photo_one" id="removePhotoOne{{ url.id }}">
+                                                                <label class="form-check-label small text-danger" for="removePhotoOne{{ url.id }}">
+                                                                    <i class="fas fa-trash me-1"></i> Remove
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <small class="text-muted">No photo 1</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div id="imagePreviewOne{{ url.id }}" style="display: none;">
+                                                        <small class="text-success">New Image Preview:</small>
+                                                        <div id="newImagePreviewOne{{ url.id }}"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Photo 2 -->
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-bold">Photo 2 (Optional)</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="file" class="form-control" name="photo_two" 
+                                                               accept="image/*" id="photoTwoInput{{ url.id }}">
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="document.getElementById('photoTwoInput{{ url.id }}').click()">
+                                                            <i class="fas fa-upload"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    {% if url.photo_two %}
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="{{ url.photo_two.url }}" alt="Photo 2" 
+                                                             class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        <div>
+                                                            <small>Photo 2</small><br>
+                                                            <div class="form-check mt-1">
+                                                                <input class="form-check-input" type="checkbox" name="remove_photo_two" id="removePhotoTwo{{ url.id }}">
+                                                                <label class="form-check-label small text-danger" for="removePhotoTwo{{ url.id }}">
+                                                                    <i class="fas fa-trash me-1"></i> Remove
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <small class="text-muted">No photo 2</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div id="imagePreviewTwo{{ url.id }}" style="display: none;">
+                                                        <small class="text-success">New Image Preview:</small>
+                                                        <div id="newImagePreviewTwo{{ url.id }}"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Description & Remarks -->
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Description</label>
+                                            <textarea class="form-control form-control-sm" name="description" rows="2">{{ url.description|default:'' }}</textarea>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Remarks <small class="text-muted">(Will appear in report)</small></label>
+                                            <textarea class="form-control form-control-sm" name="remarks" rows="2" 
+                                                      placeholder="Additional notes...">{{ url.remarks|default:'' }}</textarea>
+                                        </div>
+                                        
+                                        <!-- Submit Button -->
+                                        <div class="col-md-12 mt-3">
+                                            <button type="submit" class="btn btn-primary btn-sm" id="submitBtn{{ url.id }}">
+                                                <i class="fas fa-save me-2"></i>
+                                                Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <h5 class="mb-2">No URLs Found</h5>
+                                    <p class="mb-0">Try adjusting your filters or add a new URL</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if urls.paginator.num_pages > 1 %}
+            <div class="card-footer bg-white border-top py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">
+                            Showing {{ urls.start_index }} to {{ urls.end_index }} of {{ urls.paginator.count }} entries
+                        </small>
+                    </div>
+                    
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if urls.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in urls.paginator.page_range %}
+                                {% if urls.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > urls.number|add:'-3' and num < urls.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if urls.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ urls.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Report Generation Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-word me-2"></i>Generate Social Media Report
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Selected URLs Summary -->
+                <div class="mb-4">
+                    <h6 class="text-gray-700 mb-2">Selected URLs for Report:</h6>
+                    <div id="selectedUrlsList" class="border rounded p-3 bg-light" 
+                         style="max-height: 150px; overflow-y: auto;">
+                        <p class="text-muted mb-0 text-center py-2">No URLs selected</p>
+                    </div>
+                    <small class="text-muted" id="selectedCount">0 URLs selected</small>
+                </div>
+                
+                <!-- Report Options -->
+                <h6 class="text-gray-700 mb-2">Report Options:</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="nepaliFormat" checked>
+                            <label class="form-check-label" for="nepaliFormat">
+                                <i class="fas fa-language me-1"></i>
+                                Generate in Nepali Format
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="mt-4" id="progressSection" style="display: none;">
+                    <h6 class="text-center mb-3 text-gray-700">Generating Report...</h6>
+                    
+                    <!-- Circular Progress Bar -->
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="position-relative" style="width: 100px; height: 100px;">
+                            <svg width="100" height="100" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" 
+                                        stroke="#e9ecef" stroke-width="8" fill="none"/>
+                                <circle id="progressCircle" cx="50" cy="50" r="45" 
+                                        stroke="#0d6efd" stroke-width="8" fill="none"
+                                        stroke-linecap="round" transform="rotate(-90 50 50)"
+                                        stroke-dasharray="282.743" stroke-dashoffset="282.743"/>
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <span id="progressPercentage" class="fs-5 fw-bold">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Text -->
+                    <div class="text-center mb-3">
+                        <p id="progressStatus" class="mb-1 text-gray-700">Preparing report...</p>
+                        <small id="progressDetails" class="text-muted">Initializing</small>
+                    </div>
+                    
+                    <!-- Download Section -->
+                    <div class="text-center mt-4" id="downloadSection" style="display: none;">
+                        <div class="alert alert-success border-0 shadow-sm">
+                            <i class="fas fa-check-circle me-2 text-success"></i>
+                            Report generated successfully!
+                        </div>
+                        <a href="#" id="downloadLink" class="btn btn-success btn-sm px-4">
+                            <i class="fas fa-download me-2"></i>Download Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="startReportBtn">
+                    <i class="fas fa-play me-2"></i>Generate Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Selected Modal -->
+<div class="modal fade" id="viewSelectedModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-list-check me-2"></i>Selected Items
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="selectedItemsList" class="mb-3">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <i class="fas fa-info-circle me-2"></i>
+                    These selections are saved in your browser and will persist across page navigation.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger btn-sm" id="clearSelectedModalBtn">
+                    <i class="fas fa-trash me-1"></i>Clear All Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Modals for Each URL -->
+{% for url in urls %}
+<div class="modal fade" id="viewModal{{ url.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>View URL Details #{{ url.id }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-link me-2"></i>URL Information
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">URL</small>
+                                    <p class="mb-0">
+                                        <a href="{{ url.url }}" target="_blank" class="text-decoration-none">
+                                            {{ url.url|truncatechars:50 }}
+                                        </a>
+                                    </p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Platform</small>
+                                    <p class="mb-0">{{ url.platform|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">User ID</small>
+                                    <p class="mb-0">{{ url.user_id|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Submitted</small>
+                                    <p class="mb-0">{{ url.submitted_date|date:"M d, Y H:i" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Department</small>
+                                    <p class="mb-0">{{ url.source_department }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Personnel Information
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">Name</small>
+                                    <p class="mb-0">{{ url.name|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Personnel No</small>
+                                    <p class="mb-0">{{ url.personnel_no|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Rank</small>
+                                    <p class="mb-0">{{ url.rank|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Unit</small>
+                                    <p class="mb-0">{{ url.unit|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Status</small>
+                                    <p class="mb-0">
+                                        <span class="badge bg-{% if url.status == 'pending' %}warning{% elif url.status == 'searching' %}info{% elif url.status == 'found' %}success{% elif url.status == 'not_found' %}danger{% else %}secondary{% endif %}">
+                                            {{ url.get_status_display }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if url.photo or url.photo_one or url.photo_two %}
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-images me-2"></i>Profile Photos
+                                </h6>
+                                <div class="row">
+                                    {% if url.photo %}
+                                    <div class="col-md-4 text-center mb-3">
+                                        <small class="text-muted d-block mb-2">Main Photo</small>
+                                        <img src="{{ url.photo.url }}" alt="Main Photo" 
+                                             class="img-fluid rounded shadow" style="max-height: 200px;">
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if url.photo_one %}
+                                    <div class="col-md-4 text-center mb-3">
+                                        <small class="text-muted d-block mb-2">Photo 1</small>
+                                        <img src="{{ url.photo_one.url }}" alt="Photo 1" 
+                                             class="img-fluid rounded shadow" style="max-height: 200px;">
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if url.photo_two %}
+                                    <div class="col-md-4 text-center mb-3">
+                                        <small class="text-muted d-block mb-2">Photo 2</small>
+                                        <img src="{{ url.photo_two.url }}" alt="Photo 2" 
+                                             class="img-fluid rounded shadow" style="max-height: 200px;">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if url.description or url.remarks %}
+                <div class="row mt-3">
+                    {% if url.description %}
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-align-left me-2"></i>Description
+                                </h6>
+                                <p class="text-muted mb-0">{{ url.description|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if url.remarks %}
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-sticky-note me-2"></i>Remarks
+                                </h6>
+                                <p class="text-muted mb-0">{{ url.remarks|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+/* Custom Styles */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --warning-gradient: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+}
+
+.bg-gradient-primary {
+    background: var(--primary-gradient) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+/* Table Styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Badge Styles */
+.badge-status {
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+/* Form Control Styles */
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Checkbox Styles */
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Button Styles */
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Dropdown Styles */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Animation for row selection */
+tr.selected {
+    animation: selectPulse 0.3s ease;
+    background-color: rgba(102, 126, 234, 0.1) !important;
+    border-left: 3px solid #667eea;
+}
+
+@keyframes selectPulse {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(102, 126, 234, 0.2); }
+    100% { background-color: rgba(102, 126, 234, 0.1); }
+}
+
+/* Progress Circle Animation */
+@keyframes progressFill {
+    from { stroke-dashoffset: 282.743; }
+    to { stroke-dashoffset: 0; }
+}
+
+.progress-fill {
+    animation: progressFill 1s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Status colors */
+.bg-warning { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%) !important; }
+.bg-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; }
+.bg-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important; }
+.bg-danger { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .card-body {
+        padding: 15px !important;
+    }
+    
+    .table-responsive {
+        font-size: 0.9em;
+    }
+}
+</style>
+
+<script>
+// Global variables
+let selectedUrls = new Set();
+let isGeneratingReport = false;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initSelectionSystem();
+    initFormHandlers();
+    initReportGeneration();
+    initImagePreviews();
+    
+    // Show any Django messages
+    showDjangoMessages();
+    
+    console.log('Social Media URL Management initialized');
+});
+
+// =============================================
+// 1. SELECTION SYSTEM
+// =============================================
+
+function initSelectionSystem() {
+    // Load saved selections
+    loadSelections();
+    
+    // Select All checkbox
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            const checkboxes = document.querySelectorAll('.url-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const row = checkbox.closest('tr');
+                
+                if (isChecked) {
+                    selectedUrls.add(checkbox.value);
+                    row.classList.add('selected');
+                } else {
+                    selectedUrls.delete(checkbox.value);
+                    row.classList.remove('selected');
+                }
+            });
+            
+            saveSelections();
+            updateSelectionUI();
+        });
+    }
+    
+    // Individual checkboxes
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('url-checkbox')) {
+            const checkbox = e.target;
+            const urlId = checkbox.value;
+            const row = checkbox.closest('tr');
+            
+            if (checkbox.checked) {
+                selectedUrls.add(urlId);
+                row.classList.add('selected');
+            } else {
+                selectedUrls.delete(urlId);
+                row.classList.remove('selected');
+            }
+            
+            saveSelections();
+            updateSelectionUI();
+            updateSelectAllCheckbox();
+        }
+    });
+    
+    // Clear Selection Button
+    document.getElementById('clearSelectionBtn')?.addEventListener('click', clearAllSelections);
+    
+    // View Selected Button
+    document.getElementById('viewSelectedBtn')?.addEventListener('click', showSelectedModal);
+    
+    // Clear in Modal Button
+    document.getElementById('clearSelectedModalBtn')?.addEventListener('click', function() {
+        if (confirm('Clear all selected items?')) {
+            clearAllSelections();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('viewSelectedModal'));
+            modal?.hide();
+        }
+    });
+    
+    // Quick single report buttons
+    document.querySelectorAll('.quick-report-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const urlId = this.dataset.urlId;
+            selectedUrls.clear();
+            selectedUrls.add(urlId);
+            saveSelections();
+            updateSelectionUI();
+            
+            const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+            modal.show();
+        });
+    });
+}
+
+function loadSelections() {
+    try {
+        const saved = localStorage.getItem('selectedReportUrls');
+        if (saved) {
+            selectedUrls = new Set(JSON.parse(saved));
+            syncCheckboxes();
+        }
+    } catch (e) {
+        console.error('Error loading selections:', e);
+    }
+}
+
+function saveSelections() {
+    try {
+        localStorage.setItem('selectedReportUrls', JSON.stringify(Array.from(selectedUrls)));
+    } catch (e) {
+        console.error('Error saving selections:', e);
+    }
+}
+
+function syncCheckboxes() {
+    document.querySelectorAll('.url-checkbox').forEach(checkbox => {
+        const isSelected = selectedUrls.has(checkbox.value);
+        checkbox.checked = isSelected;
+        
+        const row = checkbox.closest('tr');
+        if (isSelected) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    });
+    
+    updateSelectAllCheckbox();
+    updateSelectionUI();
+}
+
+function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (!selectAllCheckbox) return;
+    
+    const visibleCheckboxes = document.querySelectorAll('.url-checkbox');
+    if (visibleCheckboxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+        return;
+    }
+    
+    const checkedCount = Array.from(visibleCheckboxes).filter(cb => cb.checked).length;
+    
+    if (checkedCount === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedCount === visibleCheckboxes.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    }
+}
+
+function updateSelectionUI() {
+    const count = selectedUrls.size;
+    
+    // Update header counter
+    const headerCounter = document.getElementById('globalSelectionCount');
+    if (headerCounter) {
+        headerCounter.textContent = count;
+        headerCounter.className = `badge ${count > 0 ? 'bg-primary' : 'bg-light text-dark'}`;
+    }
+    
+    // Update summary bar
+    const summaryBar = document.getElementById('selectionSummary');
+    const summaryText = document.getElementById('summaryText');
+    if (summaryBar && summaryText) {
+        if (count > 0) {
+            summaryBar.style.display = 'block';
+            summaryText.textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+        }
+    }
+    
+    // Update buttons
+    const reportBtn = document.getElementById('generateReportBtn');
+    const clearBtn = document.getElementById('clearSelectionBtn');
+    if (reportBtn) {
+        reportBtn.style.display = count > 0 ? 'inline-block' : 'none';
+        reportBtn.innerHTML = `<i class="fas fa-file-word me-2"></i>Generate Report (${count})`;
+    }
+    if (clearBtn) {
+        clearBtn.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+    
+    updateSelectedUrlsList();
+}
+
+function clearAllSelections() {
+    if (selectedUrls.size === 0) return;
+    
+    if (confirm('Clear all selections?')) {
+        selectedUrls.clear();
+        saveSelections();
+        syncCheckboxes();
+        updateSelectionUI();
+    }
+}
+
+function showSelectedModal() {
+    const modal = new bootstrap.Modal(document.getElementById('viewSelectedModal'));
+    const itemsList = document.getElementById('selectedItemsList');
+    
+    if (selectedUrls.size === 0) {
+        itemsList.innerHTML = '<p class="text-muted text-center py-4">No items selected</p>';
+    } else {
+        let html = '<div class="list-group">';
+        
+        // Get all selected items from the page
+        document.querySelectorAll('.url-checkbox:checked').forEach((checkbox, index) => {
+            const name = checkbox.dataset.name || 'Unknown';
+            const personnelNo = checkbox.dataset.personnelNo || 'N/A';
+            const rank = checkbox.dataset.rank || 'N/A';
+            const url = checkbox.dataset.url || '#';
+            
+            html += `
+            <div class="list-group-item border-0 shadow-sm mb-2">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary me-3">${index + 1}</span>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${name}</h6>
+                        <p class="mb-1 text-muted">
+                            <small>
+                                <i class="fas fa-id-card me-1"></i>${personnelNo} 
+                                <i class="fas fa-star ms-2 me-1"></i>${rank}
+                            </small>
+                        </p>
+                        <small class="text-truncate d-block">
+                            <a href="${url}" target="_blank" class="text-decoration-none">${url}</a>
+                        </small>
+                    </div>
+                </div>
+            </div>`;
+        });
+        
+        html += '</div>';
+        
+        // Show warning if selections exist on other pages
+        if (selectedUrls.size > document.querySelectorAll('.url-checkbox:checked').length) {
+            const otherCount = selectedUrls.size - document.querySelectorAll('.url-checkbox:checked').length;
+            html += `
+            <div class="alert alert-info border-0 shadow-sm mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                ${otherCount} additional item${otherCount !== 1 ? 's' : ''} selected from other pages
+            </div>`;
+        }
+        
+        itemsList.innerHTML = html;
+    }
+    
+    modal.show();
+}
+
+function hideSelectionSummary() {
+    const summaryBar = document.getElementById('selectionSummary');
+    if (summaryBar) {
+        summaryBar.style.display = 'none';
+    }
+}
+
+// =============================================
+// 2. FORM HANDLERS
+// =============================================
+
+function initFormHandlers() {
+    // Handle form submissions
+    document.querySelectorAll('form[id^="form"]').forEach(form => {
+        form.addEventListener('submit', handleFormSubmit);
+    });
+    
+    // Initialize forms when collapse is shown
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-bs-target');
+            if (target) {
+                const urlId = target.replace('#details', '');
+                setTimeout(() => {
+                    const form = document.getElementById(`form${urlId}`);
+                    if (form) {
+                        // Remove and re-add event listener to prevent duplicates
+                        const newForm = form.cloneNode(true);
+                        form.parentNode.replaceChild(newForm, form);
+                        newForm.addEventListener('submit', handleFormSubmit);
+                    }
+                }, 300);
+            }
+        });
+    });
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const urlId = form.id.replace('form', '');
+    const submitBtn = document.getElementById(`submitBtn${urlId}`);
+    const originalBtnText = submitBtn?.innerHTML;
+    
+    // Show loading state
+    if (submitBtn) {
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+        submitBtn.disabled = true;
+    }
+    
+    try {
+        const formData = new FormData(form);
+        const csrfToken = getCSRFToken();
+        
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Try to parse as JSON first
+        try {
+            const data = await response.json();
+            
+            if (data.success) {
+                showNotification(data.message || '✅ Changes saved successfully!', 'success');
+                
+                // Close collapse
+                const collapse = document.getElementById(`details${urlId}`);
+                const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                if (bsCollapse) bsCollapse.hide();
+                
+                // Reload page after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                throw new Error(data.error || 'Failed to save changes');
+            }
+        } catch (jsonError) {
+            // If not JSON, assume it's a redirect
+            window.location.href = response.url || '{% url "list_social_media_url" %}';
+        }
+        
+    } catch (error) {
+        console.error('Form submission error:', error);
+        showNotification('❌ Error saving changes. Please try again.', 'error');
+        
+        // Reset button
+        if (submitBtn) {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
+    }
+}
+
+function getCSRFToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// =============================================
+// 3. IMAGE PREVIEWS FOR ALL THREE PHOTO FIELDS
+// =============================================
+
+function initImagePreviews() {
+    // Main photo
+    document.querySelectorAll('input[type="file"][name="photo"]').forEach(input => {
+        const urlId = input.id.replace('photoInput', '');
+        input.addEventListener('change', function() {
+            handleImagePreview(this, urlId, '');
+        });
+    });
+    
+    // Photo one
+    document.querySelectorAll('input[type="file"][name="photo_one"]').forEach(input => {
+        const urlId = input.id.replace('photoOneInput', '');
+        input.addEventListener('change', function() {
+            handleImagePreview(this, urlId, 'One');
+        });
+    });
+    
+    // Photo two
+    document.querySelectorAll('input[type="file"][name="photo_two"]').forEach(input => {
+        const urlId = input.id.replace('photoTwoInput', '');
+        input.addEventListener('change', function() {
+            handleImagePreview(this, urlId, 'Two');
+        });
+    });
+}
+
+function handleImagePreview(input, urlId, suffix = '') {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    const previewContainer = document.getElementById(`imagePreview${suffix}${urlId}`);
+    const newImagePreview = document.getElementById(`newImagePreview${suffix}${urlId}`);
+    
+    if (!previewContainer || !newImagePreview) return;
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('❌ File size exceeds 5MB limit.', 'error');
+        input.value = '';
+        return;
+    }
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        showNotification('❌ Invalid file type. Please select an image file.', 'error');
+        input.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        newImagePreview.innerHTML = `
+            <img src="${e.target.result}" 
+                 alt="Preview" 
+                 class="img-thumbnail rounded" 
+                 style="max-height: 100px;">
+            <p class="mt-1 mb-0">
+                <small class="text-muted">${file.name} (${(file.size / 1024).toFixed(1)} KB)</small>
+            </p>
+        `;
+        previewContainer.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+// =============================================
+// 4. REPORT GENERATION
+// =============================================
+
+function initReportGeneration() {
+    const startReportBtn = document.getElementById('startReportBtn');
+    const reportModal = document.getElementById('reportModal');
+    
+    if (startReportBtn) {
+        startReportBtn.addEventListener('click', generateReport);
+    }
+    
+    if (reportModal) {
+        reportModal.addEventListener('show.bs.modal', updateSelectedUrlsList);
+        reportModal.addEventListener('hidden.bs.modal', resetReportModal);
+    }
+}
+
+function updateSelectedUrlsList() {
+    const listDiv = document.getElementById('selectedUrlsList');
+    const countSpan = document.getElementById('selectedCount');
+    
+    if (!listDiv || !countSpan) return;
+    
+    const count = selectedUrls.size;
+    
+    if (count === 0) {
+        listDiv.innerHTML = '<p class="text-muted mb-0 text-center py-2">No URLs selected</p>';
+        countSpan.textContent = '0 URLs selected';
+        return;
+    }
+    
+    let html = '';
+    document.querySelectorAll('.url-checkbox:checked').forEach((checkbox, index) => {
+        const name = checkbox.dataset.name || 'Unknown';
+        const personnelNo = checkbox.dataset.personnelNo || 'N/A';
+        const url = checkbox.dataset.url || '#';
+        
+        html += `
+        <div class="mb-2 pb-2 border-bottom">
+            <div class="d-flex align-items-start">
+                <span class="badge bg-primary me-2 mt-1">${index + 1}</span>
+                <div>
+                    <small class="fw-semibold">${name}</small>
+                    <br>
+                    <small class="text-muted">ID: ${personnelNo}</small>
+                    <br>
+                    <small>
+                        <a href="${url}" target="_blank" class="text-decoration-none">${url.substring(0, 50)}${url.length > 50 ? '...' : ''}</a>
+                    </small>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    listDiv.innerHTML = html;
+    countSpan.textContent = `${count} URL${count > 1 ? 's' : ''} selected`;
+}
+
+async function generateReport() {
+    if (isGeneratingReport) return;
+    
+    const count = selectedUrls.size;
+    if (count === 0) {
+        showNotification('❌ Please select at least one URL', 'error');
+        return;
+    }
+    
+    isGeneratingReport = true;
+    
+    const startReportBtn = document.getElementById('startReportBtn');
+    const progressSection = document.getElementById('progressSection');
+    const progressCircle = document.getElementById('progressCircle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressDetails = document.getElementById('progressDetails');
+    
+    // Show progress section
+    if (progressSection) progressSection.style.display = 'block';
+    if (startReportBtn) startReportBtn.disabled = true;
+    
+    // Get report options
+    const nepaliFormat = document.getElementById('nepaliFormat')?.checked || false;
+    
+    // Prepare data
+    const reportData = {
+        url_ids: Array.from(selectedUrls),
+        nepali_format: nepaliFormat
+    };
+    
+    // Show initial progress
+    simulateProgress(0, 100, 2000, progressCircle, progressPercentage, progressStatus, progressDetails);
+    
+    try {
+        // Send request
+        const response = await fetch('{% url "generate_social_media_report" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(reportData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+        
+        // Get the blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const timestamp = new Date().toISOString().slice(0,10).replace(/-/g, '');
+        const filename = `social_media_report_${timestamp}.docx`;
+        
+        // Update UI to show download
+        if (progressStatus) progressStatus.textContent = 'Report generated!';
+        if (progressDetails) progressDetails.textContent = 'Ready to download';
+        
+        // Show download section
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadLink = document.getElementById('downloadLink');
+        if (downloadSection) downloadSection.style.display = 'block';
+        if (downloadLink) {
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            
+            // Auto-click download
+            setTimeout(() => {
+                downloadLink.click();
+            }, 500);
+        }
+        
+        showNotification('✅ Report generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Report generation error:', error);
+        if (progressStatus) {
+            progressStatus.textContent = 'Error generating report';
+            progressStatus.className = 'mb-1 text-danger';
+        }
+        showNotification(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        isGeneratingReport = false;
+        if (startReportBtn) startReportBtn.disabled = false;
+    }
+}
+
+function simulateProgress(start, end, duration, circle, percentage, status, details) {
+    let current = start;
+    const increment = (end - start) / (duration / 50);
+    
+    const interval = setInterval(() => {
+        current += increment;
+        
+        if (circle) {
+            const circumference = 282.743;
+            const offset = circumference - (circumference * current) / 100;
+            circle.style.strokeDashoffset = offset;
+        }
+        
+        if (percentage) percentage.textContent = `${Math.min(Math.round(current), 100)}%`;
+        if (status) {
+            if (current < 30) status.textContent = 'Preparing data...';
+            else if (current < 60) status.textContent = 'Generating document...';
+            else if (current < 90) status.textContent = 'Formatting report...';
+            else status.textContent = 'Finalizing...';
+        }
+        if (details) details.textContent = `${Math.min(Math.round(current), 100)}% complete`;
+        
+        if (current >= end) {
+            clearInterval(interval);
+            if (circle) circle.classList.add('progress-fill');
+        }
+    }, 50);
+}
+
+function resetReportModal() {
+    const progressSection = document.getElementById('progressSection');
+    const downloadSection = document.getElementById('downloadSection');
+    const startReportBtn = document.getElementById('startReportBtn');
+    const progressCircle = document.getElementById('progressCircle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressDetails = document.getElementById('progressDetails');
+    
+    if (progressSection) progressSection.style.display = 'none';
+    if (downloadSection) downloadSection.style.display = 'none';
+    if (startReportBtn) startReportBtn.disabled = false;
+    if (progressCircle) {
+        progressCircle.style.strokeDashoffset = '282.743';
+        progressCircle.classList.remove('progress-fill');
+    }
+    if (progressPercentage) progressPercentage.textContent = '0%';
+    if (progressStatus) {
+        progressStatus.textContent = 'Preparing report...';
+        progressStatus.className = 'mb-1 text-gray-700';
+    }
+    if (progressDetails) progressDetails.textContent = 'Initializing';
+    
+    isGeneratingReport = false;
+}
+
+// =============================================
+// 5. UTILITY FUNCTIONS
+// =============================================
+
+function showNotification(message, type = 'success') {
+    // Remove existing notifications
+    const existingAlerts = document.querySelectorAll('.custom-notification');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Create notification
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `custom-notification alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show shadow-lg`;
+    alertDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${getIconForType(type)} me-3"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function getIconForType(type) {
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
+
+function showDjangoMessages() {
+    // This function can be used to handle Django messages if needed
+    const messages = document.querySelectorAll('.alert');
+    messages.forEach(message => {
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(message);
+            bsAlert.close();
+        }, 5000);
+    });
+}
+
+// Add custom notification CSS
+const style = document.createElement('style');
+style.textContent = `
+.custom-notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    min-width: 300px !important;
+    max-width: 400px !important;
+    animation: slideInRight 0.3s ease-out;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

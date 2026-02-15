@@ -1,0 +1,912 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="report-container">
+  <div class="report-card">
+    <!-- Header -->
+    <div class="report-header">
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h1 class="report-title">Threat Report Generator</h1>
+      <p class="report-subtitle">Select date range, province, and severity to analyze threat data</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{% url 'generate_word_report' %}" class="report-form" id="reportForm">
+      {% csrf_token %}
+
+      <!-- Date Range & Filters Section -->
+      <div class="form-grid">
+        <!-- Date Range -->
+        <div class="form-group">
+          <label class="form-label">
+            <svg xmlns="http://www.w3.org/2000/svg" class="label-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Date Range
+          </label>
+          <div class="date-range">
+            <div class="date-input-group">
+              <div class="date-wrapper">
+                <input
+                  type="date"
+                  id="start_date"
+                  name="start_date"
+                  required
+                  class="date-input"
+                />
+                <label for="start_date" class="date-label">Start Date</label>
+              </div>
+              <div class="date-separator">→</div>
+              <div class="date-wrapper">
+                <input
+                  type="date"
+                  id="end_date"
+                  name="end_date"
+                  required
+                  class="date-input"
+                />
+                <label for="end_date" class="date-label">End Date</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Province Filter -->
+        <div class="form-group">
+          <label class="form-label">
+            <svg xmlns="http://www.w3.org/2000/svg" class="label-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            Province
+          </label>
+          <div class="dropdown-wrapper">
+            <select name="province" class="province-select">
+              <option value="">All Provinces</option>
+              <option value="koshi">Koshi</option>
+              <option value="madhesh">Madhesh</option>
+              <option value="bagmati">Bagmati</option>
+              <option value="gandaki">Gandaki</option>
+              <option value="lumbini">Lumbini</option>
+              <option value="karnali">Karnali</option>
+              <option value="sudurpaschim">Sudurpaschim</option>
+            </select>
+            <div class="select-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Severity Filter -->
+        <div class="form-group">
+          <label class="form-label">
+            <svg xmlns="http://www.w3.org/2000/svg" class="label-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            Severity Level
+          </label>
+          <div class="severity-filters">
+            <div class="severity-options">
+              <!-- "All Levels" checkbox -->
+              <label class="severity-option">
+                <input type="checkbox" name="severity" value="all" class="severity-checkbox" id="severity_all" checked>
+                <span class="severity-label">All Levels</span>
+              </label>
+              
+              <!-- Individual severity checkboxes in CORRECT ORDER -->
+              <label class="severity-option">
+                <input type="checkbox" name="severity" value="low" class="severity-checkbox severity-individual" checked>
+                <span class="severity-badge low">Low</span>
+              </label>
+              
+              <label class="severity-option">
+                <input type="checkbox" name="severity" value="medium" class="severity-checkbox severity-individual" checked>
+                <span class="severity-badge medium">Medium</span>
+              </label>
+              
+              <label class="severity-option">
+                <input type="checkbox" name="severity" value="high" class="severity-checkbox severity-individual" checked>
+                <span class="severity-badge high">High</span>
+              </label>
+              
+              <label class="severity-option">
+                <input type="checkbox" name="severity" value="critical" class="severity-checkbox severity-individual" checked>
+                <span class="severity-badge critical">Critical</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section (Hidden by default) -->
+      <div class="progress-container" id="progressContainer" style="display: none;">
+        <div class="progress-header">
+          <svg xmlns="http://www.w3.org/2000/svg" class="progress-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <h3 class="progress-title">Generating Report</h3>
+          <p class="progress-subtitle">Please wait while we process your data</p>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-wrapper">
+          <div class="progress-info">
+            <span class="progress-text">Processing data...</span>
+            <span class="progress-percentage" id="progressPercentage">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+          </div>
+          <div class="progress-steps">
+            <span class="progress-step" id="step1">✓ Gathering data</span>
+            <span class="progress-step" id="step2">Analyzing threats</span>
+            <span class="progress-step" id="step3">Generating charts</span>
+            <span class="progress-step" id="step4">Creating document</span>
+          </div>
+        </div>
+        
+        <!-- Time estimate -->
+        <div class="progress-estimate">
+          <svg xmlns="http://www.w3.org/2000/svg" class="estimate-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Estimated time: <strong id="timeEstimate">15-30 seconds</strong></span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Generate Report
+        <span class="btn-subtext">Analyze & Export</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Base Styles */
+  .report-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .report-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Header */
+  .report-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+  }
+
+  .header-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: white;
+  }
+
+  .report-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+  }
+
+  .report-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Form Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-group:last-child {
+      grid-column: span 2;
+    }
+  }
+
+  /* Progress Container */
+  .progress-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2e8f0;
+    animation: slideIn 0.5s ease-out;
+  }
+
+  .progress-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 0.75rem;
+    stroke: #4f46e5;
+  }
+
+  .progress-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  .progress-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .progress-wrapper {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .progress-percentage {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #4f46e5;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  .progress-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .progress-step {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+  }
+
+  .progress-step.active {
+    color: #4f46e5;
+    background: #eef2ff;
+    font-weight: 500;
+  }
+
+  .progress-step.completed {
+    color: #10b981;
+    background: #ecfdf5;
+  }
+
+  .progress-estimate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .estimate-icon {
+    width: 16px;
+    height: 16px;
+    stroke: #9ca3af;
+  }
+
+  /* Form Elements - Keep existing styles */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .label-icon {
+    width: 16px;
+    height: 16px;
+    stroke: #4f46e5;
+  }
+
+  /* Date Range */
+  .date-range {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 0.75rem;
+  }
+
+  .date-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .date-wrapper {
+    flex: 1;
+    position: relative;
+  }
+
+  .date-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #111827;
+    background: white;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    height: 44px;
+  }
+
+  .date-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .date-label {
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    font-size: 0.75rem;
+    color: #6b7280;
+    background: white;
+    padding: 0 4px;
+    pointer-events: none;
+  }
+
+  .date-separator {
+    color: #9ca3af;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* Province Select */
+  .dropdown-wrapper {
+    position: relative;
+  }
+
+  .province-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    padding-right: 2.5rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #111827;
+    background: white;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    height: 44px;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .province-select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .select-arrow svg {
+    width: 16px;
+    height: 16px;
+    stroke: #6b7280;
+  }
+
+  /* Severity Filters */
+  .severity-filters {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 0.75rem;
+  }
+
+  .severity-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .severity-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .severity-option:hover {
+    transform: translateY(-2px);
+  }
+
+  .severity-checkbox {
+    display: none;
+  }
+
+  .severity-checkbox:checked + .severity-label {
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+  }
+
+  .severity-checkbox:checked + .severity-badge {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .severity-checkbox:not(:checked) + .severity-badge {
+    opacity: 0.5;
+  }
+
+  .severity-label {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .severity-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1.5px solid;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .severity-badge.critical {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+
+  .severity-badge.high {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+  }
+
+  .severity-badge.medium {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+
+  .severity-badge.low {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+    color: #10b981;
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.35);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+  }
+
+  .btn-subtext {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-left: auto;
+  }
+
+  /* Animations */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .report-container {
+      margin: 1rem auto;
+      padding: 0 0.75rem;
+    }
+    
+    .report-card {
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+    
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+    }
+    
+    .header-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .report-title {
+      font-size: 1.5rem;
+    }
+    
+    .report-subtitle {
+      font-size: 0.875rem;
+    }
+    
+    .progress-steps {
+      grid-template-columns: 1fr;
+      gap: 0.375rem;
+    }
+    
+    .date-input-group {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .date-separator {
+      transform: rotate(90deg);
+    }
+    
+    .severity-options {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .submit-btn {
+      padding: 0.875rem;
+    }
+  }
+
+  /* Animation for form interactions */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-grid {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .submit-btn {
+    animation: fadeIn 0.4s ease-out 0.1s both;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set default dates (last 30 days)
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    
+    const formatDate = (date) => date.toISOString().split('T')[0];
+    
+    const today = formatDate(end);
+    document.getElementById('start_date').value = formatDate(start);
+    document.getElementById('end_date').value = today;
+    
+    // Set max date to today
+    document.getElementById('start_date').max = today;
+    document.getElementById('end_date').max = today;
+    document.getElementById('start_date').min = '2020-01-01';
+    
+    // Date validation
+    function validateDates() {
+      const startDate = document.getElementById('start_date');
+      const endDate = document.getElementById('end_date');
+      
+      if (startDate.value > endDate.value) {
+        const temp = startDate.value;
+        startDate.value = endDate.value;
+        endDate.value = temp;
+      }
+    }
+    
+    document.getElementById('start_date').addEventListener('change', validateDates);
+    document.getElementById('end_date').addEventListener('change', validateDates);
+    
+    // Severity checkbox logic
+    const allCheckbox = document.getElementById('severity_all');
+    const severityCheckboxes = document.querySelectorAll('.severity-individual');
+    
+    // Initialize: If "All" is checked, ensure all individual boxes are checked
+    if (allCheckbox.checked) {
+      severityCheckboxes.forEach(cb => cb.checked = true);
+    }
+    
+    // Handle "All Levels" checkbox
+    allCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        severityCheckboxes.forEach(checkbox => checkbox.checked = true);
+      }
+    });
+    
+    // Handle individual severity checkboxes
+    severityCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const allChecked = Array.from(severityCheckboxes).every(cb => cb.checked);
+        allCheckbox.checked = allChecked;
+      });
+    });
+    
+    // Form validation and progress simulation
+    const form = document.getElementById('reportForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const timeEstimate = document.getElementById('timeEstimate');
+    
+    // Progress simulation function
+    function simulateProgress() {
+      let progress = 0;
+      const steps = [
+        { step: 1, percent: 20, text: 'Gathering data from database...' },
+        { step: 2, percent: 40, text: 'Analyzing threats by severity...' },
+        { step: 3, percent: 70, text: 'Generating charts and statistics...' },
+        { step: 4, percent: 90, text: 'Creating Word document...' },
+        { step: 5, percent: 100, text: 'Finalizing report...' }
+      ];
+      
+      let currentStep = 0;
+      
+      const interval = setInterval(() => {
+        // Update progress
+        progress += Math.random() * 15 + 5; // Random increment between 5-20%
+        if (progress > 100) progress = 100;
+        
+        // Update UI
+        progressFill.style.width = `${progress}%`;
+        progressPercentage.textContent = `${Math.round(progress)}%`;
+        
+        // Update current step
+        if (currentStep < steps.length && progress >= steps[currentStep].percent) {
+          progressSteps[currentStep].classList.add('completed');
+          if (currentStep > 0) {
+            progressSteps[currentStep-1].textContent = progressSteps[currentStep-1].textContent.replace('✓ ', '');
+          }
+          progressSteps[currentStep].textContent = '✓ ' + progressSteps[currentStep].textContent;
+          document.querySelector('.progress-text').textContent = steps[currentStep].text;
+          currentStep++;
+        }
+        
+        // Complete
+        if (progress >= 100) {
+          clearInterval(interval);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Report Ready!
+            <span class="btn-subtext">Click to download</span>
+          `;
+          document.querySelector('.progress-text').textContent = 'Report generated successfully!';
+          timeEstimate.textContent = 'Ready for download';
+        }
+      }, 500); // Update every 500ms
+    }
+    
+    form.addEventListener('submit', function(e) {
+      // Check if at least one severity is selected
+      const anySeveritySelected = allCheckbox.checked || 
+        Array.from(severityCheckboxes).some(cb => cb.checked);
+      
+      if (!anySeveritySelected) {
+        e.preventDefault();
+        alert('Please select at least one severity level to include in the report.');
+        return false;
+      }
+      
+      // Show progress container
+      progressContainer.style.display = 'block';
+      
+      // Update button to show loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Generating...
+        <span class="btn-subtext">Please wait</span>
+      `;
+      
+      // Reset progress steps
+      progressSteps.forEach(step => {
+        step.classList.remove('completed', 'active');
+        step.textContent = step.textContent.replace('✓ ', '');
+      });
+      progressSteps[0].classList.add('active');
+      
+      // Start progress simulation
+      simulateProgress();
+      
+      // The form will still submit normally for actual report generation
+      // In a real implementation, you might use AJAX to track actual progress
+      console.log('Form submitted - showing progress simulation');
+    });
+    
+    // Add CSS for spinner animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Add visual feedback to inputs
+    const inputs = document.querySelectorAll('.date-input, .province-select');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  });
+</script>
+{% endblock %}

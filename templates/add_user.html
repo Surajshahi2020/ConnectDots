@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Add New User{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-plus me-2"></i>Add New User
+                </h6>
+                <small class="text-muted">Fill in the details to create a new user account</small>
+            </div>
+            <div>
+                <a href="{% url 'user_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to List
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <!-- Basic Information -->
+                    <div class="col-md-6">
+                        <label class="form-label">Username *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="username" 
+                               required
+                               maxlength="150"
+                               placeholder="Enter unique username"
+                               value="{{ form_data.username|default:'' }}">
+                        <div class="form-text">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Email *</label>
+                        <input type="email" 
+                               class="form-control" 
+                               name="email" 
+                               required
+                               placeholder="user@example.com"
+                               value="{{ form_data.email|default:'' }}">
+                        <div class="form-text">Required. Must be a valid email address.</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="first_name"
+                               placeholder="Enter first name"
+                               value="{{ form_data.first_name|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="last_name"
+                               placeholder="Enter last name"
+                               value="{{ form_data.last_name|default:'' }}">
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="phone"
+                               placeholder="Enter phone number"
+                               maxlength="15"
+                               value="{{ form_data.phone|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Unit/Department</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="unit"
+                               placeholder="Enter unit or department"
+                               value="{{ form_data.unit|default:'' }}">
+                    </div>
+                    
+                    <!-- Role and Rank -->
+                    <div class="col-md-6">
+                        <label class="form-label">Role *</label>
+                        <select class="form-select" name="role" required>
+                            <option value="">Select a role</option>
+                            <option value="User" 
+                                    {% if form_data.role == "User" or not form_data.role %}selected{% endif %}>
+                                User
+                            </option>
+                            <option value="CyberUser" 
+                                    {% if form_data.role == "CyberUser" %}selected{% endif %}>
+                                CyberUser
+                            </option>
+                            
+                            {% if request.user.role == 'SuperAdmin' %}
+                                <!-- Only SuperAdmin can see Admin and SuperAdmin options -->
+                                <option value="Admin" 
+                                        {% if form_data.role == "Admin" %}selected{% endif %}>
+                                    Admin
+                                </option>
+                                <option value="SuperAdmin" 
+                                        {% if form_data.role == "SuperAdmin" %}selected{% endif %}>
+                                    SuperAdmin
+                                </option>
+                            {% endif %}
+                        </select>
+                        <div class="form-text">
+                            {% if request.user.role == 'Admin' %}
+                            <span class="text-warning">
+                                <i class="fas fa-info-circle"></i> Admin can only create User or CyberUser roles.
+                            </span>
+                            {% elif request.user.role == 'SuperAdmin' %}
+                            <span class="text-success">
+                                <i class="fas fa-check-circle"></i> SuperAdmin can create any role.
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Rank/Position</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="rank"
+                               placeholder="Enter rank or position"
+                               value="{{ form_data.rank|default:'' }}">
+                    </div>
+                    
+                    <!-- Passwords -->
+                    <div class="col-md-6">
+                        <label class="form-label">Password *</label>
+                        <input type="password" 
+                               class="form-control" 
+                               name="password" 
+                               required
+                               minlength="8"
+                               placeholder="Enter password (min. 8 characters)">
+                        <div class="form-text">Password must be at least 8 characters long.</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" 
+                               class="form-control" 
+                               name="password2" 
+                               required
+                               minlength="8"
+                               placeholder="Confirm password">
+                    </div>
+                    
+                    <!-- Social Media Access -->
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   name="social_media" 
+                                   id="social_media"
+                                   role="switch"
+                                   {% if form_data.social_media %}checked{% endif %}>
+                            <label class="form-check-label" for="social_media">
+                                <i class="fas fa-share-alt me-1"></i> Enable Social Media Access
+                            </label>
+                            <div class="form-text">
+                                When checked, user will have access to social media features
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Fields from Model -->
+                    {% if request.user.role == 'SuperAdmin' %}
+                    <div class="col-md-12">
+                        <div class="card border-info mb-3">
+                            <div class="card-header bg-info text-white">
+                                <i class="fas fa-user-shield me-2"></i> Advanced Settings (SuperAdmin Only)
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="is_active" 
+                                                   id="is_active"
+                                                   role="switch"
+                                                   {% if form_data.is_active or not form_data %}checked{% endif %}>
+                                            <label class="form-check-label" for="is_active">
+                                                <i class="fas fa-user-check me-1"></i> Account Active
+                                            </label>
+                                            <div class="form-text">
+                                                User can log in immediately
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="is_void" 
+                                                   id="is_void"
+                                                   role="switch"
+                                                   {% if form_data.is_void %}checked{% endif %}>
+                                            <label class="form-check-label" for="is_void">
+                                                <i class="fas fa-trash me-1"></i> Mark as Deleted
+                                            </label>
+                                            <div class="form-text">
+                                                User will be created as deleted (for special cases)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <!-- Hidden fields for non-SuperAdmin users -->
+                        <input type="hidden" name="is_active" value="on">
+                        <input type="hidden" name="is_void" value="off">
+                    {% endif %}
+                    
+                    <!-- Form Actions -->
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-4">
+                            <a href="{% url 'user_list' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Password confirmation validation
+    $('input[name="password"], input[name="password2"]').on('keyup', function() {
+        const password = $('input[name="password"]').val();
+        const confirmPassword = $('input[name="password2"]').val();
+        
+        if (password && confirmPassword && password !== confirmPassword) {
+            $('input[name="password2"]').addClass('is-invalid');
+            $('input[name="password2"]').next('.invalid-feedback').remove();
+            $('input[name="password2"]').after('<div class="invalid-feedback">Passwords do not match!</div>');
+        } else {
+            $('input[name="password2"]').removeClass('is-invalid');
+            $('input[name="password2"]').next('.invalid-feedback').remove();
+            if (password && confirmPassword && password === confirmPassword) {
+                $('input[name="password2"]').addClass('is-valid');
+            }
+        }
+    });
+    
+    // Password strength indicator
+    $('input[name="password"]').on('keyup', function() {
+        const password = $(this).val();
+        const strength = checkPasswordStrength(password);
+        
+        // Update strength indicator
+        $('.password-strength').remove();
+        if (password) {
+            $(this).after(`
+                <div class="password-strength mt-1">
+                    <small class="text-${strength.color}">
+                        <i class="fas fa-${strength.icon}"></i> ${strength.text}
+                    </small>
+                </div>
+            `);
+        }
+    });
+    
+    // Form validation
+    $('form').on('submit', function(event) {
+        let hasError = false;
+        
+        // Clear previous validation
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').remove();
+        
+        // Check required fields
+        $('[required]').each(function() {
+            if (!$(this).val()) {
+                $(this).addClass('is-invalid');
+                $(this).after('<div class="invalid-feedback">This field is required.</div>');
+                hasError = true;
+            }
+        });
+        
+        if (hasError) {
+            event.preventDefault();
+            return false;
+        }
+        
+        const password = $('input[name="password"]').val();
+        const confirmPassword = $('input[name="password2"]').val();
+        
+        // Check passwords match
+        if (password !== confirmPassword) {
+            event.preventDefault();
+            $('input[name="password2"]').addClass('is-invalid');
+            $('input[name="password2"]').after('<div class="invalid-feedback">Passwords do not match!</div>');
+            return false;
+        }
+        
+        // Check password length
+        if (password.length < 8) {
+            event.preventDefault();
+            $('input[name="password"]').addClass('is-invalid');
+            $('input[name="password"]').after('<div class="invalid-feedback">Password must be at least 8 characters long!</div>');
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Helper function to check password strength
+    function checkPasswordStrength(password) {
+        if (password.length === 0) {
+            return { color: 'muted', icon: 'circle', text: 'Enter password' };
+        }
+        if (password.length < 8) {
+            return { color: 'danger', icon: 'exclamation-circle', text: 'Too short (min 8 characters)' };
+        }
+        
+        let score = 0;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        switch(score) {
+            case 1: return { color: 'danger', icon: 'exclamation-triangle', text: 'Weak password' };
+            case 2: return { color: 'warning', icon: 'exclamation-circle', text: 'Moderate password' };
+            case 3: return { color: 'info', icon: 'check-circle', text: 'Good password' };
+            case 4: return { color: 'success', icon: 'shield-alt', text: 'Strong password' };
+            default: return { color: 'muted', icon: 'circle', text: 'Enter password' };
+        }
+    }
+    
+    // Real-time username and email validation
+    $('input[name="username"], input[name="email"]').on('blur', function() {
+        const field = $(this);
+        const value = field.val();
+        
+        if (value) {
+            field.removeClass('is-invalid');
+            field.addClass('is-valid');
+        }
+    });
+    
+    // Role selection validation
+    $('select[name="role"]').on('change', function() {
+        const selectedRole = $(this).val();
+        const currentUserRole = "{{ request.user.role }}";
+        
+        if (!selectedRole) {
+            $(this).addClass('is-invalid');
+            return;
+        }
+        
+        if (currentUserRole === 'Admin' && (selectedRole === 'Admin' || selectedRole === 'SuperAdmin')) {
+            $(this).addClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+            $(this).after('<div class="invalid-feedback">Admin can only create User or CyberUser roles.</div>');
+        } else {
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

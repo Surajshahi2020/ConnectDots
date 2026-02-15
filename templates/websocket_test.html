@@ -1,0 +1,176 @@
+<!-- websocket_test.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        #messages { 
+            border: 1px solid #ccc; 
+            padding: 15px; 
+            height: 400px; 
+            overflow-y: auto;
+            margin-top: 20px;
+            background: #f9f9f9;
+        }
+        .message { 
+            padding: 8px; 
+            margin: 5px 0; 
+            border-radius: 4px;
+        }
+        .backend { background: #e6f7ff; border-left: 4px solid #1890ff; }
+        .connection { background: #f6ffed; border-left: 4px solid #52c41a; }
+        .error { background: #fff1f0; border-left: 4px solid #ff4d4f; }
+    </style>
+</head>
+<body>
+    <div class="container mt-2">
+    <header class="mb-2 text-center">
+        <h1 class="display-5 fw-bold text-primary mb-1">
+            <i class="fas fa-broadcast-tower me-2"></i>
+            WebSocket Real-Time Notifications
+        </h1>
+    </header>
+
+    <div class="card shadow-sm border-0 mb-2">
+        <div class="card-body">
+            <div class="btn-group-lg d-flex flex-wrap gap-3">
+                <button class="btn btn-success px-4 py-2 fw-semibold" onclick="connectWebSocket()">
+                    <i class="fas fa-play-circle me-2"></i>
+                    Connect to WebSocket
+                </button>
+                <button class="btn btn-warning px-4 py-2 fw-semibold" onclick="sendTest()">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Send Test Message
+                </button>
+                <button class="btn btn-danger px-4 py-2 fw-semibold" onclick="clearMessages()">
+                    <i class="fas fa-trash-alt me-2"></i>
+                    Clear Messages
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="connectionStatus" style="padding: 10px; margin: 10px 0;">
+        Status: <span style="color: red;">Disconnected</span>
+    </div>
+    
+    <div id="messages">
+        <div class="message connection">Waiting for WebSocket connection...</div>
+    </div>
+    
+    <script>
+        let socket = null;
+        
+        function addMessage(text, type = 'info') {
+            const messagesDiv = document.getElementById('messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            msgDiv.innerHTML = `
+                <div>${text}</div>
+                <small style="color: #666;">${new Date().toLocaleTimeString()}</small>
+            `;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            if (connected) {
+                statusDiv.innerHTML = 'Status: <span style="color: green;">Connected ✅</span>';
+            } else {
+                statusDiv.innerHTML = 'Status: <span style="color: red;">Disconnected</span>';
+            }
+        }
+        
+        function connectWebSocket() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                addMessage('Already connected!', 'info');
+                return;
+            }
+            
+            addMessage('Connecting to WebSocket...', 'info');
+            
+            // Use the same URL as in routing.py
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/threats/`;
+            
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = function() {
+                addMessage('✅ Successfully connected to WebSocket!', 'connection');
+                updateStatus(true);
+                
+                // After connecting, you can request the message again
+                setTimeout(() => {
+                    addMessage('You should see the backend message above if it was sent recently', 'info');
+                }, 1000);
+            };
+            
+            socket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'message') {
+                        // This comes from send_to_websocket() helper
+                        addMessage(`🔔 <strong>Backend Message:</strong> ${data.content}`, 'backend');
+                    } 
+                    else if (data.type === 'connection_established') {
+                        addMessage(`📡 ${data.message}`, 'connection');
+                    }
+                    else if (data.type === 'error') {
+                        addMessage(`❌ Error: ${data.message}`, 'error');
+                    }
+                } catch (e) {
+                    addMessage(`Raw: ${event.data}`, 'info');
+                }
+            };
+            
+            socket.onerror = function(error) {
+                addMessage('❌ WebSocket connection error', 'error');
+                updateStatus(false);
+                console.error('WebSocket error:', error);
+            };
+            
+            socket.onclose = function() {
+                addMessage('🔌 WebSocket disconnected', 'info');
+                updateStatus(false);
+                socket = null;
+            };
+        }
+        
+        function sendTest() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addMessage('Not connected. Please connect first.', 'error');
+                return;
+            }
+            
+            const testMsg = {
+                message: 'Test from browser at ' + new Date().toLocaleTimeString()
+            };
+            
+            socket.send(JSON.stringify(testMsg));
+            addMessage(`📤 Sent: ${JSON.stringify(testMsg)}`, 'info');
+        }
+        
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = 
+                '<div class="message connection">Messages cleared...</div>';
+        }
+        
+        // Auto-connect when page loads
+        window.addEventListener('load', function() {
+            addMessage('Page loaded. Click "Connect to WebSocket" above.', 'info');
+            
+            // Auto-connect after 1 second
+            setTimeout(() => {
+                connectWebSocket();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,854 @@
+<!-- templates/comment_analyze.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 mb-1"><i class="fas fa-chart-line me-2"></i>Social Media Sentiment Dashboard</h1>
+                <p class="mb-0">Analyze public sentiment in social media comments</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+            <div>
+                <strong>Analysis Error</strong>
+                <div class="small">{{ error }}</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Main Analytics Section -->
+    {% if chart_data %}
+    <!-- Sentiment Filter Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h5 class="mb-3">Filter by Sentiment</h5>
+                        <div class="d-flex justify-content-center flex-wrap gap-3">
+                            <button class="btn btn-lg btn-outline-success sentiment-filter-btn active" data-sentiment="all">
+                                <i class="fas fa-list me-2"></i> All Comments
+                            </button>
+                            <button class="btn btn-lg btn-success sentiment-filter-btn" data-sentiment="positive">
+                                <i class="fas fa-smile me-2"></i> Positive Only ({{ chart_data.sentiment_counts.positive }})
+                            </button>
+                            <button class="btn btn-lg btn-danger sentiment-filter-btn" data-sentiment="negative">
+                                <i class="fas fa-frown me-2"></i> Negative Only ({{ chart_data.sentiment_counts.negative }})
+                            </button>
+                            <button class="btn btn-lg btn-primary sentiment-filter-btn" data-sentiment="neutral">
+                                <i class="fas fa-meh me-2"></i> Neutral Only ({{ chart_data.sentiment_counts.neutral }})
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 1: Dashboard Charts -->
+    <div class="row mb-4">
+        <!-- Pie Chart -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Sentiment Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="position-relative d-inline-block">
+                            <canvas id="sentimentPieChart" width="200" height="200"></canvas>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <span class="h3 mb-0">{{ chart_data.total_comments }}</span>
+                                <div class="small text-muted">Total</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-warning"></i>Sentiment Comparison</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="sentimentBarChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Sentiment Summary Boxes -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-smile text-success fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-success">Positive Comments</h5>
+                            <div class="small text-muted">Supportive and constructive feedback</div>
+                        </div>
+                    </div>
+                    <div class="text-center py-3">
+                        <div class="display-4 fw-bold text-success mb-2">{{ chart_data.sentiment_counts.positive }}</div>
+                        <div class="h5 text-muted">
+                            {% widthratio chart_data.sentiment_counts.positive chart_data.total_comments 100 %}% of total
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-danger shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-frown text-danger fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-danger">Negative Comments</h5>
+                            <div class="small text-muted">Critical or dissatisfied feedback</div>
+                        </div>
+                    </div>
+                    <div class="text-center py-3">
+                        <div class="display-4 fw-bold text-danger mb-2">{{ chart_data.sentiment_counts.negative }}</div>
+                        <div class="h5 text-muted">
+                            {% widthratio chart_data.sentiment_counts.negative chart_data.total_comments 100 %}% of total
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-primary shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-meh text-primary fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-primary">Neutral Comments</h5>
+                            <div class="small text-muted">Informational or factual statements</div>
+                        </div>
+                    </div>
+                    <div class="text-center py-3">
+                        <div class="display-4 fw-bold text-primary mb-2">{{ chart_data.sentiment_counts.neutral }}</div>
+                        <div class="h5 text-muted">
+                            {% widthratio chart_data.sentiment_counts.neutral chart_data.total_comments 100 %}% of total
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Comments Analysis -->
+    <div class="row">
+        <!-- Comments List -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0"><i class="fas fa-comment-dots me-2 text-primary"></i>Analyzed Comments</h5>
+                            <div class="small text-muted" id="activeFilters">
+                                Showing all {{ chart_data.comments_data|length }} comments • 
+                                <span class="text-success">{{ chart_data.sentiment_counts.positive }} positive</span> • 
+                                <span class="text-danger">{{ chart_data.sentiment_counts.negative }} negative</span> • 
+                                <span class="text-primary">{{ chart_data.sentiment_counts.neutral }} neutral</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-2" id="commentsCount">{{ chart_data.comments_data|length }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="comments-list" id="commentsList" style="max-height: 600px; overflow-y: auto;">
+                        {% for comment in chart_data.comments_data %}
+                        <div class="comment-item border-bottom p-3" 
+                             data-sentiment="{{ comment.sentiment|lower }}"
+                             data-author="{{ comment.author|lower|default:'unknown' }}"
+                             data-timestamp="{{ comment.timestamp }}"
+                             data-comment="{{ comment.highlighted_comment|striptags|lower }}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <div class="bg-light rounded-circle p-2">
+                                            <i class="fas fa-user text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ comment.author|default:"Anonymous" }}</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if comment.sentiment|lower == 'positive' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-smile me-1"></i> Positive
+                                    </span>
+                                    {% elif comment.sentiment|lower == 'negative' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-frown me-1"></i> Negative
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-meh me-1"></i> Neutral
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- COMMENT TEXT DISPLAY -->
+                            <div class="comment-text mt-3 mb-0 p-3 bg-light rounded">
+                                {{ comment.highlighted_comment|safe|linebreaks }}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-comment-slash fa-3x mb-3 opacity-25"></i>
+                            <h5 class="text-muted mb-2">No comments available</h5>
+                            <p class="text-muted small mb-0">Upload comments to see analysis results</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- No Results Message (for filtering) -->
+                    <div id="noResults" class="text-center py-5 text-muted" style="display: none;">
+                        <div class="py-4">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <h5 class="text-muted mb-2">No matching comments found</h5>
+                            <p class="text-muted small mb-0">Try adjusting your search criteria or filters</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Data Message -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <div class="py-4">
+                        <i class="fas fa-chart-pie fa-4x text-primary mb-4 opacity-25"></i>
+                        <h3 class="text-muted mb-3">No Comments Analyzed Yet</h3>
+                        <p class="text-muted mb-4">Upload a text file containing social media comments to see sentiment analysis results.</p>
+                        <div class="bg-light rounded p-4 d-inline-block">
+                            <form method="post" enctype="multipart/form-data" class="mb-0">
+                                {% csrf_token %}
+                                <div class="input-group input-group-lg">
+                                    <input type="file" class="form-control" name="txt_file" accept=".txt,.json" required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-upload me-2"></i> Analyze Comments
+                                    </button>
+                                </div>
+                                <div class="small text-muted mt-2">
+                                    Upload a .txt file with one comment per line OR .json file with comment data
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Hidden data container for JavaScript -->
+{% if chart_data %}
+<div id="chartData" style="display: none;" 
+     data-total="{{ chart_data.total_comments }}"
+     data-positive="{{ chart_data.sentiment_counts.positive }}"
+     data-negative="{{ chart_data.sentiment_counts.negative }}"
+     data-neutral="{{ chart_data.sentiment_counts.neutral }}">
+</div>
+{{ chart_data.sentiment_counts|json_script:"sentimentData" }}
+{% endif %}
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
+<script src="../static/js/comment-chart.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<script src="../static/js/comment-visualize.js"></script>
+
+<script>
+// Global variables
+let allComments = [];
+let currentPieChart = null;
+let currentBarChart = null;
+let currentSentimentFilter = 'all';
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sentiment Dashboard initialized');
+    
+    // Initialize all comments
+    allComments = Array.from(document.querySelectorAll('.comment-item'));
+    
+    // If no comments, show message
+    if (allComments.length === 0 && document.getElementById('noResults')) {
+        document.getElementById('noResults').style.display = 'block';
+        return;
+    }
+    
+    // Initialize charts if data exists
+    const chartDataElement = document.getElementById('chartData');
+    if (chartDataElement) {
+        try {
+            const positiveSentiment = parseInt(chartDataElement.dataset.positive) || 0;
+            const negativeSentiment = parseInt(chartDataElement.dataset.negative) || 0;
+            const neutralSentiment = parseInt(chartDataElement.dataset.neutral) || 0;
+            const totalComments = parseInt(chartDataElement.dataset.total) || 0;
+            
+            createPieChart(positiveSentiment, negativeSentiment, neutralSentiment);
+            createBarChart(positiveSentiment, negativeSentiment, neutralSentiment, totalComments);
+            
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+        }
+    }
+    
+    // Setup sentiment filter buttons
+    setupSentimentFilters();
+});
+
+// Setup sentiment filter buttons
+function setupSentimentFilters() {
+    const sentimentFilterButtons = document.querySelectorAll('.sentiment-filter-btn');
+    
+    sentimentFilterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            sentimentFilterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                // Reset button styles
+                if (btn.dataset.sentiment === 'positive') {
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success');
+                } else if (btn.dataset.sentiment === 'negative') {
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-outline-danger');
+                } else if (btn.dataset.sentiment === 'neutral') {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                } else if (btn.dataset.sentiment === 'all') {
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success');
+                }
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Set button styles for active state
+            if (this.dataset.sentiment === 'positive') {
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-success');
+            } else if (this.dataset.sentiment === 'negative') {
+                this.classList.remove('btn-outline-danger');
+                this.classList.add('btn-danger');
+            } else if (this.dataset.sentiment === 'neutral') {
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+            } else if (this.dataset.sentiment === 'all') {
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-success');
+            }
+            
+            // Apply filter
+            applySentimentFilter(this.dataset.sentiment);
+        });
+    });
+}
+
+// Apply sentiment filter
+function applySentimentFilter(sentiment) {
+    currentSentimentFilter = sentiment;
+    
+    let filteredComments = [...allComments];
+    
+    // Apply sentiment filter
+    if (sentiment !== 'all') {
+        filteredComments = filteredComments.filter(comment => {
+            return comment.dataset.sentiment === sentiment.toLowerCase();
+        });
+    }
+    
+    // Update display
+    updateCommentsDisplay(filteredComments, sentiment);
+}
+
+// Update comments display
+function updateCommentsDisplay(comments, sentimentFilter = 'all') {
+    const commentsList = document.getElementById('commentsList');
+    const noResults = document.getElementById('noResults');
+    const commentsCount = document.getElementById('commentsCount');
+    const activeFilters = document.getElementById('activeFilters');
+    
+    // Hide all comments first
+    allComments.forEach(comment => comment.style.display = 'none');
+    
+    // Show filtered comments
+    comments.forEach(comment => comment.style.display = 'block');
+    
+    // Update counts
+    if (commentsCount) commentsCount.textContent = comments.length;
+    
+    // Calculate sentiment counts for filtered comments
+    let positiveCount = 0, negativeCount = 0, neutralCount = 0;
+    comments.forEach(comment => {
+        const sentiment = comment.dataset.sentiment;
+        if (sentiment === 'positive') positiveCount++;
+        else if (sentiment === 'negative') negativeCount++;
+        else neutralCount++;
+    });
+    
+    // Show/hide no results message
+    if (noResults) {
+        if (comments.length === 0) {
+            noResults.style.display = 'block';
+            if (commentsList) commentsList.style.display = 'none';
+        } else {
+            noResults.style.display = 'none';
+            if (commentsList) commentsList.style.display = 'block';
+        }
+    }
+    
+    // Update active filters display
+    if (activeFilters) {
+        let filterText = `Showing ${comments.length} comments`;
+        if (sentimentFilter !== 'all') {
+            filterText += ` • ${sentimentFilter} only`;
+        }
+        activeFilters.textContent = filterText;
+    }
+}
+
+// Create pie chart
+function createPieChart(positive, negative, neutral) {
+    const ctx = document.getElementById('sentimentPieChart');
+    if (!ctx) return;
+    if (currentPieChart) currentPieChart.destroy();
+    
+    currentPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                data: [positive, negative, neutral],
+                backgroundColor: [
+                    'rgba(25, 135, 84, 0.8)',
+                    'rgba(220, 53, 69, 0.8)',
+                    'rgba(13, 110, 253, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(25, 135, 84)',
+                    'rgb(220, 53, 69)',
+                    'rgb(13, 110, 253)'
+                ],
+                borderWidth: 2,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = positive + negative + neutral;
+                            const percentage = Math.round((context.raw / total) * 100);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Create bar chart
+function createBarChart(positive, negative, neutral, total) {
+    const ctx = document.getElementById('sentimentBarChart');
+    if (!ctx) return;
+    if (currentBarChart) currentBarChart.destroy();
+    
+    const maxValue = Math.max(positive, negative, neutral);
+    const stepSize = Math.ceil(maxValue / 5);
+    
+    currentBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                label: 'Number of Comments',
+                data: [positive, negative, neutral],
+                backgroundColor: [
+                    'rgba(25, 135, 84, 0.7)',
+                    'rgba(220, 53, 69, 0.7)',
+                    'rgba(13, 110, 253, 0.7)'
+                ],
+                borderColor: [
+                    'rgb(25, 135, 84)',
+                    'rgb(220, 53, 69)',
+                    'rgb(13, 110, 253)'
+                ],
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                            return `${context.label}: ${context.raw} comments (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Comments'
+                    },
+                    ticks: {
+                        stepSize: stepSize > 0 ? stepSize : 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Sentiment'
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+
+<style>
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3a0ca3;
+    --success-color: #4cc9f0;
+    --danger-color: #f72585;
+    --warning-color: #f8961e;
+    --info-color: #7209b7;
+    --purple-color: #560bad;
+}
+
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+/* Sentiment Filter Buttons */
+.sentiment-filter-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-width: 2px;
+    min-width: 180px;
+}
+
+.sentiment-filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sentiment-filter-btn.active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Sentiment Summary Cards */
+.card.border-success {
+    border: 2px solid rgba(25, 135, 84, 0.3) !important;
+}
+
+.card.border-danger {
+    border: 2px solid rgba(220, 53, 69, 0.3) !important;
+}
+
+.card.border-primary {
+    border: 2px solid rgba(13, 110, 253, 0.3) !important;
+}
+
+.display-4 {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+/* Comments List */
+.comments-list {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.comment-item {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    position: relative;
+}
+
+.comment-item:hover {
+    background: linear-gradient(90deg, rgba(67, 97, 238, 0.02) 0%, transparent 100%);
+}
+
+.comment-item[data-sentiment="positive"] {
+    border-left-color: rgba(25, 135, 84, 0.3);
+}
+
+.comment-item[data-sentiment="negative"] {
+    border-left-color: rgba(220, 53, 69, 0.3);
+}
+
+.comment-item[data-sentiment="neutral"] {
+    border-left-color: rgba(13, 110, 253, 0.3);
+}
+
+/* Comment Text Display */
+.comment-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #333;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.comment-text p {
+    margin-bottom: 0.5rem;
+}
+
+.comment-text p:last-child {
+    margin-bottom: 0;
+}
+
+/* Sentiment Badges */
+.comment-item .badge {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.comment-item .badge.bg-success {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.15) 0%, rgba(25, 135, 84, 0.05) 100%);
+    color: #198754;
+    border: 2px solid rgba(25, 135, 84, 0.2);
+}
+
+.comment-item .badge.bg-danger {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%);
+    color: #dc3545;
+    border: 2px solid rgba(220, 53, 69, 0.2);
+}
+
+.comment-item .badge.bg-primary {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.15) 0%, rgba(13, 110, 253, 0.05) 100%);
+    color: #0d6efd;
+    border: 2px solid rgba(13, 110, 253, 0.2);
+}
+
+/* Button Styling */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #198754 0%, #157347 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #157347 0%, #198754 100%);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
+}
+
+/* Custom Scrollbar */
+.comments-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: rgba(67, 97, 238, 0.3);
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(67, 97, 238, 0.5);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.comment-item {
+    animation: fadeInUp 0.4s ease-out;
+    animation-fill-mode: both;
+}
+
+.comment-item:nth-child(odd) {
+    animation-delay: 0.1s;
+}
+
+.comment-item:nth-child(even) {
+    animation-delay: 0.2s;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .comments-list {
+        max-height: 500px;
+    }
+    
+    .h3, .h4 {
+        font-size: 1.5rem !important;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .comment-item {
+        padding: 1rem !important;
+    }
+    
+    .comment-text {
+        padding: 1rem !important;
+        font-size: 0.9rem;
+    }
+    
+    .sentiment-filter-btn {
+        min-width: 140px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}

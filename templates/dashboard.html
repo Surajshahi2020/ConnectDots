@@ -1,0 +1,245 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 📊 Stats Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="info-box bg-info">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><i class="fas fa-newspaper me-2"></i> Today Threat</div>
+        <h3 class="mb-0">{{ total_threats }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-md-6">
+    <div class="info-box bg-success">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><i class="fas fa-check-circle me-2"></i> High Severity</div>
+        <h3 class="mb-0">{{ high_severity }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-md-6">
+    <div class="info-box bg-danger">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><i class="fas fa-exclamation-triangle me-2"></i> Medium Severity</div>
+        <h3 class="mb-0">{{ medium_severity }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-md-6">
+    <div class="info-box bg-warning text-dark">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><i class="fas fa-hourglass-half me-2"></i> Low Severity</div>
+        <h3 class="mb-0">{{ low_severity }}</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 📰 Recent Threat Feeds -->
+<div class="card border-0">
+  <div class="card-header bg-primary text-white d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
+    <h5 class="mb-0"><i class="fas fa-rss me-2"></i> Recent Event</h5>
+    
+    <!-- 🔍 Search Box -->
+    <div class="d-flex gap-2 w-25 w-md-auto">
+      <input type="text" id="threatSearch" class="form-control form-control-sm" placeholder="Search threats...">
+      {% if user.role >= 1 %}
+        <a href="{% url 'newsfeeding' %}" class="btn btn-light btn-sm">
+          <i class="fas fa-plus me-1"></i> Add Report
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="threatTable">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 15%;">Title</th>
+            <th style="width: 35%;">Content</th>
+            <th style="width: 10%;">Source</th>
+            <th style="width: 25%;">URL</th>
+            <th style="width: 10%;">Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for threat in threats %}
+          <tr>
+            <!-- ID Column -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.id }}" 
+                   data-truncated="{{ threat.id }}">
+                {{ threat.id }}
+              </div>
+            </td>
+            
+            <!-- Title Column -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.title }}" 
+                   data-truncated="{{ threat.title|truncatechars:30 }}">
+                {{ threat.title|truncatechars:30 }}
+              </div>
+            </td>
+            
+            <!-- Content Column -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.content }}" 
+                   data-truncated="{{ threat.content|truncatewords:15 }}">
+                {{ threat.content|truncatewords:15 }}
+              </div>
+            </td>
+            
+            <!-- Source Column -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.source }}" 
+                   data-truncated="{{ threat.source|truncatechars:20 }}">
+                {{ threat.source|truncatechars:20 }}
+              </div>
+            </td>
+            
+            <!-- URL Column -->
+            <td>
+              {% if threat.url %}
+                <a href="{{ threat.url }}" target="_blank" rel="noopener noreferrer" class="text-primary">
+                  <div class="expandable-cell" 
+                       data-full="{{ threat.url }}" 
+                       data-truncated="{{ threat.url|truncatechars:30 }}">
+                    <i class="fas fa-external-link-alt me-1"></i>
+                    {{ threat.url|truncatechars:30 }}
+                  </div>
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            
+            <!-- Severity Column -->
+            <td>
+              {% if threat.severity == 'high' %}
+                <span class="badge bg-danger">High</span>
+              {% elif threat.severity == 'medium' %}
+                <span class="badge bg-warning text-dark">Medium</span>
+              {% else %}
+                <span class="badge bg-secondary">Low</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-3">No threats found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 📄 Pagination -->
+    {% if threats.has_other_pages %}
+      <div class="card-footer bg-light d-flex justify-content-center">
+        <nav aria-label="Threat pagination">
+          <ul class="pagination pagination-sm mb-0">
+            {% if threats.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&laquo; First</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Prev</a>
+              </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ threats.number }} of {{ threats.paginator.num_pages }}</span>
+            </li>
+
+            {% if threats.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Last &raquo;</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 🔍 Live Search (client-side) -->
+<script>
+  document.getElementById('threatSearch').addEventListener('input', function() {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#threatTable tbody tr');
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchValue) ? '' : 'none';
+    });
+  });
+
+  // ✅ Universal expandable cells
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.expandable-cell')) {
+      const cell = e.target.closest('.expandable-cell');
+      const isExpanded = cell.classList.contains('expanded');
+      
+      if (isExpanded) {
+        cell.textContent = cell.dataset.truncated;
+        cell.classList.remove('expanded');
+        cell.style.cursor = 'pointer';
+        cell.title = 'Click to expand';
+      } else {
+        cell.textContent = cell.dataset.full;
+        cell.classList.add('expanded');
+        cell.style.cursor = 'text';
+        cell.title = 'Click to collapse';
+      }
+    }
+  });
+</script>
+
+<style>
+.expandable-cell {
+  cursor: pointer;
+  min-height: 30px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  padding: 4px 0;
+
+  /* ✅ Standard property for future compatibility */
+  line-clamp: 2;
+}
+
+.expandable-cell:hover::after {
+  content: " (Click to expand)";
+  color: #3b82f6;
+  font-size: 0.8em;
+  margin-left: 4px;
+}
+
+.expandable-cell.expanded {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.expandable-cell.expanded:hover::after {
+  content: " (Click to collapse)" !important;
+}
+</style>
+{% endblock %}

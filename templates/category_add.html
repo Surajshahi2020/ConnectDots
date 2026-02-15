@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="fw-bold text-primary mb-1">
+                        <i class="fas fa-folder-plus me-2"></i>{{ form_title|default:"Create New Category" }}
+                    </h4>
+                </div>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card shadow border-0">
+                <div class="card-body p-3">
+                    <!-- Alert Message -->
+                    {% if messages %}
+                    <div class="alert-container mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'category_add' %}" id="categoryForm" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Category Name Input -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   placeholder="Enter category name (e.g., Violence, Drugs, Terrorism)"
+                                   required
+                                   maxlength="100"
+                                   value="{{ form_data.name|default:'' }}">
+                            <small class="form-text text-muted">
+                                Enter a unique name for the threat category. Maximum 100 characters.
+                            </small>
+                        </div>
+
+                        <!-- Active Status Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="is_active" 
+                                       name="is_active" 
+                                       {% if not form_data or form_data.is_active != False %}checked{% endif %}
+                                       role="switch">
+                                <label class="form-check-label fw-medium" for="is_active">
+                                    Active Category
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Active categories are available for selection. Inactive categories won't appear in dropdowns.
+                            </small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                            <a href="{% url 'news_report' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save me-1"></i> {{ submit_text|default:"Create Category" }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 1600px;
+}
+.card {
+    border-radius: 8px;
+}
+.form-control, .form-select {
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+.border-top {
+    border-color: #dee2e6 !important;
+}
+.form-switch .form-check-input {
+    width: 2.8em;
+    height: 1.5em;
+    cursor: pointer;
+}
+.form-switch .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+.form-text {
+    font-size: 0.8rem;
+}
+.alert {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+}
+@media (max-width: 768px) {
+    .container { padding: 0.5rem; }
+    .card-body { padding: 1rem !important; }
+    h4 { font-size: 1.1rem; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('categoryForm');
+    const nameInput = document.getElementById('name');
+    
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+    
+    form.querySelectorAll('[required]').forEach(field => {
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+    
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.isConnected) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+    
+    // Character counter
+    const charCounter = document.createElement('small');
+    charCounter.className = 'form-text text-end d-block mt-1';
+    charCounter.id = 'charCounter';
+    charCounter.textContent = '0/100 characters';
+    nameInput.parentElement.appendChild(charCounter);
+    
+    nameInput.addEventListener('input', function() {
+        const length = this.value.length;
+        charCounter.textContent = `${length}/100 characters`;
+        
+        if (length > 90) {
+            charCounter.style.color = '#dc3545';
+        } else if (length > 75) {
+            charCounter.style.color = '#ffc107';
+        } else {
+            charCounter.style.color = '#6c757d';
+        }
+    });
+    
+    // Trigger initial character count
+    nameInput.dispatchEvent(new Event('input'));
+});
+</script>
+{% endblock %}

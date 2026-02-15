@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Edit News Article
+                            {% if is_creator %}
+                            <span class="badge bg-warning ms-2">You created this</span>
+                            {% elif is_superadmin %}
+                            <span class="badge bg-danger ms-2">SuperAdmin Edit</span>
+                            {% endif %}
+                        </h5>
+                        <a href="{% url 'list_autonews' %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Display messages -->
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Title -->
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-bold">Title *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   name="title" 
+                                   value="{{ current_title }}" 
+                                   maxlength="500"
+                                   placeholder="Enter article title"
+                                   required>
+                            <div class="form-text">Article title (max 500 characters)</div>
+                            <div id="title-counter" class="form-text text-muted"></div>
+                        </div>
+                        
+                        <!-- URL -->
+                        <div class="mb-4">
+                            <label for="url" class="form-label fw-bold">URL *</label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="url" 
+                                   name="url" 
+                                   value="{{ current_url }}" 
+                                   maxlength="1000"
+                                   placeholder="https://example.com/news-article"
+                                   required>
+                            <div class="form-text">Original article URL (max 1000 characters)</div>
+                        </div>
+                        
+                        <!-- Summary -->
+                        <div class="mb-4">
+                            <label for="summary" class="form-label fw-bold">Summary *</label>
+                            <textarea class="form-control" 
+                                      id="summary" 
+                                      name="summary" 
+                                      rows="5" 
+                                      placeholder="Provide article summary"
+                                      required>{{ current_summary }}</textarea>
+                            <div class="form-text">Brief summary of the article content</div>
+                        </div>
+                        
+                        <!-- Source and Date -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="source" class="form-label fw-bold">Source *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="source" 
+                                       name="source" 
+                                       value="{{ current_source }}"
+                                       maxlength="100"
+                                       placeholder="e.g., BBC, Reuters, CNN"
+                                       required>
+                                <div class="form-text">News source/organization</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="date" class="form-label fw-bold">Date *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="date" 
+                                       name="date" 
+                                       value="{{ current_date }}"
+                                       placeholder="e.g., 2024-01-15, Jan 15, 2024"
+                                       required>
+                                <div class="form-text">Article publication date</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Image URL -->
+                        <div class="mb-4">
+                            <label for="image_url" class="form-label fw-bold">Image URL</label>
+                            <input type="url" 
+                                   class="form-control" 
+                                   id="image_url" 
+                                   name="image_url" 
+                                   value="{{ current_image_url }}"
+                                   maxlength="1000"
+                                   placeholder="https://example.com/image.jpg">
+                            <div class="form-text">URL to article image/thumbnail (optional)</div>
+                            {% if current_image_url %}
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="text-muted me-3">Current image:</span>
+                                    <a href="{{ current_image_url }}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>View Image
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Priority and Threat Level -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label fw-bold">Priority *</label>
+                                <select class="form-select" id="priority" name="priority" required>
+                                    {% for value, label in priority_choices %}
+                                    <option value="{{ value }}" 
+                                            {% if current_priority == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Article priority level</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="threat_level" class="form-label fw-bold">Threat Level *</label>
+                                <select class="form-select" id="threat_level" name="threat_level" required>
+                                    {% for value, label in threat_level_choices %}
+                                    <option value="{{ value }}" 
+                                            {% if current_threat_level == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Associated threat level</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Content Length -->
+                        <div class="mb-4">
+                            <label for="content_length" class="form-label fw-bold">Content Length</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="content_length" 
+                                   name="content_length" 
+                                   value="{{ current_content_length }}"
+                                   min="0"
+                                   placeholder="0">
+                            <div class="form-text">Article content length in characters (optional)</div>
+                        </div>
+                        
+                        <!-- Keywords -->
+                        <div class="mb-4">
+                            <label for="keywords" class="form-label fw-bold">Keywords</label>
+                            <textarea class="form-control" 
+                                      id="keywords" 
+                                      name="keywords" 
+                                      rows="3" 
+                                      placeholder="Enter keywords separated by commas">{{ current_keywords }}</textarea>
+                            <div class="form-text">Comma-separated keywords (e.g., cyber attack, malware, phishing)</div>
+                        </div>
+                        
+                        <!-- Categories -->
+                        <div class="mb-4">
+                            <label for="categories" class="form-label fw-bold">Categories</label>
+                            <textarea class="form-control" 
+                                      id="categories" 
+                                      name="categories" 
+                                      rows="3" 
+                                      placeholder="Enter categories separated by commas">{{ current_categories }}</textarea>
+                            <div class="form-text">Comma-separated categories (e.g., Technology, Politics, Business)</div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                            <a href="{% url 'list_autonews' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <div>
+                                <a href="{{ current_url }}" 
+                                   target="_blank" 
+                                   class="btn btn-outline-info me-2">
+                                    <i class="fas fa-external-link-alt me-1"></i>View Original
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update Article
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counter for title
+    $('#title').on('input', function() {
+        const maxLength = 500;
+        const currentLength = $(this).val().length;
+        const counter = $('#title-counter');
+        
+        $('#title-counter').text(`${currentLength}/${maxLength} characters`);
+        
+        if (currentLength > maxLength) {
+            $('#title-counter').addClass('text-danger');
+        } else {
+            $('#title-counter').removeClass('text-danger');
+        }
+    }).trigger('input');
+    
+    // Preview image URL
+    $('#image_url').on('blur', function() {
+        const url = $(this).val();
+        const preview = $('#image-preview');
+        
+        if (url && (url.endsWith('.jpg') || url.endsWith('.jpeg') || 
+                    url.endsWith('.png') || url.endsWith('.gif') || 
+                    url.endsWith('.webp'))) {
+            
+            if (preview.length === 0) {
+                $(this).after('<div class="mt-2"><img id="image-preview" class="img-thumbnail" style="max-height: 150px;"><div class="form-text">Image Preview</div></div>');
+            }
+            $('#image-preview').attr('src', url);
+        } else if (preview.length > 0) {
+            preview.parent().remove();
+        }
+    });
+    
+    // URL validation
+    $('#url').on('blur', function() {
+        const url = $(this).val();
+        if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+            alert('URL should start with http:// or https://');
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+});
+</script>
+{% endblock %}

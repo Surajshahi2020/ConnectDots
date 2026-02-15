@@ -1,0 +1,57 @@
+<!-- templates/sweet_alert.html -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+ <script src="../static/js/sweetalert.js"></script>
+
+
+<script>
+  // 🌟 Global reusable alert function
+  function showAlert(type, message) {
+    const config = {
+      success: { icon: 'success', title: 'Success!', timer: 3000, timerProgressBar: true },
+      error: { icon: 'error', title: 'Error!', timer: null },
+      warning: { icon: 'warning', title: 'Warning!', timer: null },
+      info: { icon: 'info', title: 'Info!', timer: 2500 }
+    }[type] || { icon: 'info', title: 'Notification!' };
+
+    Swal.fire({
+      icon: config.icon,
+      title: config.title,
+      text: message,
+      confirmButtonColor: type === 'success' ? '#1d4ed8' : '#6b7280',
+      timer: config.timer,
+      timerProgressBar: config.timerProgressBar,
+      didOpen: (popup) => {
+        if (config.timer) {
+          popup.onmouseenter = Swal.stopTimer;
+          popup.onmouseleave = Swal.resumeTimer;
+        }
+      }
+    });
+  }
+
+  // 🔄 Auto-show if Django messages exist
+  document.addEventListener('DOMContentLoaded', () => {
+    // From Django messages (if passed)
+    const alertType = document.getElementById('sweet-alert-type');
+    const alertMessage = document.getElementById('sweet-alert-message');
+    
+    if (alertType && alertMessage) {
+      showAlert(alertType.value, alertMessage.value);
+    }
+
+    // From URL params (fallback)
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('alert');
+    const msg = urlParams.get('message');
+    if (type && msg) {
+      showAlert(type, decodeURIComponent(msg));
+      history.replaceState(null, null, window.location.pathname);
+    }
+  });
+</script>
+
+<!-- Hidden inputs for Django view to pass data -->
+{% if alert_type and alert_message %}
+  <input type="hidden" id="sweet-alert-type" value="{{ alert_type }}">
+  <input type="hidden" id="sweet-alert-message" value="{{ alert_message|escapejs }}">
+{% endif %}

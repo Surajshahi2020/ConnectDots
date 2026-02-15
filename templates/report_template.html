@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ report.title }} – Sentiment Analysis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* { 
+    box-sizing:border-box; 
+    margin:0; 
+    padding:0; 
+}
+
+body {
+    font-family:'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:16px;
+}
+
+.container {
+    width:100%;
+    max-width:1200px;
+    height:auto;
+    display:flex;
+    flex-direction:column;
+    background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Header - More compact */
+.header {
+    padding:20px 24px 16px;
+    text-align:center;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    color: white;
+    position:relative;
+    overflow:hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+    background-size: cover;
+}
+
+.header h1 { 
+    font-family: 'Poppins', sans-serif;
+    font-size:28px; 
+    font-weight:700;
+    margin-bottom:6px;
+    position:relative;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    line-height: 1.2;
+}
+
+.header .subtitle { 
+    font-size:14px; 
+    opacity:0.9;
+    font-weight:400;
+    position:relative;
+    max-width:600px;
+    margin:0 auto;
+    line-height: 1.3;
+}
+
+/* Main content - Reduced padding */
+.main-content {
+    flex:1;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    overflow:auto;
+}
+
+/* Rows - Reduced gap */
+.top-row, .bottom-row {
+    display:flex;
+    gap:20px;
+    flex:1;
+    min-height: 220px; /* Reduced from 260px */
+}
+
+/* Cards - More compact */
+.pie-card, .sentiment-card, .engagement-card, .image-card {
+    flex:1;
+    padding:20px; /* Reduced from 24px */
+    border-radius:16px;
+    background: white;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.pie-card:hover, .sentiment-card:hover, 
+.engagement-card:hover, .image-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:#4a5568;
+    margin-bottom:16px; /* Reduced from 20px */
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+/* Pie chart - Smaller */
+.pie-container {
+    width:180px;
+    height:180px;
+    position:relative;
+    margin: 0 auto;
+}
+
+.pie-chart {
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    background:#e0e0e0;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.pie-center {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    background: white;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.pie-percent { 
+    font-family: 'Poppins', sans-serif;
+    font-size:18px; 
+    font-weight:700; 
+    color:#4f46e5;
+    line-height:1;
+}
+
+.pie-label { 
+    font-size:9px; 
+    color:#64748b;
+    font-weight:500;
+    margin-top:1px;
+}
+
+/* Compact Sentiment card - Tighter layout */
+.sentiment-grid {
+    display:flex;
+    gap:10px;
+    width:100%;
+    justify-content:space-around;
+    margin-top: auto;
+}
+
+.sentiment-item {
+    flex:1;
+    padding:20px 6px;
+    text-align:center;
+    font-size:25px;
+    background:#f8fafc;
+    border-radius:8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    min-height: 80px; /* Reduced from 90px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.sentiment-item:hover {
+    transform: translateY(-2px);
+}
+
+.sentiment-item:nth-child(1) {
+    color:#10b981;
+    border-color:rgba(16, 185, 129, 0.12);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(16, 185, 129, 0.01));
+}
+
+.sentiment-item:nth-child(2) {
+    color:#ef4444;
+    border-color:rgba(239, 68, 68, 0.12);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.04), rgba(239, 68, 68, 0.01));
+}
+
+.sentiment-item:nth-child(3) {
+    color:#6b7280;
+    border-color:rgba(107, 114, 128, 0.12);
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.04), rgba(107, 114, 128, 0.01));
+}
+
+.sentiment-value { 
+    font-family: 'Poppins', sans-serif;
+    font-size:20px; 
+    font-weight:700;
+    margin-top:3px;
+    display:block;
+}
+
+.sentiment-emoji {
+    font-size:30px;
+    margin-bottom:4px;
+    display: block;
+}
+
+/* Compact Engagement card - Tighter */
+.engagement-grid {
+    display:flex;
+    gap:8px;
+    width:100%;
+    justify-content:space-around;
+    margin-top: auto;
+}
+
+.engagement-item { 
+    flex:1; 
+    padding:10px 4px; 
+    text-align:center; 
+    font-size:30px;
+    background:#f8fafc;
+    border-radius:8px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(99, 102, 241, 0.06);
+    min-height: 80px; /* Reduced from 90px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.engagement-item:hover {
+    background:#f1f5f9;
+    border-color:rgba(99, 102, 241, 0.15);
+    transform: translateY(-2px);
+}
+
+.engagement-icon {
+    font-size:40px;
+    margin-bottom:4px;
+    display:block;
+}
+
+.engagement-item:nth-child(1) .engagement-icon { color:#3b82f6; }
+.engagement-item:nth-child(2) .engagement-icon { color:#8b5cf6; }
+.engagement-item:nth-child(3) .engagement-icon { color:#10b981; }
+.engagement-item:nth-child(4) .engagement-icon { color:#f59e0b; }
+
+.engagement-value { 
+    font-family: 'Poppins', sans-serif;
+    font-size:30px; 
+    font-weight:700; 
+    display:block;
+    color:#1f2937;
+    line-height: 1.2;
+}
+
+.engagement-label {
+    color:#6b7280;
+    font-size:18px;
+    margin-top:1px;
+    font-weight:500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Image container - More compact */
+.image-container {
+    width:100%;
+    height: 100%;
+    min-height: 180px; /* Reduced from 200px */
+    max-height: 280px; /* Reduced from 300px */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, #f6f8ff, #edf2ff);
+    border-radius:14px;
+    overflow: hidden;
+    border: 1.5px dashed #c7d2fe; /* Thinner border */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.image-container:hover {
+    border-color:#818cf8;
+    background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+}
+
+.uploaded-image { 
+    max-width: 96%;
+    max-height: 96%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius:10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.uploaded-image:hover {
+    transform: scale(1.02);
+}
+
+/* Footer - More compact */
+.footer {
+    padding:16px 24px; /* Reduced */
+    display:flex;
+    justify-content:space-between;
+    font-size:12px; /* Smaller font */
+    background: linear-gradient(to right, #f8fafc, #f1f5f9);
+    color:#64748b;
+    border-top:1px solid #e2e8f0;
+}
+
+.footer div {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-weight:500;
+}
+
+.footer i {
+    color:#7c3aed;
+    font-size:12px; /* Smaller icons */
+}
+
+/* Adjust card content alignment */
+.pie-card, .sentiment-card, .engagement-card {
+    justify-content: flex-start;
+}
+
+.sentiment-card .card-title,
+.engagement-card .card-title {
+    margin-bottom: 12px; /* Reduced */
+}
+
+/* Responsive adjustments */
+@media(max-width:1024px){
+    .top-row, .bottom-row { 
+        flex-direction:column; 
+        min-height: auto;
+    }
+    
+    .container {
+        height:auto;
+        min-height:auto;
+    }
+    
+    .pie-container { 
+        width:110px; 
+        height:110px; 
+    }
+    
+    .pie-center {
+        width:55px;
+        height:55px;
+    }
+    
+    .pie-percent { 
+        font-size:16px; 
+    }
+    
+    .sentiment-value, .engagement-value { 
+        font-size:20px; 
+    }
+    
+    .image-container {
+        min-height: 200px;
+        max-height: 250px;
+    }
+}
+
+@media(max-width:768px){
+    .header {
+        padding:16px;
+    }
+    
+    .header h1 {
+        font-size:22px;
+    }
+    
+    .main-content {
+        padding:16px;
+        gap:16px;
+    }
+    
+    .top-row, .bottom-row {
+        gap: 16px;
+    }
+    
+    .pie-card, .sentiment-card, 
+    .engagement-card, .image-card {
+        padding:16px;
+        min-height: auto;
+    }
+    
+    .card-title {
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+    
+    .sentiment-grid, .engagement-grid {
+        flex-wrap:wrap;
+        gap:6px;
+    }
+    
+    .sentiment-item, .engagement-item {
+        flex:calc(50% - 3px);
+        min-width: 90px;
+        padding: 8px 4px;
+        min-height: 70px;
+    }
+    
+    .footer {
+        flex-direction:column;
+        gap:8px;
+        align-items:center;
+        text-align:center;
+        padding:12px;
+        font-size: 11px;
+    }
+    
+    .image-container {
+        min-height: 180px;
+        max-height: 220px;
+    }
+}
+
+@media(max-width:480px){
+    body {
+        padding: 12px;
+    }
+    
+    .container {
+        border-radius: 16px;
+    }
+    
+    .sentiment-item, .engagement-item {
+        flex: 100%;
+        min-width: auto;
+    }
+    
+    .sentiment-grid, .engagement-grid {
+        flex-direction: column;
+    }
+    
+    .sentiment-item, .engagement-item {
+        width: 100%;
+    }
+    
+    .image-container {
+        min-height: 160px;
+        max-height: 200px;
+    }
+}
+
+/* Image loading animation */
+.image-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.no-image {
+    color:#94a3b8;
+    font-size:13px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    height: 100%;
+    padding: 16px;
+    text-align: center;
+}
+
+.no-image i {
+    font-size:36px;
+    color:#cbd5e1;
+}
+
+/* Image zoom controls */
+.image-zoom-controls {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-container:hover .image-zoom-controls {
+    opacity: 1;
+}
+
+.zoom-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s ease;
+}
+
+.zoom-btn:hover {
+    background: #7c3aed;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>{{ report.title }}</h1>
+        {% if report.description %}
+            <div class="subtitle">{{ report.description }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Row -->
+        <div class="top-row">
+            <!-- Pie Card -->
+            <div class="pie-card">
+                <div class="card-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Sentiment Distribution
+                </div>
+                <div class="pie-container">
+                    <div class="pie-chart" id="pieChart"
+                         data-positive="{{ report.positive_percentage|default:'0' }}"
+                         data-negative="{{ report.negative_percentage|default:'0' }}"
+                         data-neutral="{{ report.neutral_percentage|default:'0' }}">
+                    </div>
+                    <div class="pie-center">
+                        <div class="pie-percent">{{ report.positive_percentage }}%</div>
+                        <div class="pie-label">Positive</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentiment Card -->
+            <div class="sentiment-card">
+                <div class="card-title">
+                    <i class="fas fa-smile"></i>
+                    Sentiment Breakdown
+                </div>
+                <div class="sentiment-grid">
+                    <div class="sentiment-item">
+                        <span class="sentiment-emoji">😊</span>
+                        <span>Positive</span>
+                        <span class="sentiment-value">{{ report.positive_percentage }}%</span>
+                    </div>
+                    <div class="sentiment-item">
+                        <span class="sentiment-emoji">😞</span>
+                        <span>Negative</span>
+                        <span class="sentiment-value">{{ report.negative_percentage }}%</span>
+                    </div>
+                    <div class="sentiment-item">
+                        <span class="sentiment-emoji">😐</span>
+                        <span>Neutral</span>
+                        <span class="sentiment-value">{{ report.neutral_percentage }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="bottom-row">
+            <!-- Engagement Card -->
+            <div class="engagement-card">
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    Engagement Metrics
+                </div>
+                <div class="engagement-grid">
+                    <div class="engagement-item">
+                        <span class="engagement-icon">👍</span>
+                        <span class="engagement-value">{{ report.jay_nepal_likes|default:"0" }}</span>
+                        <span class="engagement-label">Likes</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="engagement-icon">🔁</span>
+                        <span class="engagement-value">{{ report.jay_nepal_shares|default:"0" }}</span>
+                        <span class="engagement-label">Shares</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="engagement-icon">💬</span>
+                        <span class="engagement-value">{{ report.jay_nepal_comments|default:"0" }}</span>
+                        <span class="engagement-label">Comments</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="engagement-icon">📊</span>
+                        <span class="engagement-value">{{ report.total_engagement|default:"0" }}</span>
+                        <span class="engagement-label">Total</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Card -->
+            <div class="image-card">
+                <div class="card-title">
+                    <i class="fas fa-image"></i>
+                    Report Image
+                </div>
+                <div class="image-container" id="imageContainer">
+                    {% if image_base64 and image_mime_type %}
+                        <div class="image-loading" id="imageLoading">
+                            <div class="spinner"></div>
+                            <span>Loading image...</span>
+                        </div>
+                        <img src="data:{{ image_mime_type }};base64,{{ image_base64 }}" 
+                             alt="Report Image" 
+                             class="uploaded-image"
+                             id="uploadedImage"
+                             onload="hideImageLoading()">
+                        <div class="image-zoom-controls">
+                            <button class="zoom-btn" onclick="zoomImage(1.2)">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="zoom-btn" onclick="zoomImage(0.8)">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="zoom-btn" onclick="resetImageZoom()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="no-image">
+                            <i class="fas fa-image"></i>
+                            <div>No Image Available</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div>
+            <i class="fas fa-calendar-alt"></i>
+            Generated: {{ now|date:"M d, Y" }}
+        </div>
+        <div>
+            <i class="fas fa-clock"></i>
+            Time: {{ now|time:"H:i" }}
+        </div>
+        <div>
+            <i class="fas fa-chart-bar"></i>
+            Sentiment Report v1.0
+        </div>
+    </div>
+</div>
+
+<script>
+// Keep your existing JavaScript unchanged
+document.addEventListener('DOMContentLoaded', function() {
+    const pieChart = document.getElementById('pieChart');
+    if(pieChart){
+        const p = parseFloat(pieChart.dataset.positive)||0;
+        const n = parseFloat(pieChart.dataset.negative)||0;
+        const u = parseFloat(pieChart.dataset.neutral)||0;
+        const pEnd = p*3.6;
+        const nEnd = (p+n)*3.6;
+        
+        pieChart.style.background = `conic-gradient(
+            #10b981 0deg ${pEnd}deg,
+            #ef4444 ${pEnd}deg ${nEnd}deg,
+            #6b7280 ${nEnd}deg 360deg
+        )`;
+    }
+    
+    // Add subtle animation to cards on load
+    const cards = document.querySelectorAll('.pie-card, .sentiment-card, .engagement-card, .image-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+});
+
+// Image zoom functions
+let currentScale = 1;
+const maxScale = 3;
+const minScale = 0.5;
+
+function zoomImage(factor) {
+    const image = document.getElementById('uploadedImage');
+    if (!image) return;
+    
+    currentScale = parseFloat(image.dataset.scale || '1');
+    const newScale = currentScale * factor;
+    
+    if (newScale > maxScale || newScale < minScale) return;
+    
+    currentScale = newScale;
+    image.style.transform = `scale(${currentScale})`;
+    image.dataset.scale = currentScale;
+    
+    const container = document.getElementById('imageContainer');
+    if (currentScale > 1.2) {
+        container.style.overflow = 'auto';
+    } else {
+        container.style.overflow = 'hidden';
+    }
+}
+
+function resetImageZoom() {
+    const image = document.getElementById('uploadedImage');
+    if (!image) return;
+    
+    currentScale = 1;
+    image.style.transform = 'scale(1)';
+    image.dataset.scale = '1';
+    
+    const container = document.getElementById('imageContainer');
+    container.style.overflow = 'hidden';
+    container.scrollTop = 0;
+    container.scrollLeft = 0;
+}
+
+function hideImageLoading() {
+    const loadingDiv = document.getElementById('imageLoading');
+    if (loadingDiv) {
+        loadingDiv.style.display = 'none';
+    }
+}
+</script>
+
+</body>
+</html>

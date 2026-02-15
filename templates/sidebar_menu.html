@@ -1,0 +1,409 @@
+<!-- templates/sidebar_menu.html -->
+{% if request.session.user_role == 'SuperAdmin' or request.session.user_role == 'User'%}
+<ul class="nav flex-column py-3 px-3">
+  <!-- Dashboard -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+       href="{% url 'dashboard' %}">
+      <i class="fas fa-tachometer-alt nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Dashboard</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+       href="{% url 'news_central' %}">
+      <i class="fas fa-bullhorn nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Central News</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+       href="{% url 'sharing_files' %}">
+      <i class="fas fa-folder-open nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">File Sharing</span>
+    </a>
+  </li>
+
+  {% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <!-- News Feed -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_feed' %}">
+      <i class="fas fa-rss nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Event Feed</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'SuperAdmin' or request.session.user_role == 'User' %}  <!-- Map Visualization -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'visualization_map' %}">
+      <i class="fas fa-map-marked-alt nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Map</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'SuperAdmin' or request.session.user_role == 'User' %}
+
+  <!-- <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_AutoFeed' %}">
+      <i class="fas fa-newspaper nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Auto Feed</span>
+    </a>
+  </li> -->
+
+   <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'autonews_view' %}">
+      <i class="fas fa-newspaper nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">AutoFetch News</span>
+    </a>
+  </li>
+  {% endif %}
+
+
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'keyboard_fetch' %}">
+    <i class="fas fa-key nav-icon fa-lg"></i>
+    <span class="sidebar-text ms-3">keyword Fetch</span>
+    </a>
+  </li>
+  {% endif %}
+
+  <!-- News Feed -->
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_search' %}">
+     <i class="fas fa-search nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Searching</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <!-- News Feed -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_visualization' %}">
+      <i class="fas fa-chart-line nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Visualization</span>
+    </a>
+  </li>
+
+  {% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_trending' %}">
+      <i class="fas fa-virus nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Trending Video</span>
+    </a>
+  </li>
+  {% endif %}
+
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_spy' %}">
+      <i class="fas fa-chart-line nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Spy Feed</span>
+    </a>
+  </li>
+  {% endif%}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_current' %}">
+      <i class="fas fa-chart-line nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Current Information</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'track_user' %}">
+      <i class="fas fa-bullseye nav-icon fa-lg"></i> 
+      <span class="sidebar-text ms-3">Tracking</span>
+    </a>
+  </li>
+  {% endif %}
+  
+  
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_source' %}">
+      <i class="fas fa-broadcast-tower nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Event Source</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'comment_analyze' %}">
+    <i class="fas fa-comments nav-icon fa-lg"></i>      <span class="sidebar-text ms-3">Comment Analyze</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+   <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'catch_url' %}">
+    <i class="fas fa-comments nav-icon fa-lg"></i>      <span class="sidebar-text ms-3">Catch Url</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-2">
+  <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+    href="{% url 'websocket_test' %}">
+    <i class="fas fa-bell nav-icon fa-lg"></i>
+    <span class="sidebar-text ms-3">Notifications</span>
+  </a>
+</li>
+
+<li class="nav-item mb-2">
+  <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+    href="https://huggingface.co/spaces/divagar006/newmultimodal">
+    <i class="fas fa-user-secret nav-icon fa-lg"></i>
+    <span class="sidebar-text ms-3">Deep Fake</span>
+  </a>
+</li>
+  {% endif %}
+      
+{% if request.session.user_role == 'CyberUser' %}
+<!-- 👥 User Management (with Submenu) -->
+<li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded collapsed"
+       data-bs-toggle="collapse" href="#userManagementSubmenu" role="button"
+       aria-expanded="false" aria-controls="userManagementSubmenu">
+        <i class="fas fa-hashtag nav-icon fa-lg"></i> <!-- Changed to hashtag for social media -->
+        <span class="sidebar-text ms-3">Social Media</span>
+        <i class="fas fa-chevron-right ms-auto sidebar-toggle-icon"></i>
+    </a>
+    <!-- class="collapse" to collapse or not to make dropdown -->
+    <div id="userManagementSubmenu">
+        <ul class="nav flex-column ms-4 mt-2">
+            <li class="nav-item">
+                <a class="nav-link text-white py-1 px-2 rounded {% if 'add_social_media_url' in request.path %}active{% endif %}" 
+                   href="{% url 'add_social_media_url' %}">
+                    <i class="fas fa-plus-circle fa-sm me-2"></i> <!-- Changed to plus-circle -->
+                    <span class="sidebar-text">Add URL</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white py-1 px-2 rounded {% if 'list_social_media_url' in request.path or 'social-media/list' in request.path %}active{% endif %}" 
+                   href="{% url 'list_social_media_url' %}">
+                    <i class="fas fa-list fa-sm me-2"></i> <!-- Changed to list icon -->
+                    <span class="sidebar-text">URL List</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white py-1 px-2 rounded {% if 'list_social_media_url' in request.path or 'social-media/list' in request.path %}active{% endif %}" 
+                   href="{% url 'dashboard_social_media' %}">
+                    <i class="fas fa-gauge fa-sm me-2"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link text-white py-1 px-2 rounded {% if 'photo_social_media' in request.path or 'social-media/list' in request.path %}active{% endif %}" 
+                   href="{% url 'photo_social_media' %}">
+                  <i class="fas fa-camera fa-sm me-2"></i>
+                  <span class="sidebar-text">Photo</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+{% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'sentiment_report' %}">
+      <i class="fas fa-download nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Sentiment Report</span>
+    </a>
+  </li>
+  {% endif %}
+
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'news_report' %}">
+      <i class="fas fa-download nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Download Report</span>
+    </a>
+  </li>
+  {% endif %}
+
+  {% if request.session.user_role == 'SuperAdmin' %}
+  <!-- 📌 Keyword Management (with Submenu) -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded collapsed"
+      data-bs-toggle="collapse" href="#keywordManagementSubmenu" role="button"
+      aria-expanded="false" aria-controls="keywordManagementSubmenu"> <!-- Fixed aria-controls -->
+      <i class="fas fa-keyboard nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Keyword</span>
+      <i class="fas fa-chevron-right ms-auto sidebar-toggle-icon"></i>
+    </a>
+    <div class="collapse" id="keywordManagementSubmenu"> <!-- Changed to unique ID -->
+      <ul class="nav flex-column ms-4 mt-2">
+        <li class="nav-item">
+          <a class="nav-link text-white py-1 px-2 rounded {% if 'keywords_add' in request.path %}active{% endif %}" 
+            href="{% url 'keywords_add' %}">
+            <span class="sidebar-text">Add Keywords</span> <!-- Changed from Keyboards to Keywords -->
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white py-1 px-2 rounded {% if 'keywords_listing' in request.path %}active{% endif %}" 
+            href="{% url 'keywords_listing' %}">
+            <span class="sidebar-text">List Keywords</span> <!-- Changed from Keyboards to Keywords -->
+          </a>
+        </li>
+      </ul>
+    </div>
+  </li>
+{% endif %}
+
+{% if request.session.user_role == 'SuperAdmin' %}
+  <!-- 📌 Category Management (with Submenu) -->
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded collapsed"
+       data-bs-toggle="collapse" href="#categoryManagementSubmenu" role="button"
+       aria-expanded="false" aria-controls="categoryManagementSubmenu"> <!-- Fixed aria-controls -->
+      <i class="fas fa-folder nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Category</span>
+      <i class="fas fa-chevron-right ms-auto sidebar-toggle-icon"></i>
+    </a>
+    <div class="collapse" id="categoryManagementSubmenu"> <!-- Changed to unique ID -->
+      <ul class="nav flex-column ms-4 mt-2">
+        <li class="nav-item">
+          <a class="nav-link text-white py-1 px-2 rounded {% if 'category_add' in request.path %}active{% endif %}" 
+             href="{% url 'category_add' %}">
+            <span class="sidebar-text">Add Category</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white py-1 px-2 rounded {% if 'category_list' in request.path %}active{% endif %}" 
+             href="{% url 'category_list' %}">
+            <span class="sidebar-text">List Category</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </li>
+{% endif %}
+
+
+
+{% if request.session.user_role == 'SuperAdmin' and request.session.user_unit == 'Cyber' %}
+<!-- 👥 User Management (with Submenu) -->
+<li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded collapsed management-menu"
+       data-bs-toggle="collapse" 
+       data-bs-target="#userManagementSubmenu" 
+       href="#userManagementSubmenu" 
+       role="button"
+       aria-expanded="false" 
+       aria-controls="userManagementSubmenu"
+       style="transition: all 0.3s;">
+        <i class="fas fa-sliders-h nav-icon fa-lg"></i> <!-- Changed to settings icon -->
+        <span class="sidebar-text ms-3 fw-semibold">Management</span>
+        <i class="fas fa-chevron-down ms-auto sidebar-toggle-icon" style="transition: transform 0.3s;"></i>
+    </a>
+    <div class="collapse" id="userManagementSubmenu">
+        <ul class="nav flex-column ms-4 mt-2" style="border-left: 2px solid rgba(255,255,255,0.1);">
+            <!-- List Users -->
+            <li class="nav-item mb-1">
+                <a class="nav-link d-flex align-items-center text-white-50 py-2 px-3 rounded 
+                         {% if 'user' in request.path and 'list' in request.path %}active bg-primary bg-opacity-25 border-start border-primary{% endif %}" 
+                   href="{% url 'user_list' %}"
+                   style="transition: all 0.2s;">
+                    <i class="fas fa-user-cog fa-sm me-3"></i> <!-- Changed icon -->
+                    <span class="sidebar-text">User</span>
+                </a>
+            </li>
+            <!-- List Event -->
+            <li class="nav-item mb-1">
+                <a class="nav-link d-flex align-items-center text-white-50 py-2 px-3 rounded 
+                         {% if 'event' in request.path %}active bg-primary bg-opacity-25 border-start border-primary{% endif %}" 
+                   href="{% url 'event_list' %}"
+                   style="transition: all 0.2s;">
+                    <i class="fas fa-shield-alt fa-sm me-3"></i> <!-- Changed icon -->
+                    <span class="sidebar-text">Threat</span>
+                </a>
+            </li>
+            <!-- List AutoNews -->
+            <li class="nav-item mb-1">
+                <a class="nav-link d-flex align-items-center text-white-50 py-2 px-3 rounded 
+                         {% if 'autonews' in request.path %}active bg-primary bg-opacity-25 border-start border-primary{% endif %}" 
+                   href="{% url 'list_autonews' %}"
+                   style="transition: all 0.2s;">
+                    <i class="fas fa-rss fa-sm me-3"></i> <!-- Changed icon -->
+                    <span class="sidebar-text">News</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+{% endif %}
+
+  {% if request.session.user_role == 'User' or request.session.user_role == 'SuperAdmin' %}
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded" 
+     href="{% url 'download_database' %}">
+      <i class="fas fa-database nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Database Backup</span>
+    </a>
+  </li>
+  {% endif %}
+
+</ul>
+
+<!-- ✅ Submenu Toggle Icon Rotation -->
+<style>
+  .sidebar-toggle-icon {
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+  }
+  .collapsed .sidebar-toggle-icon {
+    transform: rotate(-90deg);
+  }
+</style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Auto-expand submenu if child is active
+    const activeSubItem = document.querySelector('.nav-link.active');
+    if (activeSubItem && activeSubItem.closest('.collapse')) {
+      const parentCollapse = activeSubItem.closest('.collapse');
+      const parentToggle = document.querySelector(`[href="#${parentCollapse.id}"]`);
+      if (parentToggle) {
+        parentToggle.classList.remove('collapsed');
+        parentCollapse.classList.add('show');
+      }
+    }
+  });
+</script>

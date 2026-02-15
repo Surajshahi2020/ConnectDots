@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Alerts</h6>
+                            <h3 class="fw-bold mb-0 text-primary">{{ total_threats }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i class="fas fa-newspaper text-primary"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-building me-1"></i>Unit: {{ user_unit }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Critical</h6>
+                            <h3 class="fw-bold mb-0 text-danger">{{ critical_severity }}</h3>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-2">
+                            <i class="fas fa-skull-crossbones text-danger"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">Requires immediate action</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">High Severity</h6>
+                            <h3 class="fw-bold mb-0 text-warning">{{ high_severity }}</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">Needs attention</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Recent (7 days)</h6>
+                            <h3 class="fw-bold mb-0 text-info">{{ recent_threats }}</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-2">
+                            <i class="fas fa-clock text-info"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">Last week's activity</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Card -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <div class="row">
+                <div class="col-md-8">
+                    <form method="GET" action="{% url 'event_list' %}">
+                        <div class="input-group">
+                            <input type="hidden" name="page" value="1">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="q" 
+                                   placeholder="Search alerts by title, content, source..." 
+                                   value="{{ search_query }}"
+                                   aria-label="Search alerts">
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            {% if search_query %}
+                                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="d-flex justify-content-end gap-2">
+                        <span class="badge bg-primary align-self-center">
+                            <i class="fas fa-medium me-1"></i>Medium: {{ medium_severity }}
+                        </span>
+                        <span class="badge bg-success align-self-center">
+                            <i class="fas fa-low-vision me-1"></i>Low: {{ low_severity }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Table Card -->
+    <div class="card shadow border-0">
+        <div class="card-body p-3">
+            {% if threats %}
+            <!-- Page Info -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <small class="text-muted">
+                        Showing <strong>{{ threats.start_index }}-{{ threats.end_index }}</strong> 
+                        of <strong>{{ total_threats }}</strong> alerts
+                    </small>
+                </div>
+                <div>
+                    {% if search_query %}
+                    <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i>Clear Search
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Title & Content</th>
+                            <th>Category</th>
+                            <th>Severity</th>
+                            <th>Province</th>
+                            <th>Created By</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for threat in threats %}
+                        <tr class="{% if threat.severity == 'critical' %}table-danger{% elif threat.severity == 'high' %}table-warning{% elif threat.severity == 'medium' %}table-primary{% endif %}">
+                            <td class="text-muted">{{ forloop.counter|add:threats.start_index|add:-1 }}</td>
+                            
+                            <!-- Title & Content Column with Read More -->
+                            <td>
+                                <div class="threat-content">
+                                    <!-- Title -->
+                                    <h6 class="mb-1">
+                                        {{ threat.title|truncatechars:60 }}
+                                        {% if threat.title|length > 60 %}
+                                        <a href="#" class="text-primary ms-1" 
+                                           data-bs-toggle="collapse" 
+                                           data-bs-target="#fullTitle{{ threat.id }}"
+                                           onclick="event.preventDefault();">
+                                            <small><i class="fas fa-chevron-down"></i></small>
+                                        </a>
+                                        {% endif %}
+                                    </h6>
+                                    
+                                    {% if threat.title|length > 60 %}
+                                    <div class="collapse" id="fullTitle{{ threat.id }}">
+                                        <div class="alert alert-light p-2 mb-2 small">
+                                            <strong>Full Title:</strong> {{ threat.title }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Content -->
+                                    <div class="content-section">
+                                        <p class="mb-0 small text-muted">
+                                            {{ threat.content|truncatechars:90 }}
+                                            {% if threat.content|length > 90 %}
+                                            <a href="#" class="text-primary ms-1" 
+                                               data-bs-toggle="collapse" 
+                                               data-bs-target="#fullContent{{ threat.id }}"
+                                               onclick="event.preventDefault();">
+                                                <small>Read more</small>
+                                            </a>
+                                            {% endif %}
+                                        </p>
+                                        
+                                        {% if threat.content|length > 90 %}
+                                        <div class="collapse" id="fullContent{{ threat.id }}">
+                                            <div class="card card-body bg-light p-2 mt-1">
+                                                <p class="mb-0 small">{{ threat.content }}</p>
+                                                <div class="text-end mt-2">
+                                                    <a href="#" class="text-primary" 
+                                                       data-bs-toggle="collapse" 
+                                                       data-bs-target="#fullContent{{ threat.id }}"
+                                                       onclick="event.preventDefault();">
+                                                        <small><i class="fas fa-chevron-up me-1"></i>Show less</small>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Category -->
+                            <td>
+                                {% if threat.category %}
+                                    <span class="badge bg-info">{{ threat.category.name }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Uncategorized</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Severity -->
+                            <td>
+                                {% if threat.severity == 'critical' %}
+                                    <span class="badge bg-danger"><i class="fas fa-skull-crossbones me-1"></i> Critical</span>
+                                {% elif threat.severity == 'high' %}
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> High</span>
+                                {% elif threat.severity == 'medium' %}
+                                    <span class="badge bg-primary"><i class="fas fa-exclamation-circle me-1"></i> Medium</span>
+                                {% else %}
+                                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Low</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Province -->
+                            <td>
+                                {% if threat.province %}
+                                    <span class="badge bg-secondary">{{ threat.province }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Created By -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        {% if threat.created_by %}
+                                            {% if threat.created_by.username == session_username %}
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-1" title="You created this">
+                                                <i class="fas fa-user text-primary fa-xs"></i>
+                                            </div>
+                                            {% elif threat.user_can_edit %}
+                                            <div class="bg-warning bg-opacity-10 rounded-circle p-1" title="You can edit this">
+                                                <i class="fas fa-user-edit text-warning fa-xs"></i>
+                                            </div>
+                                            {% else %}
+                                            <div class="bg-secondary bg-opacity-10 rounded-circle p-1">
+                                                <i class="fas fa-user text-secondary fa-xs"></i>
+                                            </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="bg-warning bg-opacity-10 rounded-circle p-1">
+                                                <i class="fas fa-server text-warning fa-xs"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 ms-2">
+                                        <small>
+                                            {{ threat.created_by.username|default:"System" }}
+                                            {% if threat.created_by.username == session_username %}
+                                            <span class="badge bg-primary ms-1">You</span>
+                                            {% endif %}
+                                        </small>
+                                        {% if threat.created_by.unit %}
+                                        <div class="x-small text-muted">{{ threat.created_by.unit }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Date -->
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <small class="text-muted">{{ threat.timestamp|date:"M d, Y" }}</small>
+                                    <small class="text-muted">{{ threat.timestamp|time:"h:i A" }}</small>
+                                </div>
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <!-- Edit Button - Show if user is SuperAdmin Cyber OR creator -->
+                                    {% if is_superadmin_cyber or threat.user_can_edit %}
+                                    <a href="{% url 'threat_edit' threat.id %}" 
+                                    class="btn btn-sm btn-outline-warning" 
+                                    title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <!-- Delete Form (inline) -->
+                                    <form method="POST" action="{% url 'threat_delete' threat.id %}" 
+                                        class="d-inline" 
+                                        id="deleteForm{{ threat.id }}"
+                                        onsubmit="return confirmDelete('{{ threat.title|escapejs }}', this);">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled title="Read-only">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled title="Read-only">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if threats.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if threats.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in threats.paginator.page_range %}
+                        {% if threats.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > threats.number|add:'-3' and num < threats.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if threats.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        Page {{ threats.number }} of {{ threats.paginator.num_pages }}
+                    </small>
+                </div>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="empty-state-icon mb-4">
+                    <i class="fas fa-exclamation-triangle fa-4x text-muted"></i>
+                </div>
+                <h5 class="text-muted mb-3">No Threat Alerts Found</h5>
+                <p class="text-muted mb-4">
+                    {% if search_query %}
+                    No alerts match your search "{{ search_query }}".
+                    {% else %}
+                    No threat alerts have been reported yet.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'event_list' %}" class="btn btn-outline-primary btn-sm">
+                    Clear Search
+                </a>
+                
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top Categories Card -->
+    {% if top_categories %}
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Top Threat Categories</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for category in top_categories %}
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card h-100 border-0">
+                        <div class="card-body text-center p-3">
+                            <div class="mb-2">
+                                <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex p-3">
+                                    <i class="fas fa-tag text-info fa-lg"></i>
+                                </div>
+                            </div>
+                            <h6 class="card-title mb-1">{{ category.category__name|default:"Uncategorized" }}</h6>
+                            <h4 class="text-primary mb-0">{{ category.count }}</h4>
+                            <small class="text-muted">alerts</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(threatTitle, form) {
+    const confirmation = confirm(`Are you sure you want to delete "${threatTitle}"?\n\nThis action cannot be undone.`);
+    if (confirmation) {
+        return true;
+    }
+    return false;
+}
+
+$(document).ready(function() {
+    // Handle collapse toggles
+    $('[data-bs-toggle="collapse"]').on('click', function(e) {
+        e.preventDefault();
+        const target = $(this).data('bs-target');
+        $(target).collapse('toggle');
+    });
+});
+</script>
+{% endblock %}

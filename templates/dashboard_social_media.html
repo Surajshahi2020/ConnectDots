@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}Social Media Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Social Media Dashboard</h1>
+        
+        <!-- Interval Filter -->
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                {% if selected_interval == 'custom' %}Custom Range
+                {% elif selected_interval == 'today' %}Today
+                {% elif selected_interval == 'week' %}Last 7 Days
+                {% elif selected_interval == 'month' %}Last 30 Days
+                {% elif selected_interval == 'quarter' %}Last 90 Days
+                {% elif selected_interval == 'year' %}Last 365 Days
+                {% else %}All Time
+                {% endif %}
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="?interval=today">Today</a>
+                <a class="dropdown-item" href="?interval=week">Last 7 Days</a>
+                <a class="dropdown-item" href="?interval=month">Last 30 Days</a>
+                <a class="dropdown-item" href="?interval=quarter">Last 90 Days</a>
+                <a class="dropdown-item" href="?interval=year">Last 365 Days</a>
+                <a class="dropdown-item" href="?interval=all">All Time</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
+                    <i class="fas fa-calendar-day mr-2"></i>Custom Range
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range Modal -->
+    <div class="modal fade" id="dateRangeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Custom Date Range</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="get" action="">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ start_date }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ end_date }}" required>
+                        </div>
+                        <input type="hidden" name="interval" value="custom">
+                        <input type="hidden" name="custom_range" value="true">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Apply Date Range</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Range Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-left-info">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="mb-0">
+                                <i class="fas fa-calendar-check text-info mr-2"></i>
+                                <strong>Showing data for:</strong> 
+                                <span class="text-dark">{{ date_range_label }}</span>
+                                {% if days_in_range %}
+                                <span class="text-muted ms-2">({{ days_in_range }} days)</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
+                                <i class="fas fa-edit me-1"></i>Change Range
+                            </button>
+                            <a href="?interval=month" class="btn btn-sm btn-outline-secondary ms-1">
+                                <i class="fas fa-redo me-1"></i>Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card summary-card total-urls-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="card-title">Total URLs</div>
+                            <div class="card-value">{{ total_urls }}</div>
+                            <div class="card-subtitle">Selected Range</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-link card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card summary-card seven-days-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="card-title">Last 7 Days</div>
+                            <div class="card-value">{{ last_7_days }}</div>
+                            <div class="card-subtitle">Relative to Today</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-week card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card summary-card thirty-days-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="card-title">Last 30 Days</div>
+                            <div class="card-value">{{ last_30_days }}</div>
+                            <div class="card-subtitle">Relative to Today</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Overview -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Status Overview</h6>
+                    <small class="text-muted">For selected date range</small>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table status-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="text-center">Count</th>
+                                    <th class="text-center">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for status in status_data %}
+                                <tr class="status-row status-{{ status.code }}">
+                                    <td>
+                                        <i class="fas {{ status.icon }} me-2 status-icon"></i>
+                                        {{ status.label }}
+                                    </td>
+                                    <td class="text-center font-weight-bold">{{ status.count }}</td>
+                                    <td class="text-center">{{ status.percentage|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-footer">
+                                    <td>Total</td>
+                                    <td class="text-center font-weight-bold">{{ total_urls }}</td>
+                                    <td class="text-center font-weight-bold">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Status Summary</h6>
+                    <small class="text-muted">For selected date range</small>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for status in status_data %}
+                        <div class="col-md-6 col-sm-4 col-6 mb-3">
+                            <div class="status-card status-{{ status.code }}-card">
+                                <i class="fas {{ status.icon }} status-card-icon"></i>
+                                <div class="status-card-value">{{ status.count }}</div>
+                                <div class="status-card-label">{{ status.label }}</div>
+                                <div class="status-card-percentage">{{ status.percentage|floatformat:1 }}%</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Main Card Styling */
+.card {
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1rem 1.25rem;
+}
+
+/* Summary Cards */
+.summary-card {
+    height: 100%;
+    border-left: 4px solid;
+}
+
+.total-urls-card {
+    border-left-color: #4e73df;
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+}
+
+.seven-days-card {
+    border-left-color: #1cc88a;
+    background: linear-gradient(135deg, #f0f9f5 0%, #e6f7ef 100%);
+}
+
+.thirty-days-card {
+    border-left-color: #36b9cc;
+    background: linear-gradient(135deg, #f0f9fb 0%, #e6f7fa 100%);
+}
+
+.card-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.total-urls-card .card-title { color: #4e73df; }
+.seven-days-card .card-title { color: #1cc88a; }
+.thirty-days-card .card-title { color: #36b9cc; }
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2e3a59;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.card-subtitle {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.card-icon {
+    font-size: 3rem;
+    opacity: 0.2;
+}
+
+.total-urls-card .card-icon { color: #4e73df; }
+.seven-days-card .card-icon { color: #1cc88a; }
+.thirty-days-card .card-icon { color: #36b9cc; }
+
+/* Status Table */
+.status-table {
+    margin-bottom: 0;
+}
+
+.status-table thead th {
+    background-color: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    font-weight: 700;
+    color: #4a5568;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+}
+
+.status-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-color: #edf2f7;
+}
+
+.status-table tfoot td {
+    background-color: #f8f9fc;
+    font-weight: 700;
+    color: #2d3748;
+    padding: 1rem;
+    border-top: 2px solid #e3e6f0;
+}
+
+/* Status Row Colors */
+.status-pending .status-icon { color: #f6c23e; }
+.status-pending:hover { background-color: rgba(246, 194, 62, 0.05); }
+
+.status-searching .status-icon { color: #36b9cc; }
+.status-searching:hover { background-color: rgba(54, 185, 204, 0.05); }
+
+.status-found .status-icon { color: #1cc88a; }
+.status-found:hover { background-color: rgba(28, 200, 138, 0.05); }
+
+.status-not_found .status-icon { color: #e74a3b; }
+.status-not_found:hover { background-color: rgba(231, 74, 59, 0.05); }
+
+.status-error .status-icon { color: #858796; }
+.status-error:hover { background-color: rgba(133, 135, 150, 0.05); }
+
+/* Status Cards */
+.status-card {
+    text-align: center;
+    padding: 1.5rem 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e3e6f0;
+}
+
+.status-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.status-card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.status-pending-card { border-top: 3px solid #f6c23e; }
+.status-searching-card { border-top: 3px solid #36b9cc; }
+.status-found-card { border-top: 3px solid #1cc88a; }
+.status-not_found-card { border-top: 3px solid #e74a3b; }
+.status-error-card { border-top: 3px solid #858796; }
+
+.status-pending-card .status-card-icon { color: #f6c23e; }
+.status-searching-card .status-card-icon { color: #36b9cc; }
+.status-found-card .status-card-icon { color: #1cc88a; }
+.status-not_found-card .status-card-icon { color: #e74a3b; }
+.status-error-card .status-card-icon { color: #858796; }
+
+.status-card-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.status-card-label {
+    font-size: 0.8rem;
+    color: #718096;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.status-card-percentage {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    font-weight: 500;
+}
+
+/* Range Info Card */
+.border-left-info {
+    border-left: 4px solid #36b9cc !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-value {
+        font-size: 1.5rem;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .status-card {
+        padding: 1rem 0.5rem;
+    }
+    
+    .status-card-icon {
+        font-size: 1.5rem;
+    }
+    
+    .status-card-value {
+        font-size: 1.25rem;
+    }
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // Set today as default end date in modal
+    var today = new Date().toISOString().split('T')[0];
+    $('#end_date').val(today);
+    
+    // Set 30 days ago as default start date
+    var thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    $('#start_date').val(thirtyDaysAgo.toISOString().split('T')[0]);
+    
+    // Add click animation to status cards
+    $('.status-card').click(function() {
+        $(this).addClass('active');
+        setTimeout(() => {
+            $(this).removeClass('active');
+        }, 300);
+    });
+});
+</script>
+{% endblock %}

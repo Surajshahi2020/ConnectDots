@@ -1,0 +1,376 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- 📊 Stats Cards -->
+  <div class="row g-4 mb-4">
+    <!-- Category Chart -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Threats by Category</h5>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-chart-bar me-1"></i> Bar
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item chart-type-btn" data-chart="categoryChart" data-type="bar">Bar Chart</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="categoryChart" data-type="pie">Pie Chart</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="categoryChart" data-type="line">Line Chart</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas id="categoryChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Severity Chart -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Severity Distribution</h5>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-chart-pie me-1"></i> Doughnut
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item chart-type-btn" data-chart="severityChart" data-type="doughnut">Doughnut</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="severityChart" data-type="pie">Pie Chart</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="severityChart" data-type="bar">Bar Chart</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas id="severityChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Chart -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Threats (Last 30 Days)</h5>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-chart-line me-1"></i> Line
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item chart-type-btn" data-chart="timelineChart" data-type="line">Line Chart</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="timelineChart" data-type="bar">Bar Chart</a></li>
+              <li><a class="dropdown-item chart-type-btn" data-chart="timelineChart" data-type="area">Area Chart</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas id="timelineChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Visualizations -->
+  <div class="row g-4 mb-4">
+    <!-- Threat Trend by Severity -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Threat Trend by Severity (Last 7 Days)</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="trendChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Threat Sources -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Top Threat Sources</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="sourcesChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+<!-- Chart.js -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+ <script src="../static/js/chart.js"></script>
+
+
+<!-- Inject data securely -->
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_data|json_script:"chart-data" }}
+{{ severity_labels|json_script:"severity-labels" }}
+{{ severity_data|json_script:"severity-data" }}
+{{ timeline_labels|json_script:"timeline-labels" }}
+{{ timeline_data|json_script:"timeline-data" }}
+{{ trend_labels|json_script:"trend-labels" }}
+{{ trend_data|json_script:"trend-data" }}
+{{ sources_labels|json_script:"sources-labels" }}
+{{ sources_data|json_script:"sources-data" }}
+
+<style>
+  .icon-shape {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+  .hover-shadow:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+  }
+  .hover-card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  }
+  canvas {
+    max-height: 220px;
+  }
+  .chart-container {
+    position: relative;
+    height: 220px;
+    width: 100%;
+  }
+</style>
+
+<script>
+  // Store chart instances for updating
+  const chartInstances = {};
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // === Category Chart ===
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    const catLabels = JSON.parse(document.getElementById('chart-labels').textContent);
+    const catData = JSON.parse(document.getElementById('chart-data').textContent);
+    
+    const colorPalette = ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b','#858796','#9b59b6','#3498db'];
+    const catColors = catLabels.map((_, i) => colorPalette[i % colorPalette.length]);
+
+    chartInstances.categoryChart = new Chart(catCtx, {
+      type: 'bar',
+      data: {
+        labels: catLabels,
+        datasets: [{
+          label: 'Threats',
+          data: catData,
+          backgroundColor: catColors.map(c => c + '80'),
+          borderColor: catColors,
+          borderWidth: 2,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { 
+            ticks: { 
+              autoSkip: false, 
+              maxRotation: 45, 
+              minRotation: 45 
+            } 
+          },
+          y: { 
+            beginAtZero: true, 
+            ticks: { stepSize: 1 } 
+          }
+        }
+      }
+    });
+
+    // === Severity Chart ===
+    const sevCtx = document.getElementById('severityChart').getContext('2d');
+    const sevLabels = JSON.parse(document.getElementById('severity-labels').textContent);
+    const sevData = JSON.parse(document.getElementById('severity-data').textContent);
+    const sevColors = ['#e74a3b', '#f6c23e', '#1cc88a'];
+
+    chartInstances.severityChart = new Chart(sevCtx, {
+      type: 'doughnut',
+      data: {
+        labels: sevLabels,
+        datasets: [{
+          data: sevData,
+          backgroundColor: sevColors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    // === Timeline Chart ===
+    const timeCtx = document.getElementById('timelineChart').getContext('2d');
+    const timeLabels = JSON.parse(document.getElementById('timeline-labels').textContent);
+    const timeData = JSON.parse(document.getElementById('timeline-data').textContent);
+
+    chartInstances.timelineChart = new Chart(timeCtx, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [{
+          label: 'Daily Threats',
+          data: timeData,
+          borderColor: '#4e73df',
+          backgroundColor: 'rgba(78, 115, 223, 0.1)',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    // === Trend Chart ===
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendLabels = JSON.parse(document.getElementById('trend-labels').textContent);
+    const trendData = JSON.parse(document.getElementById('trend-data').textContent);
+
+    chartInstances.trendChart = new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: trendLabels,
+        datasets: [
+          {
+            label: 'High Severity',
+            data: trendData.high,
+            borderColor: '#e74a3b',
+            backgroundColor: 'rgba(231, 74, 59, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Medium Severity',
+            data: trendData.medium,
+            borderColor: '#f6c23e',
+            backgroundColor: 'rgba(246, 194, 62, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Low Severity',
+            data: trendData.low,
+            borderColor: '#1cc88a',
+            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    // === Sources Chart ===
+    const sourcesCtx = document.getElementById('sourcesChart').getContext('2d');
+    const sourcesLabels = JSON.parse(document.getElementById('sources-labels').textContent);
+    const sourcesData = JSON.parse(document.getElementById('sources-data').textContent);
+    const sourcesColors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'];
+
+    chartInstances.sourcesChart = new Chart(sourcesCtx, {
+      type: 'bar',
+      data: {
+        labels: sourcesLabels,
+        datasets: [{
+          label: 'Threats',
+          data: sourcesData,
+          backgroundColor: sourcesColors,
+          borderColor: sourcesColors.map(c => c.replace('0.8', '1')),
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    // Chart type switcher
+    document.querySelectorAll('.chart-type-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const chartId = this.getAttribute('data-chart');
+        const newType = this.getAttribute('data-type');
+        
+        // Update the chart type
+        chartInstances[chartId].config.type = newType;
+        chartInstances[chartId].update();
+        
+        // Update the dropdown button text
+        const dropdownBtn = this.closest('.dropdown').querySelector('.dropdown-toggle');
+        const iconClass = newType === 'bar' ? 'fa-chart-bar' : 
+                         newType === 'line' ? 'fa-chart-line' : 
+                         newType === 'pie' ? 'fa-chart-pie' : 
+                         newType === 'doughnut' ? 'fa-chart-pie' : 'fa-chart-area';
+        
+        dropdownBtn.innerHTML = `<i class="fas ${iconClass} me-1"></i> ${newType.charAt(0).toUpperCase() + newType.slice(1)}`;
+      });
+    });
+
+    // Toggle between grid and list view
+    document.getElementById('toggle-view').addEventListener('click', function() {
+      const gridView = document.getElementById('grid-view');
+      const listView = document.getElementById('list-view');
+      const icon = this.querySelector('i');
+      
+      if (gridView.classList.contains('d-none')) {
+        // Switch to grid view
+        gridView.classList.remove('d-none');
+        listView.classList.add('d-none');
+        icon.className = 'fas fa-th-large me-1';
+        this.innerHTML = '<i class="fas fa-th-large me-1"></i> Grid View';
+      } else {
+        // Switch to list view
+        gridView.classList.add('d-none');
+        listView.classList.remove('d-none');
+        icon.className = 'fas fa-list me-1';
+        this.innerHTML = '<i class="fas fa-list me-1"></i> List View';
+      }
+    });
+  });
+</script>
+{% endblock %}

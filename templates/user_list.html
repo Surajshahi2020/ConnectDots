@@ -1,0 +1,875 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - User List{% endblock %}
+
+{% block content %}
+<!-- Add custom CSS for beautiful UI -->
+<style>
+    /* ==== GORGEOUS COLOR PALETTE ==== */
+    :root {
+        /* Professional Gradient Combinations */
+        --gradient-primary: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        --gradient-secondary: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        --gradient-success: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+        --gradient-warning: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        --gradient-info: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);
+        --gradient-dark: linear-gradient(135deg, #232526 0%, #414345 100%);
+        
+        /* Soft Pastel Colors for Table */
+        --table-header: #2c3e50;
+        --table-row-even: #f8f9fa;
+        --table-row-odd: #ffffff;
+        --table-hover: #e8f4fd;
+        --border-color: #e1e8ed;
+        
+        /* Status Colors */
+        --status-active: #28a745;
+        --status-inactive: #6c757d;
+        --status-pending: #ffc107;
+        --status-suspended: #dc3545;
+        
+        /* Role Badge Colors */
+        --role-superadmin: #dc3545;
+        --role-admin: #fd7e14;
+        --role-cyber: #17a2b8;
+        --role-user: #6c757d;
+        --role-social: #20c997;
+    }
+    
+    /* ==== GRADIENT CARDS ==== */
+    .gradient-primary {
+        background: var(--gradient-primary);
+    }
+    .gradient-secondary {
+        background: var(--gradient-secondary);
+    }
+    .gradient-success {
+        background: var(--gradient-success);
+    }
+    .gradient-warning {
+        background: var(--gradient-warning);
+    }
+    .gradient-info {
+        background: var(--gradient-info);
+    }
+    .gradient-dark {
+        background: var(--gradient-dark);
+    }
+    
+    /* Card hover effects */
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+    
+    /* ==== BEAUTIFUL TABLE DESIGN ==== */
+    .user-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+    
+    .user-table thead {
+        background: var(--gradient-primary);
+        color: red;
+    }
+    
+    .user-table thead th {
+        color: rgb(83, 125, 173);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .user-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .user-table tbody tr {
+        transition: all 0.25s ease;
+        background-color: var(--table-row-odd);
+    }
+    
+    .user-table tbody tr:nth-child(even) {
+        background-color: var(--table-row-even);
+    }
+    
+    .user-table tbody tr:hover {
+        background-color: var(--table-hover);
+        transform: scale(1.002);
+        box-shadow: 0 4px 12px rgba(106, 17, 203, 0.08);
+    }
+    
+    .user-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        font-size: 0.95rem;
+        color: #2c3e50;
+    }
+    
+    .user-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Table cell special effects */
+    .user-table tbody td:first-child {
+        border-left: 3px solid transparent;
+        transition: border-left-color 0.3s ease;
+    }
+    
+    .user-table tbody tr:hover td:first-child {
+        border-left-color: #6a11cb;
+    }
+    
+    /* ==== GORGEOUS BADGES ==== */
+    .badge-pill {
+        padding: 0.5em 1.2em;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .badge-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    
+    /* Role-specific badge colors */
+    .badge-superadmin {
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
+        color: white;
+    }
+    
+    .badge-admin {
+        background: linear-gradient(135deg, #fd7e14 0%, #ffa94d 100%);
+        color: white;
+    }
+    
+    .badge-cyber {
+        background: linear-gradient(135deg, #17a2b8 0%, #48d1cc 100%);
+        color: white;
+    }
+    
+    .badge-user {
+        background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%);
+        color: white;
+    }
+    
+    .badge-social {
+        background: linear-gradient(135deg, #20c997 0%, #63e6be 100%);
+        color: white;
+    }
+    
+    /* ==== USER AVATAR WITH GRADIENT ==== */
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .user-avatar:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* Dynamic avatar colors based on role */
+    .avatar-superadmin { background: var(--gradient-primary); }
+    .avatar-admin { background: var(--gradient-warning); }
+    .avatar-cyber { background: var(--gradient-info); }
+    .avatar-user { background: var(--gradient-dark); }
+    
+    /* ==== ACTION BUTTONS ==== */
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        margin: 3px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-action.btn-outline-primary {
+        border-color: #6a11cb;
+        color: #6a11cb;
+    }
+    
+    .btn-action.btn-outline-primary:hover {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: transparent;
+    }
+    
+    .btn-action.btn-outline-info {
+        border-color: #17a2b8;
+        color: #17a2b8;
+    }
+    
+    .btn-action.btn-outline-info:hover {
+        background: var(--gradient-info);
+        color: white;
+        border-color: transparent;
+    }
+    
+    .btn-action.btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+    
+    .btn-action.btn-outline-danger:hover {
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
+        color: white;
+        border-color: transparent;
+    }
+    
+    /* ==== MODERN CARD DESIGN ==== */
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .modern-card:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    
+    .modern-card-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 16px 16px 0 0 !important;
+        padding: 1rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .modern-card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+    }
+    
+    /* ==== SEARCH BOX ==== */
+    .search-box {
+        border: 2px solid #e1e8ed;
+        border-radius: 12px;
+        padding: 0.85rem 1.25rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .search-box:focus {
+        border-color: #6a11cb;
+        box-shadow: 0 4px 20px rgba(106, 17, 203, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    /* ==== PAGINATION ==== */
+    .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        box-shadow: 0 4px 10px rgba(106, 17, 203, 0.2);
+    }
+    
+    .page-link {
+        border-radius: 10px;
+        margin: 0 4px;
+        border: none;
+        color: #6a11cb;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+    }
+    
+    .page-link:hover {
+        background-color: rgba(106, 17, 203, 0.1);
+        color: #6a11cb;
+        transform: translateY(-2px);
+    }
+    
+    /* ==== EMPTY STATE ==== */
+    .empty-state {
+        padding: 5rem 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 16px;
+        margin: 2rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 6rem;
+        margin-bottom: 2rem;
+        display: inline-block;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    /* ==== STATUS INDICATORS ==== */
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .status-active {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--status-active);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+    
+    .status-inactive {
+        background: rgba(108, 117, 125, 0.1);
+        color: var(--status-inactive);
+        border: 1px solid rgba(108, 117, 125, 0.2);
+    }
+    
+    .status-social-enabled {
+        background: rgba(32, 201, 151, 0.1);
+        color: var(--role-social);
+        border: 1px solid rgba(32, 201, 151, 0.2);
+    }
+    
+    .status-social-disabled {
+        background: rgba(108, 117, 125, 0.1);
+        color: var(--role-user);
+        border: 1px solid rgba(108, 117, 125, 0.2);
+    }
+    
+    /* ==== TEXT COLORS ==== */
+    .text-role {
+        font-weight: 600;
+    }
+    
+    .text-role-superadmin { color: var(--role-superadmin); }
+    .text-role-admin { color: var(--role-admin); }
+    .text-role-cyber { color: var(--role-cyber); }
+    .text-role-user { color: var(--role-user); }
+    
+    /* ==== LOADING ANIMATION ==== */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .loading-pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    /* ==== HIGHLIGHT EFFECT ==== */
+    .highlight {
+        background: linear-gradient(90deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0) 100%);
+        position: relative;
+    }
+    
+    .highlight::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(255, 193, 7, 0.3) 0%, transparent 100%);
+        z-index: -1;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Page Header with Breadcrumb -->
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1 fw-bold" style="color: #7551ca;">User Management</h1>
+                </div>
+                <div>
+                    <a href="{% url 'add_user' %}" class="btn shadow-sm" style="background: var(--gradient-primary); color: white; border: none;">
+                        <i class="fas fa-user-plus me-2"></i>Add New User
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card modern-card border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2" style="color: #6c757d; font-size: 0.85rem;">Total Users</h6>
+                            <h2 class="fw-bold mb-0" style="color: #2c3e50;">{{ total_users }}</h2>
+                            <small style="color: #adb5bd;">All registered users</small>
+                        </div>
+                        <div class="user-avatar gradient-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card modern-card border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2" style="color: #6c757d; font-size: 0.85rem;">Regular Users</h6>
+                            <h2 class="fw-bold mb-0" style="color: #2c3e50;">{{ user_count_by_role.User|default:0 }}</h2>
+                            <small style="color: #adb5bd;">Basic access users</small>
+                        </div>
+                        <div class="user-avatar gradient-dark">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card modern-card border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2" style="color: #6c757d; font-size: 0.85rem;">Admin Users</h6>
+                            <h2 class="fw-bold mb-0" style="color: #2c3e50;">
+                                {{ user_count_by_role.Admin|default:0 }}
+                            </h2>
+                            <small style="color: #adb5bd;">Admin</small>
+                        </div>
+                        <div class="user-avatar gradient-warning">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card modern-card border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2" style="color: #6c757d; font-size: 0.85rem;">SuperAdmin</h6>
+                            <h2 class="fw-bold mb-0" style="color: #2c3e50;">{{ user_count_by_role.SuperAdmin|default:0 }}</h2>
+                            <small style="color: #adb5bd;">Super Admin</small>
+                        </div>
+                        <div class="user-avatar gradient-info">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search Section -->
+    <div class="card modern-card mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0" style="border-right: none;">
+                            <i class="fas fa-search" style="color: #6a11cb;"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control search-box" 
+                               id="search" 
+                               name="search" 
+                               value="{{ search_query }}"
+                               placeholder="Search users by name, email, username, phone, or unit..."
+                               style="border-left: none;">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select search-box" id="role" name="role">
+                        <option value="">All Roles</option>
+                        {% for value, label in role_choices %}
+                        <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid">
+                        <button type="submit" class="btn w-60 shadow-sm d-flex align-items-center justify-content-center gap-2" 
+                                style="background: var(--gradient-primary); color: white; border: none; height: 50px; border-radius: 12px;">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card modern-card">
+        <div class="modern-card-header d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-white opacity-75">Showing {{ users.paginator.count }} users</small>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            {% if users %}
+            <div class="table-responsive">
+                <table class="table user-table mb-0" id="userTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;" class="text-center">Avatar</th>
+                            <th>User Information</th>
+                            <th>Role</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th class="text-center" style="width: 140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="text-center">
+                                <div class="user-avatar {% if user.role == 'SuperAdmin' %}avatar-superadmin{% elif user.role == 'Admin' %}avatar-admin{% elif user.role == 'CyberUser' %}avatar-cyber{% else %}avatar-user{% endif %}">
+                                    {{ user.username|first|upper }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <strong class="text-dark mb-1">{{ user.get_full_name|default:user.username }}</strong>
+                                    <small class="text-muted mb-2">@{{ user.username }}</small>
+                                    <div class="d-flex align-items-center">
+                                        <small class="me-3"><i class="fas fa-building me-1" style="color: #6c757d;"></i>{{ user.unit|default:"No unit" }}</small>
+                                        {% if user.rank %}
+                                        <small><i class="fas fa-medal me-1" style="color: #fd7e14;"></i>{{ user.rank }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if user.role == 'SuperAdmin' %}
+                                <span class="badge badge-pill badge-superadmin">
+                                    <i class="fas fa-crown me-1"></i>Super Admin
+                                </span>
+                                {% elif user.role == 'Admin' %}
+                                <span class="badge badge-pill badge-admin">
+                                    <i class="fas fa-user-shield me-1"></i>Admin
+                                </span>
+                                {% elif user.role == 'CyberUser' %}
+                                <span class="badge badge-pill badge-cyber">
+                                    <i class="fas fa-user-secret me-1"></i>Cyber User
+                                </span>
+                                {% else %}
+                                <span class="badge badge-pill badge-user">
+                                    <i class="fas fa-user me-1"></i>User
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <small class="text-dark mb-1"><i class="fas fa-envelope me-2" style="color: #6a11cb;"></i>{{ user.email }}</small>
+                                    {% if user.phone %}
+                                    <small class="text-muted"><i class="fas fa-phone me-2" style="color: #17a2b8;"></i>{{ user.phone }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        {% if user.social_media %}
+                                        <span class="status-badge status-social-enabled">
+                                             Yes
+                                        </span>
+                                        {% else %}
+                                        <span class="status-badge status-social-disabled">
+                                            No
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if user.is_active %}
+                                        <span class="status-badge status-active">
+                                            <i class="fas fa-check-circle"></i> Active
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ user.date_joined|date:"M d, Y" }}
+                                    </small>
+                                    {% if user.last_login %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-sign-in-alt me-1"></i>
+                                        {{ user.last_login|timesince }} ago
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center">
+                                    <a href="{% url 'edit_user' user.id %}" class="btn btn-action btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'password_reset' user.id %}" class="btn btn-action btn-outline-warning" title="Reset Password">
+                                        <i class="fas fa-key"></i>
+                                    </a>
+                                    
+                                    {% if request.user.role == 'SuperAdmin' and user.id != request.user.id %}
+                                  
+                                    <a href="{% url 'delete_user' user.id %}" class="btn btn-action btn-outline-danger deleteUserModal" title="Edit">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    
+                                    {% else %}
+                                    <button type="button" class="btn btn-action btn-outline-secondary" disabled 
+                                            title="Cannot delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if users.has_other_pages %}
+            <div class="p-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted" style="color: #6c757d;">
+                        Showing {{ users.start_index }} to {{ users.end_index }} of {{ total_users }} entries
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                            {% if users.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in users.paginator.page_range %}
+                                {% if num >= users.number|add:-2 and num <= users.number|add:2 %}
+                                    {% if users.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if users.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Beautiful Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="mb-3" style="color: #2c3e50;">No Users Found</h3>
+                <p class="mb-4" style="color: #6c757d;">
+                    {% if search_query or role_filter %}
+                    We couldn't find any users matching your criteria. Try adjusting your search or filters.
+                    {% else %}
+                    It looks like there are no users in the system yet. Start by adding your first user!
+                    {% endif %}
+                </p>
+                <a href="{% url 'add_user' %}" class="btn shadow-sm" style="background: var(--gradient-primary); color: white; border: none;">
+                    <i class="fas fa-user-plus me-2"></i>Add First User
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" style="color: #dc3545;"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <div style="width: 80px; height: 80px; margin: 0 auto; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-trash-alt fa-2x text-white"></i>
+                    </div>
+                </div>
+                <h5 style="color: #2c3e50;">Delete User?</h5>
+                <p class="mb-0" style="color: #6c757d;">Are you sure you want to delete <strong id="deleteUsername" style="color: #dc3545;"></strong>?</p>
+                <p class="small mt-2" style="color: #dc3545;">This action cannot be undone and will permanently remove all user data.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'delete_user' 0 %}" id="deleteUserForm" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" id="deleteUserId">
+                    <button type="submit" class="btn" style="background: var(--gradient-primary); color: white; border: none;">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize DataTable with beautiful styling
+    $('#userTable').DataTable({
+        pageLength: 25,
+        responsive: true,
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search in table...",
+            lengthMenu: "_MENU_",
+            paginate: {
+                previous: '<i class="fas fa-chevron-left"></i>',
+                next: '<i class="fas fa-chevron-right"></i>'
+            }
+        },
+        initComplete: function() {
+            // Add custom styling to DataTable elements
+            $('.dataTables_length select').addClass('search-box');
+            $('.dataTables_filter input').addClass('search-box');
+        }
+    });
+    
+    // Delete user confirmation
+    $('.delete-user-btn').click(function() {
+        var userId = $(this).data('user-id');
+        var username = $(this).data('username');
+        
+        // Update the form action with the correct user_id
+        var deleteUrl = "{% url 'delete_user' 0 %}".replace('0', userId);
+        $('#deleteUserForm').attr('action', deleteUrl);
+        
+        $('#deleteUserId').val(userId);
+        $('#deleteUsername').text(username);
+        $('#deleteUserModal').modal('show');
+    });
+    
+    // Add smooth scrolling to table
+    $('table tbody tr').click(function() {
+        $('html, body').animate({
+            scrollTop: $(this).offset().top - 100
+        }, 300);
+    });
+    
+    // Add tooltips
+    $('[title]').tooltip({
+        trigger: 'hover',
+        placement: 'top'
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,407 @@
+<!-- templates/newsTrending.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-2">
+                                <i class="fas fa-video me-2"></i>Critical Video Events
+                            </h1>
+                            <p class="mb-0 opacity-75">
+                                Monitoring critical security events with video evidence
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                                <span class="badge bg-light text-dark fs-6">
+                                    <i class="fas fa-play-circle me-1"></i>
+                                    {{ total_critical_with_videos }} Critical Videos
+                                </span>
+                                <span class="badge bg-warning text-dark fs-6">
+                                    <i class="fas fa-video me-1"></i>
+                                    {{ total_all_videos }} Total Videos
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control border-start-0" 
+                                       placeholder="Search video threats by title, content, category, or source..."
+                                       value="{{ search_query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            {% if search_query %}
+                            <a href="{% url 'newsTrending' %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times me-1"></i> Clear
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Threats Grid -->
+    <div class="row">
+        {% for threat in threats %}
+        <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+            <div class="card threat-video-card h-100 border-0 shadow-sm hover-shadow">
+                <!-- Video Thumbnail/Player -->
+                <div class="video-thumbnail-container">
+                    {% if threat.video %}
+                    <video class="video-thumbnail" controls preload="metadata">
+                        <source src="{{ threat.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="video-overlay">
+                        <div class="video-badge video-indicator">
+                            <i class="fas fa-play-circle me-1"></i> Video
+                        </div>
+                        <div class="video-badge severity-badge severity-{{ threat.severity }}">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            {{ threat.get_severity_display }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <!-- Title with Read More -->
+                    <div class="threat-title-container mb-2">
+                        <h6 class="card-title fw-bold threat-title-preview">
+                            <span class="title-preview">{{ threat.title|truncatewords:15 }}</span>
+                            {% if threat.title|wordcount > 15 %}
+                                <button class="btn btn-link p-0 text-primary btn-read-more-title" type="button" style="font-size: 0.85rem;">
+                                    Read More
+                                </button>
+                                <div class="title-full d-none">{{ threat.title }}</div>
+                            {% endif %}
+                        </h6>
+                    </div>
+
+                    <!-- Content with Read More -->
+                    <div class="card-text text-muted small mb-2 threat-content-preview">
+                        <span class="content-preview">{{ threat.content|truncatewords:25 }}</span>
+                        {% if threat.content|wordcount > 25 %}
+                            <button class="btn btn-link p-0 text-primary btn-read-more-content" type="button" style="font-size: 0.85rem;">
+                                Read More
+                            </button>
+                            <div class="content-full d-none">{{ threat.content }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="threat-meta">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-tag me-1"></i>
+                                {{ threat.get_category_display }}
+                            </span>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ threat.timestamp|timesince }} ago
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-link me-1"></i>
+                                {{ threat.source }}
+                            </span>
+                            <a href="{{ threat.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            ID: #{{ threat.id }}
+                        </small>
+                        <div class="video-actions">
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    onclick="downloadVideo('{{ threat.video.url|escapejs }}')"
+                                    title="Download Video">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-video-slash fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">
+                        {% if search_query %}
+                        No video threats found for "{{ search_query }}"
+                        {% else %}
+                        No critical video threats available
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-0">
+                        {% if search_query %}
+                        Try adjusting your search terms or clear the search filter.
+                        {% else %}
+                        Check back later for new video threat reports.
+                        {% endif %}
+                    </p>
+                    {% if search_query %}
+                    <a href="{% url 'newsTrending' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-times me-1"></i> Clear Search
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if threats.has_other_pages %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Video threats pagination">
+                <ul class="pagination justify-content-center">
+                    {% if threats.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.previous_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page {{ threats.number }} of {{ threats.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if threats.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.next_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threats.paginator.num_pages }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Custom CSS -->
+<style>
+.threat-video-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.threat-video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.video-thumbnail-container {
+    position: relative;
+    background: #000;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+}
+
+.video-thumbnail {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    display: block;
+    background: #000;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+    pointer-events: none;
+}
+
+.video-badge {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.video-indicator {
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.severity-badge {
+    top: 12px;
+    right: 12px;
+}
+
+.severity-critical { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+.severity-high { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
+.severity-medium { background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%); }
+.severity-low { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); }
+
+.threat-title-container {
+    position: relative;
+    line-height: 1.4;
+}
+
+.threat-content-preview {
+    position: relative;
+    line-height: 1.5;
+}
+
+.btn-read-more-title,
+.btn-read-more-content {
+    text-decoration: underline;
+    padding: 0;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.threat-meta .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+}
+
+.video-actions .btn {
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hover-shadow {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+function downloadVideo(videoUrl) {
+    const link = document.createElement('a');
+    link.href = videoUrl;
+    link.download = 'threat-video.mp4';
+    link.click();
+}
+
+// Read More / Read Less toggle for both title and content
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle title read more/less
+    document.querySelectorAll('.btn-read-more-title').forEach(button => {
+        button.addEventListener('click', function () {
+            const titleContainer = this.closest('.threat-title-container');
+            const preview = titleContainer.querySelector('.title-preview');
+            const full = titleContainer.querySelector('.title-full');
+            const isExpanded = full.classList.contains('d-none');
+
+            if (isExpanded) {
+                preview.classList.add('d-none');
+                full.classList.remove('d-none');
+                this.textContent = 'Read Less';
+            } else {
+                preview.classList.remove('d-none');
+                full.classList.add('d-none');
+                this.textContent = 'Read More';
+            }
+        });
+    });
+
+    // Handle content read more/less
+    document.querySelectorAll('.btn-read-more-content').forEach(button => {
+        button.addEventListener('click', function () {
+            const contentContainer = this.closest('.threat-content-preview');
+            const preview = contentContainer.querySelector('.content-preview');
+            const full = contentContainer.querySelector('.content-full');
+            const isExpanded = full.classList.contains('d-none');
+
+            if (isExpanded) {
+                preview.classList.add('d-none');
+                full.classList.remove('d-none');
+                this.textContent = 'Read Less';
+            } else {
+                preview.classList.remove('d-none');
+                full.classList.add('d-none');
+                this.textContent = 'Read More';
+            }
+        });
+    });
+
+    // Optional: auto-play on hover (muted)
+    const videos = document.querySelectorAll('.video-thumbnail');
+    videos.forEach(video => {
+        video.addEventListener('mouseenter', function () {
+            this.muted = true;
+            this.play();
+        });
+        video.addEventListener('mouseleave', function () {
+            this.pause();
+            this.currentTime = 0;
+        });
+    });
+});
+</script>
+{% endblock %}

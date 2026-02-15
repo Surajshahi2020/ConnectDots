@@ -1,0 +1,286 @@
+<!-- templates/searchVisualization.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 📊 Category Filter Bar -->
+<div class="card border-0 mb-4">
+  <div class="card-body">
+    <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
+      {% for value, label in all_categories %}
+        <div class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            name="category" 
+            value="{{ value }}" 
+            id="cat_{{ value }}"
+            {% if value in selected_categories %}checked{% endif %}
+          >
+          <label class="form-check-label" for="cat_{{ value }}">
+            {{ label }}
+          </label>
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="fas fa-filter me-1"></i> Apply Filters
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- 📰 Filtered Threat Feeds -->
+<div class="card border-0">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">
+      <i class="fas fa-search me-2"></i> 
+      Threat Reports ({{ threats.paginator.count }} found)
+    </h5>
+  </div>
+  
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="threatTable">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 15%;">Title</th>
+            <th style="width: 10%;">Category</th>
+            <th style="width: 25%;">Content</th>
+            <th style="width: 10%;">Source</th>
+            <th style="width: 15%;">URL</th>
+            <th style="width: 10%;">Uploaded</th>
+            <th style="width: 10%;">Image</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for threat in threats %}
+          <tr>
+            <!-- ID -->
+            <td>{{ threat.id }}</td>
+            
+            <!-- Title -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.title }}" 
+                   data-truncated="{{ threat.title|truncatechars:30 }}">
+                {{ threat.title|truncatechars:30 }}
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td>
+              <span class="badge bg-info text-dark">
+                {{ threat.get_category_display }}
+              </span>
+            </td>
+            
+            <!-- Content -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.content }}" 
+                   data-truncated="{{ threat.content|truncatewords:12 }}">
+                {{ threat.content|truncatewords:12 }}
+              </div>
+            </td>
+
+            <!-- Source -->
+            <td>
+              <div class="expandable-cell" 
+                   data-full="{{ threat.source }}" 
+                   data-truncated="{{ threat.source|truncatechars:20 }}">
+                {{ threat.source|truncatechars:20 }}
+              </div>
+            </td>
+
+            <!-- URL Column -->
+            <td>
+              {% if threat.url %}
+                <a href="{{ threat.url }}" target="_blank" rel="noopener noreferrer" class="text-primary">
+                  <div class="expandable-cell" 
+                       data-full="{{ threat.url }}" 
+                       data-truncated="{{ threat.url|truncatechars:30 }}">
+                    <i class="fas fa-external-link-alt me-1"></i>
+                    {{ threat.url|truncatechars:30 }}
+                  </div>
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Timestamp (Uploaded) -->
+            <td>
+              {% load tz %}
+              {% timezone "Asia/Kathmandu" %}
+                <div class="expandable-cell" 
+                     data-full="{{ threat.timestamp|date:'Y-m-d H:i:s' }}" 
+                     data-truncated="{{ threat.timestamp|date:'M d, Y H:i' }}">
+                  {{ threat.timestamp|date:"M d, Y H:i" }}
+                </div>
+              {% endtimezone %}
+            </td>
+
+            <!-- Image -->
+            <td class="text-center">
+              {% if threat.image %}
+                <a href="{{ threat.image.url }}" target="_blank" rel="noopener noreferrer" title="View full image">
+                  <img src="{{ threat.image.url }}" 
+                       alt="Threat image" 
+                       class="img-thumbnail rounded" 
+                       style="width: 50px; height: 50px; object-fit: cover;">
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-4 text-muted">
+              No threat reports match your filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 📄 Pagination -->
+    {% if threats.has_other_pages %}
+      <div class="card-footer bg-light d-flex justify-content-center">
+        <nav aria-label="Threat pagination">
+          <ul class="pagination pagination-sm mb-0">
+            {% if threats.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">&laquo; First</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.previous_page_number }}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">Prev</a>
+              </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ threats.number }} of {{ threats.paginator.num_pages }}</span>
+            </li>
+
+            {% if threats.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.next_page_number }}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">Next</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ threats.paginator.num_pages }}{% for cat in selected_categories %}&category={{ cat }}{% endfor %}">Last &raquo;</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 🔍 Live Client-Side Search -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const table = document.querySelector('#threatTable');
+    if (!table) return;
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'form-control form-control-sm mb-3';
+    searchInput.placeholder = '🔍 Search in current page...';
+
+    const tableContainer = table.closest('.table-responsive') || table.parentNode;
+    tableContainer.parentNode.insertBefore(searchInput, tableContainer);
+
+    searchInput.addEventListener('input', function() {
+      const term = this.value.toLowerCase().trim();
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+
+    // Focus search on '/' key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // Expandable cells functionality
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.expandable-cell')) {
+        const cell = e.target.closest('.expandable-cell');
+        const isExpanded = cell.classList.contains('expanded');
+        
+        if (isExpanded) {
+          cell.textContent = cell.dataset.truncated;
+          cell.classList.remove('expanded');
+        } else {
+          // Store the original HTML if it's a link
+          if (cell.closest('a')) {
+            const parentLink = cell.closest('a');
+            const linkHtml = parentLink.innerHTML;
+            parentLink.innerHTML = cell.dataset.full;
+            cell.dataset.linkHtml = linkHtml;
+          } else {
+            cell.textContent = cell.dataset.full;
+          }
+          cell.classList.add('expanded');
+        }
+      }
+    });
+  });
+</script>
+
+<!-- ✅ Expandable Cells Styles -->
+<style>
+.expandable-cell {
+  cursor: pointer;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 4px 0;
+  max-height: 3em; /* Show about 2 lines */
+  line-height: 1.5em;
+}
+.expandable-cell.expanded {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: none;
+}
+.expandable-cell:hover:not(.expanded) {
+  background-color: #f8f9fa;
+}
+.expandable-cell:hover:not(.expanded)::after {
+  content: " (click to expand)";
+  color: #0d6efd;
+  font-size: 0.8em;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+/* For URL links inside expandable cells */
+.expandable-cell a {
+  color: inherit;
+  text-decoration: none;
+}
+.expandable-cell a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .expandable-cell {
+    max-height: 4.5em; /* 3 lines on mobile */
+  }
+}
+</style>
+
+{% include 'sweet_alert.html' %}
+
+{% endblock %}

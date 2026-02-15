@@ -1,0 +1,615 @@
+<!-- templates/auto_news.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="h3 mb-2">
+                                <i class="fas fa-newspaper me-2"></i>News Articles
+                            </h1>
+                            <p class="mb-0 opacity-75">
+                                Monitoring news articles with threat analysis
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                                <span class="badge bg-danger text-white fs-6">
+                                    <i class="fas fa-skull me-1"></i>
+                                    {{ critical_count }} Critical
+                                </span>
+                                <span class="badge bg-warning text-dark fs-6">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    {{ high_count }} High
+                                </span>
+                                <span class="badge bg-info text-white fs-6">
+                                    <i class="fas fa-newspaper me-1"></i>
+                                    {{ total_articles }} Total
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <!-- Search -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control border-start-0" 
+                                       placeholder="Title, summary, keywords..."
+                                       value="{{ search_query }}">
+                            </div>
+                        </div>
+
+                        <!-- Threat Level Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Threat Level</label>
+                            <select name="threat_level" class="form-select">
+                                <option value="">All Levels</option>
+                                <option value="critical" {% if threat_level_filter == 'critical' %}selected{% endif %}>Critical</option>
+                                <option value="high" {% if threat_level_filter == 'high' %}selected{% endif %}>High</option>
+                                <option value="medium" {% if threat_level_filter == 'medium' %}selected{% endif %}>Medium</option>
+                                <option value="low" {% if threat_level_filter == 'low' %}selected{% endif %}>Low</option>
+                            </select>
+                        </div>
+
+                        <!-- Priority Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="">All Priorities</option>
+                                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                                <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                            </select>
+                        </div>
+
+                        <!-- Date Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">Date Range</label>
+                            <select name="date_filter" class="form-select">
+                                <option value="">All Time</option>
+                                <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                                <option value="yesterday" {% if date_filter == 'yesterday' %}selected{% endif %}>Yesterday</option>
+                                <option value="week" {% if date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
+                                <option value="month" {% if date_filter == 'month' %}selected{% endif %}>Last 30 Days</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="fas fa-filter me-1"></i> Apply Filters
+                                </button>
+                                {% if threat_level_filter or priority_filter or date_filter or search_query %}
+                                <a href="{% url 'autonews_view' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Active Filters -->
+                    {% if threat_level_filter or priority_filter or date_filter or search_query %}
+                    <div class="mt-3 pt-3 border-top">
+                        <small class="text-muted fw-bold me-2">Active Filters:</small>
+                        {% if search_query %}
+                        <span class="badge bg-primary me-1">
+                            Search: "{{ search_query }}"
+                            <a href="?{% if threat_level_filter %}threat_level={{ threat_level_filter }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}" class="text-white ms-1">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                        {% if threat_level_filter %}
+                        <span class="badge bg-warning text-dark me-1">
+                            Threat: {{ threat_level_filter|title }}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}" class="text-dark ms-1">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                        {% if priority_filter %}
+                        <span class="badge bg-info text-white me-1">
+                            Priority: {{ priority_filter|title }}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if threat_level_filter %}threat_level={{ threat_level_filter }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}" class="text-white ms-1">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                        {% if date_filter %}
+                        <span class="badge bg-success text-white me-1">
+                            Date: {{ date_filter|title }}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if threat_level_filter %}threat_level={{ threat_level_filter }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}&{% endif %}" class="text-white ms-1">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-skull fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ critical_count }}</h4>
+                    <small>Critical Threats</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ high_count }}</h4>
+                    <small>High Threats</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ medium_count }}</h4>
+                    <small>Medium Threats</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ low_count }}</h4>
+                    <small>Low Threats</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles Grid -->
+    <div class="row">
+        {% for article in articles %}
+        <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+            <div class="card article-card h-100 border-0 shadow-sm hover-shadow">
+                <!-- Article Image -->
+                <div class="article-image-container">
+                    {% if article.image_url %}
+                    <img src="{{ article.image_url }}" alt="{{ article.title }}" class="article-image">
+                    <div class="image-overlay">
+                        <div class="image-badge source-badge">
+                            <i class="fas fa-source me-1"></i> {{ article.source }}
+                        </div>
+                        <div class="image-badge threat-badge threat-{{ article.threat_level }}">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            {{ article.threat_level|title }}
+                        </div>
+                        <div class="image-badge priority-badge priority-{{ article.priority }}">
+                            <i class="fas fa-flag me-1"></i>
+                            {{ article.priority|title }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="article-image-placeholder">
+                        <i class="fas fa-newspaper fa-3x text-muted"></i>
+                        <div class="image-overlay">
+                            <div class="image-badge source-badge">
+                                <i class="fas fa-source me-1"></i> {{ article.source }}
+                            </div>
+                            <div class="image-badge threat-badge threat-{{ article.threat_level }}">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                {{ article.threat_level|title }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <!-- Title with Read More functionality -->
+                    <div class="article-title-container mb-2">
+                        <h6 class="card-title fw-bold article-title-content">
+                            <span class="title-preview">{{ article.title|truncatewords:15 }}</span>
+                            {% if article.title|wordcount > 15 %}
+                                <button class="btn btn-link p-0 text-primary btn-read-more-title" type="button" style="font-size: 0.85rem;">
+                                    Read More
+                                </button>
+                                <span class="title-full d-none">{{ article.title }}</span>
+                            {% endif %}
+                        </h6>
+                    </div>
+
+                    <!-- Summary with Read More -->
+                    <div class="card-text text-muted small mb-2 article-summary-content">
+                        <span class="summary-preview">{{ article.summary|truncatewords:25 }}</span>
+                        {% if article.summary|wordcount > 25 %}
+                            <button class="btn btn-link p-0 text-primary btn-read-more-summary" type="button" style="font-size: 0.85rem;">
+                                Read More
+                            </button>
+                            <span class="summary-full d-none">{{ article.summary }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Keywords & Categories -->
+                    <div class="article-tags mb-2">
+                        {% if article.keywords %}
+                        <div class="keywords-section mb-2">
+                            <small class="text-muted fw-bold">Keywords:</small>
+                            <div class="keywords-list" data-keywords="{{ article.keywords }}">
+                                <!-- Keywords will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if article.categories %}
+                        <div class="categories-section">
+                            <small class="text-muted fw-bold">Categories:</small>
+                            <div class="categories-list" data-categories="{{ article.categories }}">
+                                <!-- Categories will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="article-meta">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ article.date }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-ruler me-1"></i>
+                                {{ article.content_length }} chars
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ article.created_at|timesince }} ago
+                            </small>
+                            <a href="{{ article.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            ID: #{{ article.id }}
+                        </small>
+                        <div class="article-actions">
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    onclick="copyArticleLink('{{ article.url|escapejs }}')"
+                                    title="Copy Link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-newspaper fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">
+                        {% if search_query or threat_level_filter or priority_filter or date_filter %}
+                        No articles found with current filters
+                        {% else %}
+                        No articles available
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-0">
+                        {% if search_query or threat_level_filter or priority_filter or date_filter %}
+                        Try adjusting your filters or clear all filters.
+                        {% else %}
+                        Check back later for new articles.
+                        {% endif %}
+                    </p>
+                    {% if search_query or threat_level_filter or priority_filter or date_filter %}
+                    <a href="{% url 'autonews_view' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-times me-1"></i> Clear All Filters
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if articles.has_other_pages %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Articles pagination">
+                <ul class="pagination justify-content-center">
+                    {% if articles.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if threat_level_filter %}&threat_level={{ threat_level_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ articles.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if threat_level_filter %}&threat_level={{ threat_level_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page {{ articles.number }} of {{ articles.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if articles.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ articles.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if threat_level_filter %}&threat_level={{ threat_level_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ articles.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if threat_level_filter %}&threat_level={{ threat_level_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Custom CSS -->
+<style>
+.article-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.article-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.article-image-container {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    height: 200px;
+}
+
+.article-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.article-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+    pointer-events: none;
+}
+
+.image-badge {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.source-badge {
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.threat-badge {
+    top: 12px;
+    right: 12px;
+}
+
+.priority-badge {
+    top: 50px;
+    right: 12px;
+}
+
+.threat-critical { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+.threat-high { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
+.threat-medium { background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%); }
+.threat-low { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); }
+
+.priority-high { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
+.priority-medium { background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%); }
+.priority-low { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); }
+
+.article-title-content, .article-summary-content {
+    position: relative;
+    line-height: 1.5;
+}
+
+.btn-read-more-title, .btn-read-more-summary {
+    text-decoration: underline;
+    padding: 0;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.article-tags .badge {
+    font-size: 10px;
+    padding: 3px 6px;
+    display: inline-block;
+    margin: 2px;
+}
+
+.keywords-list, .categories-list {
+    display: block;
+    margin-top: 4px;
+}
+
+.article-actions .btn {
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hover-shadow {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Statistics cards */
+.card.bg-danger, .card.bg-warning, .card.bg-info, .card.bg-success {
+    border-radius: 10px;
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+function copyArticleLink(url) {
+    navigator.clipboard.writeText(url).then(function() {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-outline-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Read More / Read Less toggle for both titles and summaries
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle title read more
+    document.querySelectorAll('.btn-read-more-title').forEach(button => {
+        button.addEventListener('click', function () {
+            const titleContainer = this.closest('.article-title-content');
+            const preview = titleContainer.querySelector('.title-preview');
+            const full = titleContainer.querySelector('.title-full');
+            
+            if (preview.classList.contains('d-none')) {
+                // Currently showing full, switch to preview
+                preview.classList.remove('d-none');
+                full.classList.add('d-none');
+                this.textContent = 'Read More';
+            } else {
+                // Currently showing preview, switch to full
+                preview.classList.add('d-none');
+                full.classList.remove('d-none');
+                this.textContent = 'Read Less';
+            }
+        });
+    });
+
+    // Handle summary read more
+    document.querySelectorAll('.btn-read-more-summary').forEach(button => {
+        button.addEventListener('click', function () {
+            const summaryContainer = this.closest('.article-summary-content');
+            const preview = summaryContainer.querySelector('.summary-preview');
+            const full = summaryContainer.querySelector('.summary-full');
+            
+            if (preview.classList.contains('d-none')) {
+                // Currently showing full, switch to preview
+                preview.classList.remove('d-none');
+                full.classList.add('d-none');
+                this.textContent = 'Read More';
+            } else {
+                // Currently showing preview, switch to full
+                preview.classList.add('d-none');
+                full.classList.remove('d-none');
+                this.textContent = 'Read Less';
+            }
+        });
+    });
+
+    // Process keywords and categories
+    document.querySelectorAll('.keywords-list').forEach(container => {
+        const keywords = container.getAttribute('data-keywords');
+        if (keywords) {
+            const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k);
+            keywordList.forEach(keyword => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-light text-dark me-1 mb-1';
+                badge.textContent = keyword;
+                container.appendChild(badge);
+            });
+        }
+    });
+
+    // Process categories
+    document.querySelectorAll('.categories-list').forEach(container => {
+        const categories = container.getAttribute('data-categories');
+        if (categories) {
+            const categoryList = categories.split(',').map(c => c.trim()).filter(c => c);
+            categoryList.forEach(category => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-info text-white me-1 mb-1';
+                badge.textContent = category;
+                container.appendChild(badge);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
+

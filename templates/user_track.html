@@ -1,0 +1,1778 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- user_track.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
+    <script src="../static/js/d3.js"></script>
+
+    <!-- Add html2canvas library for PNG export -->
+    <!-- <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script> -->
+    <script src="../static/js/html2canvas.min.js"></script>
+
+    <style>
+        #network-diagram {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+        
+        #network-diagram.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: white;
+            border: none;
+        }
+        
+        .fullscreen-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10001;
+            display: none;
+        }
+        
+        .fullscreen-controls.active {
+            display: block;
+        }
+        
+        .fullscreen-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .node {
+            cursor: pointer;
+        }
+        
+        .node circle {
+            stroke-width: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .node.active circle {
+            stroke-width: 4px;
+            stroke: gold !important;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7));
+        }
+        
+        .fullscreen .node circle {
+            stroke-width: 3px;
+        }
+        
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 1.5px;
+            transition: all 0.3s ease;
+        }
+        
+        .fullscreen .link {
+            stroke-width: 2px;
+        }
+        
+        .node-text {
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .fullscreen .node-text {
+            font-size: 14px;
+        }
+        
+        /* Central Tooltip Container */
+        .central-tooltip-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10003;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .central-tooltip-container.visible {
+            display: block;
+            opacity: 1;
+        }
+        
+        .central-tooltip {
+            background: rgba(0, 0, 0, 0.98);
+            color: white;
+            border-radius: 12px;
+            width: 650px;
+            max-width: 90vw;
+            max-height: 85vh;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .central-tooltip .tooltip-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+        
+        .central-tooltip .tooltip-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            padding-right: 40px;
+            line-height: 1.3;
+        }
+        
+        .central-tooltip .tooltip-subtitle {
+            font-size: 15px;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .central-tooltip .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #F44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .central-tooltip .close-btn:hover {
+            background: #D32F2F;
+            transform: scale(1.1);
+        }
+        
+        .central-tooltip .severity-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .central-tooltip .tooltip-content-wrapper {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .central-tooltip .info-section {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        
+        .central-tooltip .image-section {
+            width: 300px;
+            padding: 25px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .central-tooltip .tooltip-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .central-tooltip .tooltip-row {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        
+        .central-tooltip .tooltip-label {
+            color: #aaa;
+            font-weight: 500;
+            min-width: 120px;
+            flex-shrink: 0;
+            font-size: 13px;
+        }
+        
+        .central-tooltip .tooltip-value {
+            color: #fff;
+            flex-grow: 1;
+            word-break: break-word;
+            font-size: 14px;
+        }
+        
+        .central-tooltip .tooltip-url {
+            color: #4FC3F7;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .central-tooltip .tooltip-url:hover {
+            text-decoration: underline;
+        }
+        
+        .central-tooltip .content-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 5px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        /* Image Styling */
+        .central-tooltip .image-container {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .central-tooltip .tooltip-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        
+        .central-tooltip .no-image {
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: #888;
+            font-style: italic;
+            width: 100%;
+        }
+        
+        .central-tooltip .image-meta {
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        /* Fullscreen adjustments */
+        .fullscreen .central-tooltip {
+            width: 800px;
+            max-width: 95vw;
+        }
+        
+        .fullscreen .central-tooltip .tooltip-title {
+            font-size: 24px;
+        }
+        
+        .fullscreen .central-tooltip .tooltip-content {
+            font-size: 15px;
+        }
+        
+        .fullscreen .central-tooltip .image-section {
+            width: 350px;
+        }
+        
+        .fullscreen .central-tooltip .image-container {
+            height: 300px;
+        }
+        
+        /* Hover tooltip (temporary) */
+        .hover-tooltip {
+            position: fixed;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 10002;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        /* Controls */
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            margin-top: 28px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .control-btn.secondary {
+            background: #2196F3;
+        }
+        
+        .control-btn.fullscreen-btn {
+            background: #9C27B0;
+        }
+        
+        .category-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        
+        .category-select {
+            padding: 8px;
+            font-size: 16px;
+            min-width: 250px;
+            margin-right: 10px;
+        }
+        
+        /* Date Filter Styling */
+        .date-filter {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 5px;
+            border: 1px solid #d1e7ff;
+        }
+        
+        .date-filter h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .date-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .date-stats {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .date-stats strong {
+            color: #2c3e50;
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        
+        .status-bar {
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        /* Date Range Indicator */
+        .date-range-indicator {
+            padding: 8px 15px;
+            background: #e3f2fd;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #1565c0;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .date-range-indicator .clear-date {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 5px;
+            padding: 0 5px;
+        }
+        
+        .date-range-indicator .clear-date:hover {
+            color: #d32f2f;
+        }
+        
+        /* Backdrop overlay */
+        .tooltip-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tooltip-backdrop.visible {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Threat Intelligence Node Diagram</h2>
+        
+        <!-- Date Filter -->
+        <div class="date-filter">
+            <h4>Filter by Date Range</h4>
+            <form method="get" action="">
+                <!-- Hidden category field to preserve category selection -->
+                {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+                {% endif %}
+                
+                <div class="date-input-group">
+                    <div>
+                        <label for="start_date" style="display: block; margin-bottom: 5px; font-weight: 500;">Start Date:</label>
+                        <input type="date" 
+                               id="start_date" 
+                               name="start_date" 
+                               class="date-input"
+                               value="{{ start_date|default:'' }}">
+                    </div>
+                    
+                    <div>
+                        <label for="end_date" style="display: block; margin-bottom: 5px; font-weight: 500;">End Date:</label>
+                        <input type="date" 
+                               id="end_date" 
+                               name="end_date" 
+                               class="date-input"
+                               value="{{ end_date|default:'' }}">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <button type="submit" class="control-btn">Apply Date Filter</button>
+                        {% if start_date or end_date %}
+                        <a href="?{% if selected_category %}category={{ selected_category }}{% endif %}" 
+                           class="control-btn secondary">Clear Dates</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if start_date or end_date %}
+                <div class="date-stats">
+                    <strong>Date Range Applied:</strong>
+                    {% if start_date and end_date %}
+                    {{ start_date }} to {{ end_date }}
+                    {% elif start_date %}
+                    From {{ start_date }}
+                    {% elif end_date %}
+                    Until {{ end_date }}
+                    {% endif %}
+                    | Showing {{ total_threats }} threats in selected range
+                </div>
+                {% endif %}
+            </form>
+        </div>
+        
+        <!-- Category Selector -->
+        <div class="category-selector">
+            <form method="get" action="">
+                <!-- Hidden date fields to preserve date selection -->
+                {% if start_date %}
+                <input type="hidden" name="start_date" value="{{ start_date }}">
+                {% endif %}
+                {% if end_date %}
+                <input type="hidden" name="end_date" value="{{ end_date }}">
+                {% endif %}
+                
+                <select name="category" class="category-select" onchange="this.form.submit()">
+                    <option value="">-- All Categories --</option>
+                    {% for code, name in all_categories %}
+                    <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="control-btn">Load Category</button>
+                {% if selected_category %}
+                <a href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}" 
+                   class="control-btn secondary">Show All Categories</a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <strong>Status:</strong> 
+            {% if show_all_categories %}
+            Showing <strong>All Categories</strong> 
+            {% else %}
+            Showing <strong>{{ selected_category|default:"Category" }}</strong> 
+            {% endif %}
+            
+            {% if start_date or end_date %}
+            <span class="date-range-indicator">
+                📅 
+                {% if start_date and end_date %}
+                {{ start_date }} to {{ end_date }}
+                {% elif start_date %}
+                From {{ start_date }}
+                {% elif end_date %}
+                Until {{ end_date }}
+                {% endif %}
+                <a href="?{% if selected_category %}category={{ selected_category }}{% endif %}" 
+                   class="clear-date" title="Clear date filter">×</a>
+            </span>
+            {% endif %}
+            
+            | Total Threats: {{ total_threats }}
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend">
+            {% if not selected_category %}
+            <div class="legend-item">
+                <div class="legend-color" style="background: #607D8B;"></div>
+                <span>Category Node</span>
+            </div>
+            {% endif %}
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2196F3;"></div>
+                <span>Date Group</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F44336;"></div>
+                <span>Critical Threat</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF9800;"></div>
+                <span>High Threat</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFC107;"></div>
+                <span>Medium Threat</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4CAF50;"></div>
+                <span>Low Threat</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: gold; border: 2px solid #333;"></div>
+                <span>Selected Node</span>
+            </div>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button onclick="resetZoom()" class="control-btn">Reset Zoom</button>
+            <button onclick="centerGraph()" class="control-btn secondary">Center Graph</button>
+            <button onclick="toggleLabels()" class="control-btn secondary" id="toggleLabelsBtn">
+                Hide Labels
+            </button>
+            <button onclick="toggleFullscreen()" class="control-btn fullscreen-btn">
+                Enter Fullscreen
+            </button>
+            <!-- Removed "Close Tooltip" button -->
+            <button onclick="exportAsPNG()" class="control-btn secondary">Export as PNG</button>
+        </div>
+        
+        <!-- Fullscreen Controls (Hidden by default) -->
+        <div class="fullscreen-controls" id="fullscreenControls">
+            <button onclick="toggleFullscreen()" class="fullscreen-btn">Exit Fullscreen</button>
+            <button onclick="resetZoom()" class="fullscreen-btn">Reset Zoom</button>
+            <button onclick="centerGraph()" class="fullscreen-btn">Center</button>
+        </div>
+        
+        <!-- Node Diagram -->
+        <div id="network-diagram"></div>
+        
+        <!-- Central Tooltip Container (Hidden by default) -->
+        <div class="central-tooltip-container" id="centralTooltipContainer">
+            <div class="central-tooltip" id="centralTooltip">
+                <!-- Content will be inserted here by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Backdrop Overlay -->
+        <div class="tooltip-backdrop" id="tooltipBackdrop" onclick="closeCentralTooltip()"></div>
+        
+        <!-- Data Container (Hidden) -->
+        {{ hierarchy_data|json_script:"hierarchy-data" }}
+        {{ show_all_categories|json_script:"show-all-data" }}
+        {{ selected_category|json_script:"selected-category" }}
+        {{ total_threats|json_script:"total-threats" }}
+        {{ start_date|json_script:"start-date" }}
+        {{ end_date|json_script:"end-date" }}
+        
+        <!-- Quick Stats -->
+        <div style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 5px;">
+            <h4>Quick Links</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for code, name in all_categories %}
+                {% if code != selected_category %}
+                <a href="?category={{ code }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" 
+                   style="padding: 5px 10px; background: #607D8B; color: white; border-radius: 3px; text-decoration: none;">
+                    {{ name }}
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get data from JSON script tags (safe method)
+        const hierarchyData = JSON.parse(
+            document.getElementById('hierarchy-data').textContent
+        );
+        const showAllCategories = JSON.parse(
+            document.getElementById('show-all-data').textContent
+        );
+        const selectedCategory = JSON.parse(
+            document.getElementById('selected-category').textContent
+        );
+        const totalThreats = JSON.parse(
+            document.getElementById('total-threats').textContent
+        );
+        const startDate = JSON.parse(
+            document.getElementById('start-date').textContent
+        );
+        const endDate = JSON.parse(
+            document.getElementById('end-date').textContent
+        );
+        
+        console.log('Data loaded:', {
+            hierarchyData,
+            showAllCategories,
+            selectedCategory,
+            totalThreats,
+            startDate,
+            endDate
+        });
+        
+        let showLabels = true;
+        let isFullscreen = false;
+        let originalWidth, originalHeight;
+        let originalTransform;
+        let activeNode = null;
+        let hoverTooltip = null;
+        let isTooltipLocked = false; // Track if tooltip should stay locked
+        
+        // Set up SVG
+        const container = document.getElementById('network-diagram');
+        let width = container.clientWidth;
+        let height = 600;
+        
+        let svg = null;
+        let g = null;
+        let simulation = null;
+        let zoom = null;
+        
+        // Initialize graph
+        function initializeGraph() {
+            // Clear previous graph if exists
+            d3.select('#network-diagram').selectAll('svg').remove();
+            
+            svg = d3.select('#network-diagram')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('id', 'graph-svg');
+            
+            g = svg.append('g');
+            
+            // Zoom behavior
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 8])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            // Create force simulation
+            simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(d => {
+                    // Adjust distance based on node type
+                    if (d.type === 'category') return 200;
+                    if (d.type === 'date') return 150;
+                    return 100;
+                }))
+                .force('charge', d3.forceManyBody().strength(-400))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.size + 10));
+            
+            createGraph();
+        }
+        
+        // Process data for D3 hierarchy
+        function processData(data) {
+            let nodeId = 0;
+            
+            function processNode(node, depth = 0, parentId = null) {
+                const id = nodeId++;
+                const processedNode = {
+                    id: id,
+                    name: node.name,
+                    type: node.type || (depth === 0 ? 'root' : 'node'),
+                    category_code: node.category_code,
+                    category: node.category || '',
+                    severity: node.severity,
+                    severity_display: node.severity_display || '',
+                    source: node.source || '',
+                    url: node.url || '',
+                    province: node.province || '',
+                    image_url: node.image_url || '',
+                    has_image: node.has_image || false,
+                    size: node.size || getNodeSize(node, depth),
+                    count: node.count || 0,
+                    title: node.title || '',
+                    content: node.content || '',
+                    date: node.date || '',
+                    time: node.time || '',
+                    full_timestamp: node.full_timestamp || '',
+                    children: []
+                };
+                
+                // Set color based on type/severity
+                processedNode.color = getNodeColor(processedNode, depth);
+                
+                if (node.children) {
+                    node.children.forEach(child => {
+                        const childNode = processNode(child, depth + 1, id);
+                        processedNode.children.push(childNode);
+                    });
+                }
+                
+                return processedNode;
+            }
+            
+            function getNodeSize(node, depth) {
+                if (node.type === 'category') return 50;
+                if (node.type === 'date') return 35;
+                if (node.type === 'threat') {
+                    const sizes = {
+                        'critical': 35,
+                        'high': 30,
+                        'medium': 25,
+                        'low': 20
+                    };
+                    return sizes[node.severity] || 20;
+                }
+                // Root node
+                if (depth === 0) return 60;
+                return 20;
+            }
+            
+            function getNodeColor(node, depth) {
+                if (node.type === 'category') {
+                    const categoryColors = {
+                        'Genz': '#FF4081',
+                        'Protest': '#FF5722',
+                        'Disinformation': '#795548',
+                        'Army': '#607D8B',
+                        'Police': '#9E9E9E',
+                        'APF': '#3F51B5',
+                        'NationalCyberCrime': '#2196F3',
+                        'InternationalCyberCrime': '#03A9F4',
+                        'UML': '#448AFF',
+                        'Chapagau': '#7C4DFF',
+                        'Bhrikuti Mandav': '#8BC34A',
+                        'Samakoshi': '#CDDC39',
+                        'PM': '#FFC107',
+                        'People': '#FF9800',
+                        'ElectionManipulation': '#E91E63',
+                        'SocialEngineering': '#9C27B0',
+                        'DataLeak': '#673AB7',
+                        'Scam': '#3F51B5',
+                        'Impersonation': '#009688',
+                        'Malware': '#F44336',
+                        'Other': '#757575'
+                    };
+                    return categoryColors[node.category_code] || '#607D8B';
+                }
+                if (node.type === 'date') return '#2196F3';
+                if (node.type === 'threat') {
+                    const colors = {
+                        'critical': '#F44336',
+                        'high': '#FF9800',
+                        'medium': '#FFC107',
+                        'low': '#4CAF50'
+                    };
+                    return colors[node.severity] || '#9E9E9E';
+                }
+                if (depth === 0 && !showAllCategories) return '#9C27B0';
+                return '#607D8B';
+            }
+            
+            const root = processNode(data);
+            
+            // Flatten nodes and create links
+            const nodes = [];
+            const links = [];
+            
+            function flatten(node) {
+                nodes.push(node);
+                if (node.children) {
+                    node.children.forEach(child => {
+                        links.push({
+                            source: node.id,
+                            target: child.id,
+                            value: 1
+                        });
+                        flatten(child);
+                    });
+                }
+            }
+            
+            flatten(root);
+            
+            return { nodes, links, root };
+        }
+        
+        // Create the network graph
+        function createGraph() {
+            const { nodes, links } = processData(hierarchyData);
+            
+            // Clear previous graph
+            g.selectAll('*').remove();
+            
+            // Create links
+            const link = g.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('stroke-width', d => {
+                    if (d.source.type === 'root' && d.target.type === 'category') return 3;
+                    if (d.source.type === 'category' && d.target.type === 'date') return 2;
+                    return 1.5;
+                })
+                .attr('stroke-opacity', d => {
+                    if (d.source.type === 'root' && d.target.type === 'category') return 0.8;
+                    return 0.6;
+                });
+            
+            // Create nodes
+            const node = g.append('g')
+                .selectAll('circle')
+                .data(nodes)
+                .enter()
+                .append('circle')
+                .attr('class', d => `node ${d.id === activeNode?.id ? 'active' : ''}`)
+                .attr('r', d => d.size)
+                .attr('fill', d => d.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .call(d3.drag()
+                    .on('start', dragStarted)
+                    .on('drag', dragged)
+                    .on('end', dragEnded))
+                .on('dblclick', function(event, d) {
+                    toggleFullscreen();
+                    centerOnNode(d);
+                });
+            
+            // Add labels
+            const text = g.append('g')
+                .selectAll('text')
+                .data(nodes)
+                .enter()
+                .append('text')
+                .attr('class', 'node-text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', d => -d.size - 5)
+                .text(d => {
+                    if (!showLabels) return '';
+                    if (d.type === 'root' && !showAllCategories) return d.name;
+                    if (d.type === 'category') return `${d.name} (${d.count})`;
+                    if (d.type === 'date') return `${d.name}\n${d.count} threats`;
+                    if (d.type === 'threat') {
+                        const words = d.title.split(' ').slice(0, 3).join(' ');
+                        return words + (d.title.split(' ').length > 3 ? '...' : '');
+                    }
+                    return d.name;
+                })
+                .style('font-size', d => {
+                    if (d.type === 'root') return '16px';
+                    if (d.type === 'category') return '14px';
+                    if (d.type === 'date') return '12px';
+                    if (d.type === 'threat') return '10px';
+                    return '10px';
+                })
+                .style('display', showLabels ? 'block' : 'none');
+            
+            // Add date nodes also get date labels
+            const dateText = g.append('g')
+                .selectAll('text.date-label')
+                .data(nodes.filter(d => d.type === 'date'))
+                .enter()
+                .append('text')
+                .attr('class', 'date-label')
+                .attr('text-anchor', 'middle')
+                .attr('dy', d => d.size + 15)
+                .text(d => d.name)
+                .style('font-size', '11px')
+                .style('fill', '#666')
+                .style('display', showLabels ? 'block' : 'none');
+            
+            // Add date range indicator to date nodes
+            if (startDate || endDate) {
+                dateText.each(function(d) {
+                    const nodeDate = new Date(d.name);
+                    let inRange = true;
+                    
+                    if (startDate) {
+                        const start = new Date(startDate);
+                        if (nodeDate < start) inRange = false;
+                    }
+                    
+                    if (endDate) {
+                        const end = new Date(endDate);
+                        if (nodeDate > end) inRange = false;
+                    }
+                    
+                    if (!inRange) {
+                        d3.select(this)
+                            .style('fill', '#999')
+                            .style('font-style', 'italic')
+                            .style('opacity', '0.6');
+                        
+                        // Also style the circle node
+                        d3.selectAll('circle').filter(circleData => circleData.id === d.id)
+                            .style('opacity', '0.4')
+                            .style('fill', '#ccc');
+                    }
+                });
+            }
+            
+            // Hover events for temporary tooltip
+            node.on('mouseover', function(event, d) {
+                // Only show hover tooltip if no central tooltip is active
+                if (!activeNode && !isTooltipLocked) {
+                    showHoverTooltip(event, d);
+                }
+                
+                // Highlight connected nodes
+                link.style('stroke', l => {
+                    if (l.source.id === d.id || l.target.id === d.id) return d.color;
+                    return '#ccc';
+                }).style('stroke-width', l => {
+                    if (l.source.id === d.id || l.target.id === d.id) return 3;
+                    return 1.5;
+                });
+            })
+            .on('mouseout', function() {
+                // Only hide hover tooltip if no central tooltip is active
+                if (!activeNode && !isTooltipLocked) {
+                    hideHoverTooltip();
+                }
+                
+                // Reset link styles
+                link.style('stroke', '#ccc')
+                    .style('stroke-width', d => {
+                        if (d.source.type === 'root' && d.target.type === 'category') return 3;
+                        if (d.source.type === 'category' && d.target.type === 'date') return 2;
+                        return 1.5;
+                    });
+            })
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                event.preventDefault();
+                
+                // Lock the tooltip
+                isTooltipLocked = true;
+                
+                // Toggle central tooltip
+                toggleCentralTooltip(d);
+                
+                // Center on node
+                centerOnNode(d);
+                
+                // If it's a threat with URL and Ctrl is pressed, open in new tab
+                if (event.ctrlKey && d.type === 'threat' && d.url) {
+                    window.open(d.url, '_blank');
+                }
+            });
+            
+            // Update simulation
+            simulation.nodes(nodes);
+            simulation.force('link').links(links);
+            
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+                
+                text
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+                
+                dateText
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+            });
+            
+            // Drag functions
+            function dragStarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragEnded(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+            
+            // Add initial animation
+            simulation.alpha(1).restart();
+        }
+        
+        // Helper function for severity colors
+        function getSeverityColor(severity) {
+            const colors = {
+                'critical': '#F44336',
+                'high': '#FF9800',
+                'medium': '#FFC107',
+                'low': '#4CAF50'
+            };
+            return colors[severity] || '#9E9E9E';
+        }
+        
+        // Show hover tooltip
+        function showHoverTooltip(event, d) {
+            hideHoverTooltip();
+            
+            hoverTooltip = d3.select('body').append('div')
+                .attr('class', 'hover-tooltip')
+                .style('opacity', 0)
+                .html(generateHoverTooltipHtml(d));
+            
+            // Position near cursor
+            const x = event.pageX + 15;
+            const y = event.pageY - 15;
+            
+            hoverTooltip
+                .style('left', x + 'px')
+                .style('top', y + 'px')
+                .transition()
+                .duration(200)
+                .style('opacity', .95);
+        }
+        
+        function hideHoverTooltip() {
+            if (hoverTooltip) {
+                hoverTooltip.transition()
+                    .duration(200)
+                    .style('opacity', 0)
+                    .remove();
+                hoverTooltip = null;
+            }
+        }
+        
+        function generateHoverTooltipHtml(d) {
+            const severityColor = getSeverityColor(d.severity);
+            
+            if (d.type === 'threat') {
+                const titlePreview = d.title.length > 50 ? d.title.substring(0, 50) + '...' : d.title;
+                return `
+                    <div><strong>${titlePreview}</strong></div>
+                    <div style="margin-top: 5px; font-size: 12px;">
+                        <span style="color: #aaa;">Severity:</span> 
+                        <span style="color: ${severityColor}; font-weight: bold;">${d.severity_display}</span>
+                    </div>
+                    <div style="margin-top: 3px; font-size: 12px;">
+                        <span style="color: #aaa;">Date:</span> ${d.date} ${d.time}
+                    </div>
+                    <div style="margin-top: 3px; font-size: 11px; color: #4FC3F7;">
+                        Click for details
+                    </div>
+                `;
+            } else if (d.type === 'date') {
+                // Check if date is in range
+                let inRange = true;
+                let rangeInfo = '';
+                
+                if (startDate || endDate) {
+                    const nodeDate = new Date(d.name);
+                    
+                    if (startDate) {
+                        const start = new Date(startDate);
+                        if (nodeDate < start) inRange = false;
+                    }
+                    
+                    if (endDate) {
+                        const end = new Date(endDate);
+                        if (nodeDate > end) inRange = false;
+                    }
+                    
+                    rangeInfo = inRange ? 
+                        '<div style="margin-top: 3px; font-size: 11px; color: #4CAF50;">✓ In date range</div>' :
+                        '<div style="margin-top: 3px; font-size: 11px; color: #FF9800;">⚠ Outside date range</div>';
+                }
+                
+                return `
+                    <div><strong>${d.name}</strong></div>
+                    <div style="margin-top: 5px; font-size: 12px;">
+                        <span style="color: #aaa;">Type:</span> Date Group
+                    </div>
+                    <div style="margin-top: 3px; font-size: 12px;">
+                        <span style="color: #aaa;">Threats:</span> ${d.count}
+                    </div>
+                    ${rangeInfo}
+                `;
+            } else {
+                return `
+                    <div><strong>${d.name}</strong></div>
+                    <div style="margin-top: 5px; font-size: 12px;">
+                        <span style="color: #aaa;">Type:</span> ${d.type}
+                    </div>
+                    <div style="margin-top: 3px; font-size: 12px;">
+                        <span style="color: #aaa;">Count:</span> ${d.count}
+                    </div>
+                `;
+            }
+        }
+        
+        // Central tooltip functions
+        function toggleCentralTooltip(d) {
+            // If clicking the same node, close it
+            if (activeNode && activeNode.id === d.id) {
+                closeCentralTooltip();
+                return;
+            }
+            
+            // Close any existing tooltip
+            closeCentralTooltip();
+            
+            // Set new active node
+            activeNode = d;
+            
+            // Highlight the node
+            d3.selectAll('.node').classed('active', false);
+            d3.selectAll('circle').filter(node => node.id === d.id).classed('active', true);
+            
+            // Generate and show tooltip
+            showCentralTooltip(d);
+        }
+        
+        function showCentralTooltip(d) {
+            const container = document.getElementById('centralTooltipContainer');
+            const tooltip = document.getElementById('centralTooltip');
+            const backdrop = document.getElementById('tooltipBackdrop');
+            
+            // Generate tooltip content
+            tooltip.innerHTML = generateCentralTooltipHtml(d);
+            
+            // Show backdrop and tooltip
+            backdrop.classList.add('visible');
+            container.classList.add('visible');
+            
+            // Add event listener to close button
+            const closeBtn = tooltip.querySelector('.close-btn');
+            if (closeBtn) {
+                closeBtn.onclick = function() {
+                    isTooltipLocked = false;
+                    closeCentralTooltip();
+                };
+            }
+            
+            // Add event listener to URL links
+            const urlLinks = tooltip.querySelectorAll('.tooltip-url');
+            urlLinks.forEach(link => {
+                link.onclick = function(e) {
+                    e.stopPropagation();
+                    window.open(this.href, '_blank');
+                };
+            });
+            
+            // Load image with proper handling
+            const img = tooltip.querySelector('.tooltip-image');
+            if (img && d.has_image && d.image_url) {
+                img.onload = function() {
+                    console.log('Image loaded successfully:', d.image_url);
+                };
+                img.onerror = function() {
+                    console.log('Image failed to load:', d.image_url);
+                    this.style.display = 'none';
+                    const container = this.closest('.image-container');
+                    if (container) {
+                        container.innerHTML = '<div class="no-image">Image not available</div>';
+                    }
+                };
+            }
+        }
+        
+        function closeCentralTooltip() {
+            const container = document.getElementById('centralTooltipContainer');
+            const backdrop = document.getElementById('tooltipBackdrop');
+            
+            container.classList.remove('visible');
+            backdrop.classList.remove('visible');
+            
+            // Remove active class from node
+            d3.selectAll('.node').classed('active', false);
+            activeNode = null;
+            
+            // Also hide hover tooltip
+            hideHoverTooltip();
+        }
+        
+        function generateCentralTooltipHtml(d) {
+            const severityColor = getSeverityColor(d.severity);
+            
+            // Format content with proper line breaks
+            const formattedContent = d.content ? 
+                d.content.replace(/\n/g, '<br>') : 
+                'No content available';
+            
+            // Generate image section
+            let imageSection = '';
+            if (d.has_image && d.image_url) {
+                imageSection = `
+                    <div class="image-section">
+                        <div class="image-container">
+                            <img src="${d.image_url}" class="tooltip-image" alt="Threat Image">
+                        </div>
+                        <div class="image-meta">
+                            Associated image for threat analysis
+                        </div>
+                    </div>
+                `;
+            } else {
+                imageSection = `
+                    <div class="image-section">
+                        <div class="no-image">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📷</div>
+                            <div>No image available</div>
+                            <div style="font-size: 11px; margin-top: 5px;">for this threat</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Check if date is in range
+            let dateRangeInfo = '';
+            if (d.type === 'date' && (startDate || endDate)) {
+                const nodeDate = new Date(d.name);
+                let inRange = true;
+                
+                if (startDate) {
+                    const start = new Date(startDate);
+                    if (nodeDate < start) inRange = false;
+                }
+                
+                if (endDate) {
+                    const end = new Date(endDate);
+                    if (nodeDate > end) inRange = false;
+                }
+                
+                dateRangeInfo = inRange ? 
+                    '<div class="tooltip-row"><div class="tooltip-label">In Range:</div><div class="tooltip-value" style="color: #4CAF50;">✓ Yes</div></div>' :
+                    '<div class="tooltip-row"><div class="tooltip-label">In Range:</div><div class="tooltip-value" style="color: #FF9800;">⚠ No (filtered out)</div></div>';
+            }
+            
+            if (d.type === 'threat') {
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${d.title}</div>
+                        <button class="close-btn" title="Close">×</button>
+                        <div class="tooltip-subtitle">
+                            <span>Threat ID: ${d.id}</span>
+                            <span class="severity-badge" style="background: ${severityColor};">${d.severity_display}</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-content-wrapper">
+                        <div class="info-section">
+                            <div class="tooltip-content">
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Category:</div>
+                                    <div class="tooltip-value">${d.category}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Source:</div>
+                                    <div class="tooltip-value">${d.source}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Province:</div>
+                                    <div class="tooltip-value">${d.province}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Date & Time:</div>
+                                    <div class="tooltip-value">${d.date} at ${d.time}</div>
+                                </div>
+                                ${dateRangeInfo}
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">URL:</div>
+                                    <div class="tooltip-value">
+                                        <a href="${d.url}" target="_blank" class="tooltip-url">${d.url}</a>
+                                    </div>
+                                </div>
+                                <div class="tooltip-row" style="flex-direction: column; align-items: flex-start; margin-top: 15px;">
+                                    <div class="tooltip-label">Content:</div>
+                                    <div class="content-preview">
+                                        ${formattedContent}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${imageSection}
+                    </div>
+                `;
+            } else if (d.type === 'category') {
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${d.name}</div>
+                        <button class="close-btn" title="Close">×</button>
+                        <div class="tooltip-subtitle">
+                            <span>Category Overview</span>
+                            <span class="severity-badge" style="background: ${severityColor};">${d.count} threats</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-content-wrapper">
+                        <div class="info-section" style="width: 100%;">
+                            <div class="tooltip-content">
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Category Code:</div>
+                                    <div class="tooltip-value">${d.category_code}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Total Threats:</div>
+                                    <div class="tooltip-value">${d.count}</div>
+                                </div>
+                                ${dateRangeInfo}
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Description:</div>
+                                    <div class="tooltip-value">This category contains ${d.count} threat alerts.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (d.type === 'date') {
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${d.name}</div>
+                        <button class="close-btn" title="Close">×</button>
+                        <div class="tooltip-subtitle">
+                            <span>Date Group</span>
+                            <span>${d.count} threats</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-content-wrapper">
+                        <div class="info-section" style="width: 100%;">
+                            <div class="tooltip-content">
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Date:</div>
+                                    <div class="tooltip-value">${d.name}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Threat Count:</div>
+                                    <div class="tooltip-value">${d.count} threats recorded</div>
+                                </div>
+                                ${dateRangeInfo}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (d.type === 'root') {
+                let dateRangeDisplay = '';
+                if (startDate || endDate) {
+                    dateRangeDisplay = `
+                        <div class="tooltip-row">
+                            <div class="tooltip-label">Date Range:</div>
+                            <div class="tooltip-value">
+                                ${startDate || 'Any start'} to ${endDate || 'Any end'}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="tooltip-header">
+                        <div class="tooltip-title">${d.name}</div>
+                        <button class="close-btn" title="Close">×</button>
+                        <div class="tooltip-subtitle">
+                            <span>Overview Dashboard</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-content-wrapper">
+                        <div class="info-section" style="width: 100%;">
+                            <div class="tooltip-content">
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">Total Threats:</div>
+                                    <div class="tooltip-value">${d.count}</div>
+                                </div>
+                                <div class="tooltip-row">
+                                    <div class="tooltip-label">View:</div>
+                                    <div class="tooltip-value">${showAllCategories ? 'All Categories' : 'Single Category'}</div>
+                                </div>
+                                ${dateRangeDisplay}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return '<div>No information available</div>';
+        }
+        
+        // Center on specific node
+        function centerOnNode(d) {
+            const scale = isFullscreen ? 4 : (d.type === 'threat' ? 3 : 2);
+            const x = width / 2 - scale * d.x;
+            const y = height / 2 - scale * d.y;
+            
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+        }
+        
+        // Fullscreen functions
+        function toggleFullscreen() {
+            const container = document.getElementById('network-diagram');
+            const fullscreenControls = document.getElementById('fullscreenControls');
+            const fullscreenBtn = document.querySelector('button[onclick="toggleFullscreen()"]');
+            
+            if (!isFullscreen) {
+                isFullscreen = true;
+                container.classList.add('fullscreen');
+                fullscreenControls.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                fullscreenBtn.textContent = 'Exit Fullscreen';
+                
+                originalWidth = width;
+                originalHeight = height;
+                originalTransform = g.attr('transform');
+                
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                svg.attr('width', width).attr('height', height);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+                
+                setTimeout(() => centerGraph(), 100);
+                
+            } else {
+                isFullscreen = false;
+                container.classList.remove('fullscreen');
+                fullscreenControls.classList.remove('active');
+                document.body.style.overflow = '';
+                fullscreenBtn.textContent = 'Enter Fullscreen';
+                
+                width = originalWidth;
+                height = originalHeight;
+                
+                svg.attr('width', width).attr('height', height);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+                
+                if (originalTransform) {
+                    g.attr('transform', originalTransform);
+                } else {
+                    centerGraph();
+                }
+            }
+        }
+        
+        // Control functions
+        function resetZoom() {
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity);
+        }
+        
+        function toggleLabels() {
+            showLabels = !showLabels;
+            d3.selectAll('.node-text, .date-label')
+                .style('display', showLabels ? 'block' : 'none');
+            
+            const button = document.querySelector('button[onclick="toggleLabels()"]');
+            button.textContent = showLabels ? 'Hide Labels' : 'Show Labels';
+        }
+        
+        function centerGraph() {
+            const nodes = g.selectAll('circle').nodes();
+            if (nodes.length === 0) return;
+            
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            
+            nodes.forEach(node => {
+                const cx = parseFloat(node.getAttribute('cx') || 0);
+                const cy = parseFloat(node.getAttribute('cy') || 0);
+                const r = parseFloat(node.getAttribute('r') || 0);
+                
+                minX = Math.min(minX, cx - r);
+                maxX = Math.max(maxX, cx + r);
+                minY = Math.min(minY, cy - r);
+                maxY = Math.max(maxY, cy + r);
+            });
+            
+            const boundsWidth = maxX - minX;
+            const boundsHeight = maxY - minY;
+            
+            const scale = Math.min(
+                0.9 * width / boundsWidth,
+                0.9 * height / boundsHeight,
+                1
+            );
+            
+            const translateX = (width - boundsWidth * scale) / 2 - minX * scale;
+            const translateY = (height - boundsHeight * scale) / 2 - minY * scale;
+            
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity.translate(translateX, translateY).scale(scale));
+        }
+        
+        // Export as PNG function
+        function exportAsPNG() {
+            // Show loading message
+            const originalText = document.querySelector('button[onclick="exportAsPNG()"]').textContent;
+            document.querySelector('button[onclick="exportAsPNG()"]').textContent = 'Exporting...';
+            document.querySelector('button[onclick="exportAsPNG()"]').disabled = true;
+            
+            // Capture the entire network diagram container
+            const element = document.getElementById('network-diagram');
+            
+            // Hide any active tooltips before capturing
+            const backdrop = document.getElementById('tooltipBackdrop');
+            const tooltipContainer = document.getElementById('centralTooltipContainer');
+            const wasTooltipVisible = tooltipContainer.classList.contains('visible');
+            
+            if (wasTooltipVisible) {
+                tooltipContainer.classList.remove('visible');
+                backdrop.classList.remove('visible');
+            }
+            
+            // Get current transform for restoration
+            const currentTransform = g.attr('transform');
+            
+            // Temporarily reset zoom for better export
+            resetZoom();
+            
+            // Add a small delay to ensure zoom reset is complete
+            setTimeout(() => {
+                // Use html2canvas to capture the diagram
+                html2canvas(element, {
+                    backgroundColor: '#f9f9f9',
+                    scale: 2, // Higher scale for better quality
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true,
+                    width: element.scrollWidth,
+                    height: element.scrollHeight
+                }).then(canvas => {
+                    // Convert canvas to image
+                    const image = canvas.toDataURL('image/png');
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = 'threat-intelligence-diagram-' + new Date().toISOString().split('T')[0] + '.png';
+                    link.href = image;
+                    link.click();
+                    
+                    // Restore original state
+                    if (wasTooltipVisible) {
+                        tooltipContainer.classList.add('visible');
+                        backdrop.classList.add('visible');
+                    }
+                    
+                    // Restore previous transform
+                    if (currentTransform) {
+                        g.attr('transform', currentTransform);
+                    }
+                    
+                    // Restore button state
+                    document.querySelector('button[onclick="exportAsPNG()"]').textContent = originalText;
+                    document.querySelector('button[onclick="exportAsPNG()"]').disabled = false;
+                    
+                    console.log('PNG export completed successfully');
+                }).catch(error => {
+                    console.error('Error exporting PNG:', error);
+                    alert('Error exporting PNG. Please try again.');
+                    
+                    // Restore button state on error
+                    document.querySelector('button[onclick="exportAsPNG()"]').textContent = originalText;
+                    document.querySelector('button[onclick="exportAsPNG()"]').disabled = false;
+                });
+            }, 500);
+        }
+        
+        // Handle Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                isTooltipLocked = false;
+                closeCentralTooltip();
+                if (isFullscreen) {
+                    toggleFullscreen();
+                }
+            }
+        });
+        
+        // Close tooltips when clicking outside (only if not locked)
+        document.getElementById('tooltipBackdrop').addEventListener('click', function(event) {
+            if (isTooltipLocked) {
+                isTooltipLocked = false;
+                closeCentralTooltip();
+            }
+        });
+        
+        // Set today's date for max date in end date field
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const endDateField = document.getElementById('end_date');
+            if (endDateField) {
+                endDateField.max = today;
+            }
+            
+            // Set start date field max to today
+            const startDateField = document.getElementById('start_date');
+            if (startDateField) {
+                startDateField.max = today;
+            }
+            
+            // Set end date min based on start date
+            if (startDateField && endDateField) {
+                startDateField.addEventListener('change', function() {
+                    endDateField.min = this.value;
+                    if (endDateField.value && endDateField.value < this.value) {
+                        endDateField.value = this.value;
+                    }
+                });
+                
+                // Set start date max based on end date
+                endDateField.addEventListener('change', function() {
+                    startDateField.max = this.value;
+                    if (startDateField.value && startDateField.value > this.value) {
+                        startDateField.value = this.value;
+                    }
+                });
+            }
+        });
+        
+        // Initialize graph when page loads
+        window.addEventListener('load', initializeGraph);
+        window.addEventListener('resize', function() {
+            if (!isFullscreen) {
+                const newWidth = document.getElementById('network-diagram').clientWidth;
+                width = newWidth;
+                d3.select('svg').attr('width', width);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+                centerGraph();
+            } else {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                svg.attr('width', width).attr('height', height);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+            }
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-folder me-2"></i>Threat Categories
+            </h4>
+            <small class="text-muted">Manage your threat alert categories</small>
+        </div>
+        <a href="{% url 'category_add' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i>Add New Category
+        </a>
+    </div>
+
+    <!-- Search and Stats Card -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="GET" action="{% url 'category_list' %}">
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="search" 
+                                   placeholder="Search categories..." 
+                                   value="{{ search_query }}"
+                                   aria-label="Search categories">
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            {% if search_query %}
+                                <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <span class="badge bg-primary">
+                        <i class="fas fa-layer-group me-1"></i>
+                        Total: {{ categories.paginator.count }}
+                    </span>
+                    <span class="badge bg-success ms-2">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Active: {{ active_count }}
+                    </span>
+                    <span class="badge bg-secondary ms-2">
+                        <i class="fas fa-ban me-1"></i>
+                        Inactive: {{ inactive_count }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Table Card -->
+    <div class="card shadow border-0">
+        <div class="card-body p-3">
+            {% if categories %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="{% if category.is_active %}bg-primary bg-opacity-10{% else %}bg-secondary bg-opacity-10{% endif %} rounded-circle p-2">
+                                            <i class="fas fa-folder {% if category.is_active %}text-primary{% else %}text-secondary{% endif %}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0">{{ category.name }}</h6>
+                                        {% if category.description %}
+                                        <small class="text-muted">{{ category.description|truncatechars:50 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if category.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                           
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <small class="text-muted">{{ category.created_at|date:"M d, Y" }}</small>
+                                    <small class="text-muted">{{ category.created_at|date:"h:i A" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'category_edit' category.id %}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if categories.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if categories.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in categories.paginator.page_range %}
+                        {% if categories.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if categories.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="empty-state-icon mb-4">
+                    <i class="fas fa-folder-open fa-4x text-muted"></i>
+                </div>
+                <h5 class="text-muted mb-3">No Categories Found</h5>
+                <p class="text-muted mb-4">
+                    {% if search_query %}
+                    No categories match your search "{{ search_query }}".
+                    {% else %}
+                    You haven't created any categories yet.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm">
+                    Clear Search
+                </a>
+                {% else %}
+                <a href="{% url 'category_add' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Add First Category
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* .container-fluid {
+    max-width: 1600px;
+} */
+.card {
+    border-radius: 8px;
+}
+.form-control {
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+.badge {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+}
+.table {
+    font-size: 0.9rem;
+}
+.table th {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: none;
+    border-bottom: 2px solid #dee2e6;
+}
+.table td {
+    vertical-align: middle;
+}
+.page-link {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+}
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.input-group .btn {
+    border-radius: 0 6px 6px 0;
+}
+.bg-opacity-10 {
+    opacity: 0.1;
+}
+@media (max-width: 768px) {
+    .container-fluid { padding: 0.5rem; }
+    .card-body { padding: 1rem !important; }
+    h4 { font-size: 1.1rem; }
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+    .d-flex.justify-content-between > div:last-child {
+        align-self: flex-start;
+    }
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus search input
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.focus();
+    }
+    
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.isConnected) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

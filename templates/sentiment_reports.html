@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Form Section -->
+        <div class="col-12">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="reportForm">
+                        {% csrf_token %}
+
+                        <!-- Basic Information -->
+                        <div class="section-card mb-4">
+                            <div class="section-header mb-4">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-info-circle me-2"></i> Basic Information
+                                </h5>
+                                <p class="text-muted small mb-0">
+                                    Enter report title and description
+                                </p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Report Title <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           name="title"
+                                           value="{{ form_data.title|default:'' }}"
+                                           placeholder=""
+                                           required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Cover Image</label>
+                                    <input type="file" class="form-control" name="image" accept="image/*">
+                                    <div class="form-text">
+                                        <i class="fas fa-image me-1"></i> Optional: JPG, PNG, GIF, BMP, WebP (max 5MB)
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Description</label>
+                                    <textarea class="form-control"
+                                              name="description"
+                                              rows="2"
+                                              placeholder="">{{ form_data.description|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Analysis -->
+                        <div class="section-card mb-4">
+                            <div class="section-header mb-4">
+                                <h5 class="mb-0 text-success">
+                                    <i class="fas fa-chart-pie me-2"></i> Sentiment Analysis
+                                </h5>
+                                <p class="text-muted small mb-0">
+                                    Enter sentiment percentages
+                                </p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold text-success">
+                                        <i class="fas fa-thumbs-up me-2"></i> Positive (%)
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="positive_percentage"
+                                           value="{{ form_data.positive_percentage|default:'89.2' }}"
+                                           min="0" max="100" step="0.1" required>
+                                    <div class="progress mt-2" style="height:6px">
+                                        <div id="positiveProgress" class="progress-bar bg-success"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold text-danger">
+                                        <i class="fas fa-thumbs-down me-2"></i> Negative (%)
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="negative_percentage"
+                                           value="{{ form_data.negative_percentage|default:'6.9' }}"
+                                           min="0" max="100" step="0.1" required>
+                                    <div class="progress mt-2" style="height:6px">
+                                        <div id="negativeProgress" class="progress-bar bg-danger"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold text-primary">
+                                        <i class="fas fa-minus-circle me-2"></i> Neutral (%)
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="neutral_percentage"
+                                           value="{{ form_data.neutral_percentage|default:'3.9' }}"
+                                           min="0" max="100" step="0.1" required>
+                                    <div class="progress mt-2" style="height:6px">
+                                        <div id="neutralProgress" class="progress-bar bg-primary"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="card bg-light border-0 p-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Total Percentage:</strong>
+                                                <span id="percentageTotal" class="ms-2 fw-bold">100.0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Engagement Metrics -->
+                        <div class="section-card mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-heart text-danger me-2"></i> Likes
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="jay_nepal_likes"
+                                           value="{{ form_data.jay_nepal_likes|default:'70000' }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-share-alt text-primary me-2"></i> Shares
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="jay_nepal_shares"
+                                           value="{{ form_data.jay_nepal_shares|default:'13800' }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-comment text-info me-2"></i> Comments
+                                    </label>
+                                    <input type="number" class="form-control"
+                                           name="jay_nepal_comments"
+                                           value="{{ form_data.jay_nepal_comments|default:'2000' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-2" id="submitBtn">
+                                <i class="fas fa-download me-2"></i> Generate & Download Report
+                            </button>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> Click to generate and download report immediately
+                                </small>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize progress bars and total
+    updateProgressBars();
+    updatePercentageTotal();
+    
+    // Add event listeners
+    const percentageInputs = document.querySelectorAll('input[name$="_percentage"]');
+    percentageInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            updateProgressBars();
+            updatePercentageTotal();
+        });
+    });
+    
+    // Form submission - NO PERCENTAGE VALIDATION
+    const form = document.getElementById('reportForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Show loading state immediately
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating Report...';
+            submitBtn.disabled = true;
+            
+            // Let the form submit normally - NO VALIDATION
+            // No percentage checking, no auto-adjustment
+        });
+    }
+    
+    function updateProgressBars() {
+        const positive = parseFloat(document.querySelector('[name="positive_percentage"]').value) || 0;
+        const negative = parseFloat(document.querySelector('[name="negative_percentage"]').value) || 0;
+        const neutral = parseFloat(document.querySelector('[name="neutral_percentage"]').value) || 0;
+        
+        const positiveProgress = document.getElementById('positiveProgress');
+        const negativeProgress = document.getElementById('negativeProgress');
+        const neutralProgress = document.getElementById('neutralProgress');
+        
+        if (positiveProgress) positiveProgress.style.width = Math.min(positive, 100) + '%';
+        if (negativeProgress) negativeProgress.style.width = Math.min(negative, 100) + '%';
+        if (neutralProgress) neutralProgress.style.width = Math.min(neutral, 100) + '%';
+    }
+    
+    function updatePercentageTotal() {
+        const positive = parseFloat(document.querySelector('[name="positive_percentage"]').value) || 0;
+        const negative = parseFloat(document.querySelector('[name="negative_percentage"]').value) || 0;
+        const neutral = parseFloat(document.querySelector('[name="neutral_percentage"]').value) || 0;
+        
+        const total = positive + negative + neutral;
+        const totalElement = document.getElementById('percentageTotal');
+        
+        if (totalElement) {
+            totalElement.textContent = total.toFixed(1) + '%';
+            
+            // Simple display - no validation colors
+            totalElement.className = 'ms-2 fw-bold';
+            
+            // Optional: Show different color only for visual feedback
+            if (total === 100) {
+                totalElement.classList.add('text-success');
+            } else {
+                totalElement.classList.add('text-dark');
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

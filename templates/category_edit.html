@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="fw-bold text-primary mb-1">
+                        <i class="fas fa-edit me-2"></i>Edit Category
+                    </h4>
+                    <small class="text-muted">
+                        Editing: {{ category.name }} • Created: {{ category.created_at|date:"M d, Y" }}
+                    </small>
+                </div>
+                <div>
+                    <a href="{% url 'category_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card shadow border-0">
+                <div class="card-body p-3">
+                    <!-- Alert Messages -->
+                    {% if messages %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                   
+                    <form method="POST" id="editCategoryForm" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Category Name Input -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   value="{{ category.name }}"
+                                   placeholder="Enter category name"
+                                   required
+                                   maxlength="100">
+                            <small class="form-text text-muted">
+                                Enter a unique name for your threat category. Maximum 100 characters.
+                            </small>
+                            <small id="charCounter" class="form-text text-end d-block mt-1">100 characters remaining</small>
+                        </div>
+
+                        <!-- Active Status Toggle -->
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="is_active" 
+                                       name="is_active" 
+                                       {% if category.is_active %}checked{% endif %}
+                                       role="switch">
+                                <label class="form-check-label fw-medium" for="is_active">
+                                    Active Category
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                {% if category.threat_alerts.count > 0 %}
+                                <span class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    This category has {{ category.threat_alerts.count }} alert(s). 
+                                    Deactivating will hide it from new reports but keep existing alerts.
+                                </span>
+                                {% else %}
+                                Inactive categories won't be available for selection in new threat reports.
+                                {% endif %}
+                            </small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                            <a href="{% url 'category_list' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save me-1"></i> Update Category
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 1600px;
+}
+.card {
+    border-radius: 8px;
+}
+.form-control, .form-select {
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+.border-top {
+    border-color: #dee2e6 !important;
+}
+.form-switch .form-check-input {
+    width: 2.8em;
+    height: 1.5em;
+    cursor: pointer;
+}
+.form-switch .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+.form-text {
+    font-size: 0.8rem;
+}
+.alert {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border-left: 4px solid transparent;
+}
+.alert-info {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border-left-color: #0d6efd;
+}
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border-left-color: #ffc107;
+}
+.alert-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border-left-color: #198754;
+}
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-left-color: #dc3545;
+}
+.text-warning {
+    color: #ffc107 !important;
+}
+.text-muted {
+    color: #6c757d !important;
+}
+@media (max-width: 768px) {
+    .container { padding: 0.5rem; }
+    .card-body { padding: 1rem !important; }
+    h4 { font-size: 1.1rem; }
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+    .d-flex.justify-content-between > div:last-child {
+        align-self: flex-start;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editCategoryForm');
+    const nameInput = document.getElementById('name');
+    const charCounter = document.getElementById('charCounter');
+    
+    // Character counter
+    function updateCharCounter() {
+        const length = nameInput.value.length;
+        const remaining = 100 - length;
+        charCounter.textContent = `${remaining} characters remaining`;
+        
+        if (remaining < 20) {
+            charCounter.style.color = '#ffc107';
+        } else if (remaining < 0) {
+            charCounter.style.color = '#dc3545';
+        } else {
+            charCounter.style.color = '#6c757d';
+        }
+    }
+    
+    // Initialize character counter
+    updateCharCounter();
+    
+    // Update counter on input
+    nameInput.addEventListener('input', function() {
+        updateCharCounter();
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        // Validate name length
+        if (nameInput.value.length > 100) {
+            nameInput.classList.add('is-invalid');
+            isValid = false;
+            alert('Category name cannot exceed 100 characters.');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields correctly.');
+        }
+    });
+    
+    // Clear validation on input
+    form.querySelectorAll('[required]').forEach(field => {
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+    
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.isConnected) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+    
+    // Focus on name field
+    nameInput.focus();
+    nameInput.select();
+});
+</script>
+{% endblock %}
