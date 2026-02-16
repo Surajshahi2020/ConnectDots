@@ -450,15 +450,18 @@ def newsSearching(request):
         'user_unit': user_unit,
     })
 
+# At the VERY TOP of your views.py file, use this import:
+import datetime
 from django.utils import timezone
-from datetime import datetime, timedelta
 from django.db.models import Count, Q
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
 
 @login_required
 def newsVisualization(request):
     if not check_access(request):
-        return redirect('logout')  # Create this view
+        return redirect('logout')
     user = request.user
     
     # Check if user account is active
@@ -546,18 +549,18 @@ def newsVisualization(request):
     
     # Create ordered list
     for severity in severity_order:
-        item = severity_data.filter(severity=severity).first()
-        if item:
-            severity_labels.append(item['severity'].title())
-            severity_counts.append(item['count'])
+        count = threats.filter(severity=severity).count()
+        if count > 0:
+            severity_labels.append(severity.title())
+            severity_counts.append(count)
 
     # Timeline data (last 30 days)
-    thirty_days_ago = timezone.now() - timedelta(days=30)
+    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
     
     # Simple manual approach for timeline data
     date_counts = {}
     for i in range(30):
-        date = (timezone.now() - timedelta(days=i)).date()
+        date = (timezone.now() - datetime.timedelta(days=i)).date()
         date_counts[date] = 0
     
     # Count threats for each date
@@ -584,10 +587,10 @@ def newsVisualization(request):
         sources_counts.append(item['count'])
 
     # Trend data (last 7 days by severity)
-    seven_days_ago = timezone.now() - timedelta(days=7)
+    seven_days_ago = timezone.now() - datetime.timedelta(days=7)
     
     # Get dates for last 7 days
-    dates = [(timezone.now() - timedelta(days=i)).date() for i in range(6, -1, -1)]
+    dates = [(timezone.now() - datetime.timedelta(days=i)).date() for i in range(6, -1, -1)]
     trend_labels = [date.strftime('%m/%d') for date in dates]
     
     # Initialize trend data structure
@@ -600,8 +603,15 @@ def newsVisualization(request):
     
     # Get threat counts for each severity for last 7 days
     for i, date in enumerate(dates):
-        day_start = timezone.make_aware(datetime.combine(date, datetime.min.time()))
-        day_end = timezone.make_aware(datetime.combine(date, datetime.max.time()))
+        # Create timezone-aware datetime objects - using datetime.datetime
+        day_start = timezone.make_aware(
+            datetime.datetime.combine(date, datetime.time.min),
+            timezone.get_current_timezone()
+        )
+        day_end = timezone.make_aware(
+            datetime.datetime.combine(date, datetime.time.max),
+            timezone.get_current_timezone()
+        )
         
         day_threats = threats.filter(timestamp__range=(day_start, day_end))
         
@@ -613,7 +623,6 @@ def newsVisualization(request):
     # Department/Unit comparison (for superusers and admins only)
     department_data = []
     if user.is_superuser or (hasattr(user, 'role') and user.role == 2):
-        from django.contrib.auth import get_user_model
         User = get_user_model()
         
         department_data = User.objects.values(
@@ -648,7 +657,6 @@ def newsVisualization(request):
         'is_admin': getattr(user, 'role', 0) == 2,
         'department_data': department_data,
     })
-
 
 @login_required
 def newsTrending(request):
