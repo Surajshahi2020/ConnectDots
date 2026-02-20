@@ -796,7 +796,7 @@ from django.utils import timezone
 from django.db.models import Q, Count
 import pytz
 from io import BytesIO
-from datetime import datetime
+import datetime
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -842,6 +842,7 @@ def generate_word_report(request):
         
         # Convert dates to datetime using Kathmandu timezone
         try:
+            from datetime import datetime
             start_naive = datetime.strptime(start_date, '%Y-%m-%d')
             end_naive = datetime.strptime(end_date, '%Y-%m-%d')
             
@@ -3101,8 +3102,8 @@ def get_markers(request):
             elif date_filter == 'custom' and start_date_str and end_date_str:
                 # Parse custom date range
                 try:
-                    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-                    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d').date()
                     
                     # Filter between dates (inclusive)
                     queryset = queryset.filter(
@@ -5921,7 +5922,8 @@ def sentiment_report(request):
                 image_mime_type = 'image/jpeg'  # default
         
         # Get current datetime once
-        current_time = datetime.now()
+    
+        current_time = datetime.datetime.now()
         
         # Calculate gradient positions for pie chart
         positive_end = positive
@@ -5994,7 +5996,7 @@ def websocket_test(request):
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -6946,7 +6948,9 @@ def event_list(request):
     }
     
     # Recent threats (last 7 days)
-    one_week_ago = datetime.now() - timedelta(days=7)
+    import datetime
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(days=7)  # ✅ Correct
+    # one_week_ago = datetime.now() - timedelta(days=7)
     recent_threats = threats.filter(timestamp__gte=one_week_ago).count()
     
     # Top categories
@@ -7423,7 +7427,9 @@ def list_autonews(request):
     }
     
     # Recent articles (last 7 days)
-    one_week_ago = datetime.now() - timedelta(days=7)
+    #  import datetime
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(days=7)  # ✅ Correct
+    # one_week_ago = datetime.now() - timedelta(days=7)
     recent_articles = articles.filter(created_at__gte=one_week_ago).count()
     
     # Top sources
