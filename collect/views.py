@@ -23,7 +23,7 @@ from django.utils.html import escapejs
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import io
 
-from .models import ThreatAlert, CurrentInformation, NewsSource, DangerousKeyword, User, AutoNewsArticle, MapMarker, SocialMediaURL, SharedFile
+from .models import ThreatAlert, CurrentInformation, NewsSource, DangerousKeyword, User, AutoNewsArticle, MapMarker, SocialMediaURL, SharedFile, Website
 from collections import Counter
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -57,6 +57,7 @@ from datetime import datetime, timedelta
 from utils.sentiment import predict_sentiment
 from django.utils.dateparse import parse_date
 from utils.permission import check_access
+import requests
 
 
 
@@ -7949,3 +7950,296 @@ START TRANSACTION;
         messages.error(request, f'Backup failed: {str(e)}')
         return redirect(request.META.get('HTTP_REFERER', 'admin:index'))
 
+import requests
+import time
+import urllib3
+import warnings
+import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from django.core.cache import cache
+from django.utils import timezone
+from django.db import models
+from .models import Website
+import pytz
+from datetime import datetime
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Add file handler for down sites log
+down_logger = logging.getLogger('down_sites')
+down_logger.setLevel(logging.INFO)
+
+# Create file handler
+file_handler = logging.FileHandler('down_sites.log')
+file_handler.setLevel(logging.INFO)
+
+# Create formatter
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', 
+                              datefmt='%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+
+# Add handler to logger
+down_logger.addHandler(file_handler)
+
+# Also log to console
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(formatter)
+down_logger.addHandler(console_handler)
+
+# Suppress SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
+
+# Timeout settings
+TIMEOUT = 5
+MAX_RETRIES = 3
+RETRY_DELAY = 3
+CACHE_TIMEOUT = 60
+
+# Set Kathmandu timezone
+KATHMANDU_TZ = pytz.timezone('Asia/Kathmandu')
+
+def get_kathmandu_time():
+    """Get current time in Kathmandu timezone in HH:MM:SS format"""
+    return timezone.now().astimezone(KATHMANDU_TZ).strftime("%H:%M:%S")
+
+def get_kathmandu_datetime():
+    """Get current datetime in Kathmandu timezone for logging"""
+    return timezone.now().astimezone(KATHMANDU_TZ).strftime("%Y-%m-%d %H:%M:%S")
+
+def log_down_site(website, error, attempts, response_time=None, status_code=None):
+    """Log details when a site is down"""
+    log_entry = (
+        f"DOWN - {website.name} | "
+        f"URL: {website.url} | "
+        f"Error: {error} | "
+        f"Attempts: {attempts} | "
+        f"Status Code: {status_code if status_code else 'N/A'} | "
+        f"Response Time: {response_time if response_time else 'N/A'}ms"
+    )
+    down_logger.info(log_entry)
+    
+    # Also log to console with color (if supported)
+    print(f"\033[91m[DOWN] {get_kathmandu_datetime()} - {website.name} - {error}\033[0m")
+
+def log_site_recovery(website, response_time, status_code, attempts):
+    """Log when a previously down site recovers"""
+    log_entry = (
+        f"RECOVERED - {website.name} | "
+        f"URL: {website.url} | "
+        f"Response Time: {response_time}ms | "
+        f"Status Code: {status_code} | "
+        f"Attempts: {attempts}"
+    )
+    down_logger.info(log_entry)
+    print(f"\033[92m[RECOVERED] {get_kathmandu_datetime()} - {website.name} - Back online\033[0m")
+
+def log_site_check(website, status_info):
+    """Log all site checks (optional - for debugging)"""
+    if status_info['status'] == 'up':
+        logger.debug(f"UP - {website.name} - {status_info['response_time']}ms")
+    else:
+        logger.warning(f"DOWN - {website.name} - {status_info['error']}")
+
+def check_website_with_retry(website, max_retries=MAX_RETRIES, timeout=TIMEOUT):
+    """Check website status with multiple retry attempts and logging"""
+    url = website.url
+    attempts = 0
+    last_error = None
+    
+    while attempts < max_retries:
+        attempts += 1
+        try:
+            if not url.startswith(('http://', 'https://')):
+                url = 'https://' + url
+            
+            start = time.time()
+            
+            response = requests.get(
+                url, 
+                timeout=timeout,
+                headers={'User-Agent': 'Mozilla/5.0'},
+                allow_redirects=True,
+                verify=False
+            )
+            
+            response_time = round((time.time() - start) * 1000)
+            
+            # If this was a recovery (previous attempts failed)
+            if attempts > 1:
+                log_site_recovery(website, response_time, response.status_code, attempts)
+            
+            return {
+                'status': 'up',
+                'response_time': response_time,
+                'status_code': response.status_code,
+                'error': None,
+                'attempts': attempts
+            }
+            
+        except requests.Timeout:
+            last_error = 'Timeout'
+            logger.debug(f"Attempt {attempts}/{max_retries} timeout for {website.name}")
+            if attempts < max_retries:
+                time.sleep(RETRY_DELAY)
+                continue
+                
+        except requests.ConnectionError:
+            last_error = 'Connection failed'
+            logger.debug(f"Attempt {attempts}/{max_retries} connection failed for {website.name}")
+            if attempts < max_retries:
+                time.sleep(RETRY_DELAY)
+                continue
+                
+        except Exception as e:
+            last_error = str(e)[:30]
+            logger.debug(f"Attempt {attempts}/{max_retries} error for {website.name}: {last_error}")
+            if attempts < max_retries:
+                time.sleep(RETRY_DELAY)
+                continue
+    
+    # All attempts failed - log the down site
+    error_msg = f'{last_error} after {max_retries} attempts'
+    log_down_site(website, error_msg, max_retries)
+    
+    return {
+        'status': 'down',
+        'response_time': None,
+        'status_code': None,
+        'error': error_msg,
+        'attempts': max_retries
+    }
+
+def check_website_batch(websites):
+    """Check multiple websites in parallel with logging"""
+    results = []
+    up_count = 0
+    down_count = 0
+    fast_sites = 0
+    slow_sites = 0
+    very_slow_sites = 0
+    
+    # Log batch start
+    logger.info(f"Starting batch check of {len(websites)} websites at {get_kathmandu_datetime()}")
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_website = {
+            executor.submit(check_website_with_retry, website): website 
+            for website in websites
+        }
+        
+        for future in as_completed(future_to_website):
+            website = future_to_website[future]
+            try:
+                status_info = future.result(timeout=30)
+            except Exception as e:
+                status_info = {
+                    'status': 'down',
+                    'response_time': None,
+                    'status_code': None,
+                    'error': f'Check failed',
+                    'attempts': MAX_RETRIES
+                }
+                # Log unexpected errors
+                log_down_site(website, f'Unexpected error: {str(e)[:50]}', MAX_RETRIES)
+            
+            if status_info['status'] == 'up':
+                up_count += 1
+                response_time = status_info.get('response_time')
+                
+                if response_time and response_time < 1000:
+                    fast_sites += 1
+                elif response_time and response_time < 3000:
+                    slow_sites += 1
+                elif response_time:
+                    very_slow_sites += 1
+            else:
+                down_count += 1
+            
+            results.append({
+                'id': website.id,
+                'name': website.name,
+                'url': website.url,
+                'status': status_info['status'],
+                'response_time': status_info.get('response_time'),
+                'status_code': status_info.get('status_code'),
+                'error': status_info.get('error', 'Unknown error'),
+                'attempts': status_info.get('attempts', 1)
+            })
+    
+    # Log batch summary
+    logger.info(f"Batch check completed - Up: {up_count}, Down: {down_count}, Total: {len(websites)}")
+    
+    return results, up_count, down_count, fast_sites, slow_sites, very_slow_sites
+
+def monitor_sites(request):
+    """Main dashboard view with logging"""
+    start_total = time.time()
+    
+    search_query = request.GET.get('search', '').strip()
+    cache_key = f"website_monitor_{search_query}"
+    cached_data = cache.get(cache_key)
+    force_refresh = request.GET.get('refresh') == '1'
+    
+    if cached_data and not force_refresh:
+        context = cached_data
+        context['cached'] = True
+        context['load_time'] = round((time.time() - start_total) * 1000)
+        return render(request, 'website_monitor.html', context)
+    
+    websites = Website.objects.filter(is_active=True)
+    
+    if search_query:
+        websites = websites.filter(
+            models.Q(name__icontains=search_query) | 
+            models.Q(url__icontains=search_query)
+        )
+    
+    website_list = list(websites)
+    total = len(website_list)
+    
+    # Log the check initiation
+    logger.info(f"Website check initiated by user at {get_kathmandu_datetime()}")
+    
+    if total == 0:
+        context = {
+            'results': [],
+            'total': 0,
+            'up_count': 0,
+            'down_count': 0,
+            'fast_sites': 0,
+            'slow_sites': 0,
+            'very_slow_sites': 0,
+            'uptime_percentage': 0,
+            'search_query': search_query,
+            'last_checked': get_kathmandu_time(),
+            'load_time': round((time.time() - start_total) * 1000)
+        }
+        return render(request, 'website_monitor.html', context)
+    
+    results, up_count, down_count, fast_sites, slow_sites, very_slow_sites = check_website_batch(website_list)
+    uptime_percentage = round((up_count / total) * 100) if total > 0 else 0
+    
+    results.sort(key=lambda x: (0 if x['status'] == 'up' else 1, x.get('response_time') or 9999))
+    
+    context = {
+        'results': results,
+        'total': total,
+        'up_count': up_count,
+        'down_count': down_count,
+        'fast_sites': fast_sites,
+        'slow_sites': slow_sites,
+        'very_slow_sites': very_slow_sites,
+        'uptime_percentage': uptime_percentage,
+        'search_query': search_query,
+        'last_checked': get_kathmandu_time(),
+        'load_time': round((time.time() - start_total) * 1000),
+        'retry_count': MAX_RETRIES,
+        'retry_delay': RETRY_DELAY
+    }
+    
+    cache.set(cache_key, context, CACHE_TIMEOUT)
+    
+    return render(request, 'website_monitor.html', context)

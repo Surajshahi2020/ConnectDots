@@ -4,6 +4,14 @@
   <!-- Dashboard -->
   <li class="nav-item mb-2">
     <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+       href="{% url 'monitor_sites' %}">
+      <i class="fas fa-eye nav-icon fa-lg"></i>
+      <span class="sidebar-text ms-3">Monitoring</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-2">
+    <a class="nav-link d-flex align-items-center text-white py-2 px-3 rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
        href="{% url 'dashboard' %}">
       <i class="fas fa-tachometer-alt nav-icon fa-lg"></i>
       <span class="sidebar-text ms-3">Dashboard</span>

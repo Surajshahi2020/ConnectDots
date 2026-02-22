@@ -679,3 +679,11 @@ class SharedFile(models.Model):
             'xlsx': 'text-success',
         }
         return color_map.get(self.extension, 'text-muted')
+    
+class Website(models.Model):
+    name = models.CharField(max_length=200)
+    url = models.URLField()
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name

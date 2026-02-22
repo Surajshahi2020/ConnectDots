@@ -1,0 +1,15 @@
+INFO 2026-02-22 14:54:21 DOWN - Ministry of Home Affairs | URL: https://www.moha.gov.np/ | Error: Timeout after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-02-22 14:54:21 DOWN - Ministry of Home Affairs | URL: https://www.moha.gov.np/ | Error: Timeout after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-02-22 14:54:42 DOWN - Ministry of Home Affairs | URL: https://www.moha.gov.np/ | Error: Timeout after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-02-22 14:56:39 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 98ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 14:57:46 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 107ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 14:57:48 RECOVERED - passport | URL: https://nepalpassport.gov.np/ | Response Time: 334ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 14:58:55 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 88ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:00:02 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 86ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:01:50 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 122ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:04:00 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 111ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:04:04 RECOVERED - investigation of abuse of authority | URL: https://ciaa.gov.np/ | Response Time: 1169ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:05:10 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 147ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:05:14 RECOVERED - president | URL: https://president.gov.np/ | Response Time: 1777ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:06:21 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 109ms | Status Code: 200 | Attempts: 2
+INFO 2026-02-22 15:07:27 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 73ms | Status Code: 200 | Attempts: 2

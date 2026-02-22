@@ -81,6 +81,8 @@ urlpatterns = [
     path('files/bulk-delete/', views.bulk_delete_files, name='bulk_delete_files'),
     #Database Backup
     path('download-database/', views.download_database_backup, name='download_database'),
+    #Monitor
+    path('sites-monitor', views.monitor_sites, name='monitor_sites'),
     ]
 
 # Serve media files during development

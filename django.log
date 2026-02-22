@@ -1,0 +1,34 @@
+INFO 2026-02-22 14:53:29 Watching for file changes with StatReloader
+INFO 2026-02-22 14:53:52 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-22 14:53:54 Watching for file changes with StatReloader
+INFO 2026-02-22 14:54:21 - Broken pipe from ('127.0.0.1', 61308)
+INFO 2026-02-22 14:54:21 - Broken pipe from ('127.0.0.1', 63266)
+INFO 2026-02-22 14:54:23 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-22 14:54:30 "POST / HTTP/1.1" 302 0
+INFO 2026-02-22 14:54:30 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-22 14:54:32 "GET /sites-monitor HTTP/1.1" 200 110547
+WARNING 2026-02-22 14:54:32 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 14:54:32 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 14:54:42 - Broken pipe from ('127.0.0.1', 60681)
+INFO 2026-02-22 14:55:32 "GET /sites-monitor HTTP/1.1" 200 110553
+WARNING 2026-02-22 14:55:33 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 14:55:33 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 14:56:39 "GET /sites-monitor HTTP/1.1" 200 109556
+WARNING 2026-02-22 14:56:39 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 14:56:39 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 14:57:48 "GET /sites-monitor HTTP/1.1" 200 109558
+WARNING 2026-02-22 14:57:49 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 14:57:49 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 14:58:55 "GET /sites-monitor HTTP/1.1" 200 109557
+WARNING 2026-02-22 14:58:55 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 14:58:55 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 15:00:02 "GET /sites-monitor HTTP/1.1" 200 109554
+WARNING 2026-02-22 15:00:02 "GET /static/webfonts/fa-regular-400.woff2 HTTP/1.1" 404 1846
+WARNING 2026-02-22 15:00:02 "GET /static/webfonts/fa-regular-400.ttf HTTP/1.1" 404 1840
+INFO 2026-02-22 15:00:43 "GET /sites-monitor HTTP/1.1" 200 109519
+INFO 2026-02-22 15:01:50 "GET /sites-monitor HTTP/1.1" 200 109530
+INFO 2026-02-22 15:02:54 "GET /sites-monitor HTTP/1.1" 200 109525
+INFO 2026-02-22 15:04:04 "GET /sites-monitor HTTP/1.1" 200 109527
+INFO 2026-02-22 15:05:14 "GET /sites-monitor HTTP/1.1" 200 109521
+INFO 2026-02-22 15:06:21 "GET /sites-monitor HTTP/1.1" 200 109521
+INFO 2026-02-22 15:07:27 "GET /sites-monitor HTTP/1.1" 200 109518
