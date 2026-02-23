@@ -51,6 +51,15 @@ from collect.scrapers.keyboard_techpana import keyboard_techpana_to_json
 from collect.scrapers.keyboard_kantipur import keyboard_kantipur_to_json 
 from collect.scrapers.keyboard_kathmandupost import keyboard_kathmandu_post_to_json 
 from collect.scrapers.keyboard_onlinekhabar import keyboard_onlinekhabar_to_json
+from collect.scrapers.keyboard_paschim import keyboard_paschimnepal_to_json
+from collect.scrapers.tvnepal import keyboard_onlinetvnepal_to_json
+from collect.scrapers.osnepal import keyboard_osnepal_to_json
+from collect.scrapers.eAdarsha import keyboard_eadarsha_to_json
+from collect.scrapers.keyboard_arthasarokar import keyboard_arthasarokar_to_json
+from collect.scrapers.keyboard_newsofnepal import keyboard_newsofnepal_to_json
+from collect.scrapers.keyboard_rajdhanidaily import keyboard_rajdhanidaily_to_json
+
+
 from django.urls import reverse  # Add this import
 from django.db.models import Q
 from datetime import datetime, timedelta
@@ -2705,12 +2714,20 @@ def keyboard_AutoFeed(request):
             'kantipur': keyboard_kantipur_to_json,
             'kathmandupost': keyboard_kathmandu_post_to_json,
             'onlinekhabar': keyboard_onlinekhabar_to_json,
+            'paschimnepal': keyboard_paschimnepal_to_json,
+            'onlinetvnepal': keyboard_onlinetvnepal_to_json,
+            'osnepal': keyboard_osnepal_to_json, 
+            'eadarsha': keyboard_eadarsha_to_json,
+            'arthasarokar': keyboard_arthasarokar_to_json,
+            'newsofnepal': keyboard_newsofnepal_to_json,
+            'rajdhanidaily': keyboard_rajdhanidaily_to_json,
             # Add more sources here as you create their scraper functions
         }
         
         # Determine which sources to scrape
         if source in SCRAPER_FUNCTIONS:
             sources_to_scrape = [source]
+            print(333333333333333333333333, sources_to_scrape)
         elif source == 'all' or source is None:
             sources_to_scrape = list(SCRAPER_FUNCTIONS.keys())
         else:

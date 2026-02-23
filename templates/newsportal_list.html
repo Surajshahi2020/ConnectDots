@@ -36,14 +36,6 @@
                         Fetch News
                     </button>
                     
-                    <div id="techpanaProgress" class="mt-3" style="display: none;">
-                        <div class="alert alert-light border">
-                            <div class="d-flex align-items-center">
-                                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-                                <span class="small">Fetching Techpana...</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -74,14 +66,6 @@
                         Fetch News
                     </button>
                     
-                    <div id="nagarikProgress" class="mt-3" style="display: none;">
-                        <div class="alert alert-light border">
-                            <div class="d-flex align-items-center">
-                                <div class="spinner-border spinner-border-sm text-danger me-2"></div>
-                                <span class="small">Fetching Nagarik...</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -112,14 +96,6 @@
                         Fetch News
                     </button>
                     
-                    <div id="kantipurProgress" class="mt-3" style="display: none;">
-                        <div class="alert alert-light border">
-                            <div class="d-flex align-items-center">
-                                <div class="spinner-border spinner-border-sm text-success me-2"></div>
-                                <span class="small">Fetching Kantipur...</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -150,14 +126,254 @@
                         Fetch News
                     </button>
                     
-                    <div id="kathmanduProgress" class="mt-3" style="display: none;">
-                        <div class="alert alert-light border">
-                            <div class="d-flex align-items-center">
-                                <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
-                                <span class="small">Fetching Kathmandu Post...</span>
-                            </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paschim Nepal Card (based on Kathmandu Post pattern) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            {% load static %}
+                            <img src="{% static 'project_images/paschimnepal.jpg' %}" 
+                                alt="Paschim Nepal" 
+                                class="img-fluid" 
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=Paschim+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Paschim Nepal</h5>
+                        <p class="text-muted small mb-3">पश्चिम नेपालको समाचार</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-warning bg-opacity-10 text-warning">नेपाली</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning">Regional</span>
                         </div>
                     </div>
+                    
+                    <button class="btn btn-warning w-100 py-2 text-dark" 
+                            id="paschimNepalBtn" 
+                            onclick="fetchSource('paschimnepal', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/onlinekhabar.png' %}" 
+                                 alt="Online Khabar" 
+                                 class="img-fluid" 
+                                 style="height: 60px; width: auto;">
+                        </div>
+                        <h5 class="fw-bold mb-2">Online Khabar</h5>
+                        <p class="text-muted small mb-3">Digital news portal</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-warning bg-opacity-10 text-warning">नेपाली</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning">Digital</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-dark" 
+                            id="onlinekhabarBtn" 
+                            onclick="fetchSource('onlinekhabar', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Online TV Nepal Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            {% load static %}
+                            <img src="{% static 'project_images/onlinetv.png' %}" 
+                                alt="Online TV Nepal" 
+                                class="img-fluid" 
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=Online+TV+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Online TV Nepal</h5>
+                        <p class="text-muted small mb-3">Filmy news portal</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-info bg-opacity-10 text-info">मनोरञ्जन</span>
+                            <span class="badge bg-info bg-opacity-10 text-info">Filmy</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-info w-100 py-2 text-white" 
+                            id="onlinetvnepalBtn" 
+                            onclick="fetchSource('onlinetvnepal', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- OSNepal Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/osnepal.png' %}" 
+                                alt="OSNepal" 
+                                class="img-fluid" 
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=OSNepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">OSNepal</h5>
+                        <p class="text-muted small mb-3">News Portal</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary">समाचार</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">News</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100 py-2 text-white" 
+                            id="osnepalBtn" 
+                            onclick="fetchSource('osnepal', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- eAdarsha Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/eadarsha.jpg' %}" 
+                                alt="eAdarsha" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=Online+TV+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">eAdarsha</h5>
+                        <p class="text-muted small mb-3">Adarsha Samaj News</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-danger bg-opacity-10 text-danger">पोखरा</span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-danger w-100 py-2 text-white" 
+                            id="eadarshaBtn" 
+                            onclick="fetchSource('eadarsha', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Artha Sarokar Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/arthasarokar.png' %}" 
+                                alt="Artha Sarokar" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=Artha+Sarokar';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Artha Sarokar</h5>
+                        <p class="text-muted small mb-3">Economic News Portal</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-success bg-opacity-10 text-success">अर्थ</span>
+                            <span class="badge bg-success bg-opacity-10 text-success">व्यापार</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success w-100 py-2 text-white" 
+                            id="arthasarokarBtn" 
+                            onclick="fetchSource('arthasarokar', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of Nepal Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/newsofnepal.png' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">News of Nepal</h5>
+                        <p class="text-muted small mb-3">Nepal Samacharpatra, Kamana, Sadhana</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('newsofnepal', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Rajdhani Daily Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/rajdhanidaily.jpg' %}" 
+                                alt="Rajdhani Daily" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=Rajdhani';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Rajdhani Daily</h5>
+                        <p class="text-muted small mb-3">राजधानी राष्ट्रिय दैनिक</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary">राष्ट्रिय</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">दैनिक</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100 py-2 text-white" 
+                            id="rajdhanidailyBtn" 
+                            onclick="fetchSource('rajdhanidaily', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
                 </div>
             </div>
         </div>
@@ -199,6 +415,8 @@
                 </div>
             </div>
         </div> -->
+
+
 
     </div>
     
@@ -275,6 +493,10 @@ function getSourceName(source) {
         'kantipur': 'Kantipur',
         'kathmandupost': 'Kathmandu Post',
         'onlinekhabar': 'Online Khabar',
+        'paschimnepal': 'paschimnepal',
+        'onlinetvnepal': 'onlinetvnepal',
+        'osnepal': 'osnepal',
+        'eadarsha': 'eadarsha',
         'all': 'All Sources'
     };
     return names[source] || source;

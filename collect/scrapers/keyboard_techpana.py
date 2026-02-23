@@ -64,6 +64,7 @@ def keyboard_techpana_to_json(request):
         "/category/facebook",
         "/category/cyber-crime",
         "/category/cyber-attack",
+        "/category/tiktok",
         # "/category/twitter",
         # "/category/youtube",
         # "/category/law",
