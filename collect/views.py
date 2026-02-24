@@ -460,18 +460,21 @@ def newsSearching(request):
         'user_unit': user_unit,
     })
 
-# At the VERY TOP of your views.py file, use this import:
-import datetime
+# At the VERY TOP of your views.py file, use these imports:
+from datetime import datetime, timedelta  # Changed this line
 from django.utils import timezone
 from django.db.models import Count, Q
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
+from .models import ThreatAlert  # Add this import for the ThreatAlert model
+from utils.permission import check_access
 
 @login_required
 def newsVisualization(request):
     if not check_access(request):
         return redirect('logout')
+    
     user = request.user
     
     # Check if user account is active
@@ -483,6 +486,7 @@ def newsVisualization(request):
             'high_severity': 0,
             'medium_severity': 0,
             'low_severity': 0,
+            'critical_severity': 0,
             'chart_labels': [],
             'chart_data': [],
             'severity_labels': [],
@@ -490,11 +494,14 @@ def newsVisualization(request):
             'timeline_labels': [],
             'timeline_data': [],
             'trend_labels': [],
-            'trend_data': {'high': [], 'medium': [], 'low': []},
+            'trend_data': {'critical': [], 'high': [], 'medium': [], 'low': []},
             'sources_labels': [],
             'sources_data': [],
             'unit_stats': {},
             'user_unit': user.unit if hasattr(user, 'unit') else None,
+            'is_superuser': user.is_superuser,
+            'is_admin': getattr(user, 'role', 0) == 2,
+            'department_data': [],
         })
     
     # Get threats based on user's unit
@@ -549,10 +556,6 @@ def newsVisualization(request):
         category_counts.append(item['count'])
 
     # Severity distribution for chart
-    severity_data = threats.values('severity').annotate(
-        count=Count('id')
-    ).order_by('severity')
-
     severity_labels = []
     severity_counts = []
     severity_order = ['critical', 'high', 'medium', 'low']
@@ -565,12 +568,12 @@ def newsVisualization(request):
             severity_counts.append(count)
 
     # Timeline data (last 30 days)
-    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+    thirty_days_ago = timezone.now() - timedelta(days=30)  # Changed datetime.timedelta to timedelta
     
     # Simple manual approach for timeline data
     date_counts = {}
     for i in range(30):
-        date = (timezone.now() - datetime.timedelta(days=i)).date()
+        date = (timezone.now() - timedelta(days=i)).date()  # Changed datetime.timedelta to timedelta
         date_counts[date] = 0
     
     # Count threats for each date
@@ -597,10 +600,8 @@ def newsVisualization(request):
         sources_counts.append(item['count'])
 
     # Trend data (last 7 days by severity)
-    seven_days_ago = timezone.now() - datetime.timedelta(days=7)
-    
     # Get dates for last 7 days
-    dates = [(timezone.now() - datetime.timedelta(days=i)).date() for i in range(6, -1, -1)]
+    dates = [(timezone.now() - timedelta(days=i)).date() for i in range(6, -1, -1)]  # Changed datetime.timedelta to timedelta
     trend_labels = [date.strftime('%m/%d') for date in dates]
     
     # Initialize trend data structure
@@ -613,13 +614,13 @@ def newsVisualization(request):
     
     # Get threat counts for each severity for last 7 days
     for i, date in enumerate(dates):
-        # Create timezone-aware datetime objects - using datetime.datetime
+        # Create timezone-aware datetime objects - FIXED VERSION
         day_start = timezone.make_aware(
-            datetime.datetime.combine(date, datetime.time.min),
+            datetime.combine(date, datetime.min.time()),  # Changed datetime.datetime to datetime
             timezone.get_current_timezone()
         )
         day_end = timezone.make_aware(
-            datetime.datetime.combine(date, datetime.time.max),
+            datetime.combine(date, datetime.max.time()),  # Changed datetime.datetime to datetime
             timezone.get_current_timezone()
         )
         
@@ -5941,7 +5942,7 @@ def sentiment_report(request):
         
         # Get current datetime once
     
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
         
         # Calculate gradient positions for pie chart
         positive_end = positive
@@ -7446,7 +7447,7 @@ def list_autonews(request):
     
     # Recent articles (last 7 days)
     #  import datetime
-    one_week_ago = datetime.datetime.now() - datetime.timedelta(days=7)  # ✅ Correct
+    one_week_ago = datetime.now() - timedelta(days=7)  # ✅ Correct
     # one_week_ago = datetime.now() - timedelta(days=7)
     recent_articles = articles.filter(created_at__gte=one_week_ago).count()
     

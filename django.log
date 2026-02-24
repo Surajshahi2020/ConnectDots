@@ -805,3 +805,212 @@ INFO 2026-02-23 19:22:17 "POST /autofeed_keyboard/ HTTP/1.1" 200 226
 INFO 2026-02-23 19:22:22 "GET /viewAutoNews/ HTTP/1.1" 200 146648
 INFO 2026-02-23 19:22:28 "GET /viewAutoNews/ HTTP/1.1" 200 146648
 INFO 2026-02-23 19:22:31 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 01:35:07 Watching for file changes with StatReloader
+INFO 2026-02-24 01:35:19 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-24 01:35:19 "GET /static/css/fontawesome.min.css HTTP/1.1" 304 0
+INFO 2026-02-24 01:35:19 "GET /static/css/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2026-02-24 01:35:19 "GET /static/css/all.min.css HTTP/1.1" 304 0
+INFO 2026-02-24 01:35:19 "GET /static/js/sweetalert.js HTTP/1.1" 304 0
+INFO 2026-02-24 01:35:19 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 304 0
+WARNING 2026-02-24 01:35:19 Not Found: /favicon.ico
+WARNING 2026-02-24 01:35:19 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-24 01:35:28 "POST / HTTP/1.1" 302 0
+INFO 2026-02-24 01:35:28 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-24 01:35:28 "GET /static/js/boostrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2026-02-24 01:35:31 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 01:35:31 "GET /static/project_images/onlinekhabar.png HTTP/1.1" 200 6528
+INFO 2026-02-24 01:35:31 "GET /static/project_images/osnepal.png HTTP/1.1" 200 4693
+INFO 2026-02-24 01:35:31 "GET /static/project_images/eadarsha.jpg HTTP/1.1" 200 7615
+INFO 2026-02-24 01:35:31 "GET /static/project_images/onlinetv.png HTTP/1.1" 200 31144
+INFO 2026-02-24 01:35:31 "GET /static/project_images/paschimnepal.jpg HTTP/1.1" 200 43780
+INFO 2026-02-24 01:35:31 "GET /static/project_images/rajdhanidaily.jpg HTTP/1.1" 200 6808
+INFO 2026-02-24 01:35:31 "GET /static/project_images/newsofnepal.png HTTP/1.1" 200 14172
+INFO 2026-02-24 01:35:31 "GET /static/project_images/arthasarokar.png HTTP/1.1" 200 22757
+INFO 2026-02-24 01:35:56 "GET /log_out/ HTTP/1.1" 302 0
+INFO 2026-02-24 01:35:56 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-24 02:31:44 Watching for file changes with StatReloader
+INFO 2026-02-24 14:31:15 Watching for file changes with StatReloader
+INFO 2026-02-24 14:31:32 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-24 14:31:32 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-24 14:31:32 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-24 14:31:40 "POST / HTTP/1.1" 302 0
+INFO 2026-02-24 14:31:40 "GET /adding_new/ HTTP/1.1" 200 35422
+WARNING 2026-02-24 14:31:41 Not Found: /favicon.ico
+WARNING 2026-02-24 14:31:41 "GET /favicon.ico HTTP/1.1" 404 12493
+ERROR 2026-02-24 14:31:43 Internal Server Error: /visualize_news/
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 568, in newsVisualization
+    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+AttributeError: type object 'datetime.datetime' has no attribute 'timedelta'
+ERROR 2026-02-24 14:31:43 "GET /visualize_news/ HTTP/1.1" 500 80970
+INFO 2026-02-24 14:37:44 "GET /sites-monitor HTTP/1.1" 200 109554
+INFO 2026-02-24 14:37:47 "GET /dashboard/ HTTP/1.1" 200 40137
+INFO 2026-02-24 14:37:49 "GET /central_news/ HTTP/1.1" 200 117686
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/Screenshot_2026-02-14_114840_QaqLEYM.png HTTP/1.1" 200 135584
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/Screenshot_10.png HTTP/1.1" 200 258707
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/kp-oli_MZDFPE7D7z.jpg HTTP/1.1" 200 41043
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_1_2A3Zlp8.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_1_EiZtWnD.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_1_1VTXkaF.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_1.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_WppcnWn.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:49 "GET /media/threat_alerts/onlinekhabar_cSZ9VHE.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:50 "GET /media/threat_alerts/onlinekhabar_0C1S2HF.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:50 "GET /media/threat_alerts/onlinekhabar_APyww3J.png HTTP/1.1" 200 6528
+INFO 2026-02-24 14:37:50 "GET /files_sharing/ HTTP/1.1" 200 50239
+INFO 2026-02-24 14:37:52 "GET /files_sharing/ HTTP/1.1" 200 50239
+INFO 2026-02-24 14:37:53 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-24 14:37:54 "GET /map_visualization/ HTTP/1.1" 200 80113
+INFO 2026-02-24 14:37:54 "GET /static/css/leaflet.css HTTP/1.1" 200 14278
+INFO 2026-02-24 14:37:54 "GET /static/map/province1-district.js HTTP/1.1" 200 316802
+INFO 2026-02-24 14:37:54 "GET /static/map/province2-district.js HTTP/1.1" 200 194994
+INFO 2026-02-24 14:37:54 "GET /static/map/nepal-province.js HTTP/1.1" 200 364559
+INFO 2026-02-24 14:37:54 "GET /static/js/leaflet.js HTTP/1.1" 200 142605
+INFO 2026-02-24 14:37:54 "GET /static/map/province4-district.js HTTP/1.1" 200 273060
+INFO 2026-02-24 14:37:54 "GET /static/map/province5-district.js HTTP/1.1" 200 423914
+INFO 2026-02-24 14:37:54 "GET /static/map/province6-district.js HTTP/1.1" 200 462858
+INFO 2026-02-24 14:37:54 "GET /static/map/province7-district.js HTTP/1.1" 200 511607
+INFO 2026-02-24 14:37:55 "GET /static/map/province3-district.js HTTP/1.1" 200 1926058
+INFO 2026-02-24 14:37:56 "GET /get-markers/ HTTP/1.1" 200 8414
+INFO 2026-02-24 14:37:59 "GET /search_news/ HTTP/1.1" 200 63281
+ERROR 2026-02-24 14:38:00 Internal Server Error: /visualize_news/
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 568, in newsVisualization
+    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+AttributeError: type object 'datetime.datetime' has no attribute 'timedelta'
+ERROR 2026-02-24 14:38:00 "GET /visualize_news/ HTTP/1.1" 500 80971
+INFO 2026-02-24 14:38:10 "GET /report_sentiment HTTP/1.1" 200 36355
+ERROR 2026-02-24 14:38:13 Internal Server Error: /report_sentiment
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 5944, in sentiment_report
+    current_time = datetime.datetime.now()
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+ERROR 2026-02-24 14:38:13 "POST /report_sentiment HTTP/1.1" 500 77425
+ERROR 2026-02-24 14:38:23 Internal Server Error: /visualize_news/
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 568, in newsVisualization
+    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+AttributeError: type object 'datetime.datetime' has no attribute 'timedelta'
+ERROR 2026-02-24 14:38:23 "GET /visualize_news/ HTTP/1.1" 500 80975
+INFO 2026-02-24 14:41:17 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:41:19 Watching for file changes with StatReloader
+INFO 2026-02-24 14:41:30 Watching for file changes with StatReloader
+ERROR 2026-02-24 14:41:36 Internal Server Error: /visualize_news/
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 575, in newsVisualization
+    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+AttributeError: type object 'datetime.datetime' has no attribute 'timedelta'
+ERROR 2026-02-24 14:41:36 "GET /visualize_news/ HTTP/1.1" 500 80435
+INFO 2026-02-24 14:42:35 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:42:36 Watching for file changes with StatReloader
+INFO 2026-02-24 14:42:36 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:42:37 Watching for file changes with StatReloader
+INFO 2026-02-24 14:42:41 "GET /visualize_news/ HTTP/1.1" 200 38049
+INFO 2026-02-24 14:42:42 "GET /static/js/chart.js HTTP/1.1" 200 208534
+INFO 2026-02-24 14:43:11 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:43:11 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:43:12 Watching for file changes with StatReloader
+INFO 2026-02-24 14:43:13 Watching for file changes with StatReloader
+INFO 2026-02-24 14:43:19 "GET /visualize_news/ HTTP/1.1" 200 38049
+INFO 2026-02-24 14:43:25 "GET /sites-monitor HTTP/1.1" 200 109541
+INFO 2026-02-24 14:43:26 "GET /dashboard/ HTTP/1.1" 200 40137
+INFO 2026-02-24 14:43:27 "GET /central_news/ HTTP/1.1" 200 117686
+INFO 2026-02-24 14:43:29 "GET /files_sharing/ HTTP/1.1" 200 50239
+INFO 2026-02-24 14:43:30 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-24 14:43:31 "GET /viewAutoNews/ HTTP/1.1" 200 146828
+INFO 2026-02-24 14:43:33 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 14:43:33 "GET /static/project_images/nagarik.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/techpana.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/paschimnepal.jpg HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/kantipur.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/onlinetv.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/kathmandu.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/osnepal.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/eadarsha.jpg HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/arthasarokar.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/newsofnepal.png HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:33 "GET /static/project_images/rajdhanidaily.jpg HTTP/1.1" 304 0
+INFO 2026-02-24 14:43:34 "GET /search_news/ HTTP/1.1" 200 63281
+INFO 2026-02-24 14:43:36 "GET /visualize_news/ HTTP/1.1" 200 38049
+INFO 2026-02-24 14:43:38 "GET /trending_news/ HTTP/1.1" 200 52557
+INFO 2026-02-24 14:43:40 "GET /media/threat_alerts/videos/Screen_Recording_2026-01-25_101006_rY8rvuL.mp4 HTTP/1.1" 200 97313746
+INFO 2026-02-24 14:43:42 "GET /report_news/ HTTP/1.1" 200 49665
+INFO 2026-02-24 14:43:42 - Broken pipe from ('127.0.0.1', 64335)
+INFO 2026-02-24 14:43:42 - Broken pipe from ('127.0.0.1', 63217)
+INFO 2026-02-24 14:43:42 - Broken pipe from ('127.0.0.1', 51016)
+INFO 2026-02-24 14:43:42 - Broken pipe from ('127.0.0.1', 58549)
+INFO 2026-02-24 14:43:42 - Broken pipe from ('127.0.0.1', 58810)
+INFO 2026-02-24 14:43:46 "POST /generate_word/ HTTP/1.1" 200 38408
+INFO 2026-02-24 14:43:55 "GET /users/ HTTP/1.1" 200 58929
+INFO 2026-02-24 14:44:01 "GET /event/ HTTP/1.1" 200 100226
+ERROR 2026-02-24 14:44:04 "GET /autonews_list/ HTTP/1.1" 500 86412
+INFO 2026-02-24 14:44:36 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:44:36 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:44:37 Watching for file changes with StatReloader
+INFO 2026-02-24 14:44:37 Watching for file changes with StatReloader
+ERROR 2026-02-24 14:44:40 "GET /autonews_list/ HTTP/1.1" 500 78089
+INFO 2026-02-24 14:44:46 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:44:46 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:44:47 Watching for file changes with StatReloader
+INFO 2026-02-24 14:44:47 Watching for file changes with StatReloader
+INFO 2026-02-24 14:44:51 "GET /autonews_list/ HTTP/1.1" 200 167388
+INFO 2026-02-24 14:44:58 "GET /visualize_news/ HTTP/1.1" 200 38049
+INFO 2026-02-24 14:45:03 "GET /report_sentiment HTTP/1.1" 200 36355
+ERROR 2026-02-24 14:45:07 Internal Server Error: /report_sentiment
+Traceback (most recent call last):
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cyber\AppData\Local\Programs\Python\Python310\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cyber\Desktop\ConnectDots\collect\views.py", line 5945, in sentiment_report
+    current_time = datetime.datetime.now()
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+ERROR 2026-02-24 14:45:07 "POST /report_sentiment HTTP/1.1" 500 85570
+INFO 2026-02-24 14:45:32 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:45:32 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:45:33 Watching for file changes with StatReloader
+INFO 2026-02-24 14:45:33 Watching for file changes with StatReloader
+INFO 2026-02-24 14:45:37 "GET /report_sentiment HTTP/1.1" 200 36355
+INFO 2026-02-24 14:45:40 "POST /report_sentiment HTTP/1.1" 200 18974
+INFO 2026-02-24 14:47:06 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:47:06 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:47:07 Watching for file changes with StatReloader
+INFO 2026-02-24 14:47:07 Watching for file changes with StatReloader
+INFO 2026-02-24 14:47:12 "GET /map_visualization/ HTTP/1.1" 200 80113
+INFO 2026-02-24 14:47:14 "GET /get-markers/ HTTP/1.1" 200 8414
+INFO 2026-02-24 14:47:17 "GET /get-markers/?category=speech_event HTTP/1.1" 200 700
+INFO 2026-02-24 14:47:20 "GET /report_sentiment HTTP/1.1" 200 36355
+INFO 2026-02-24 14:47:26 "GET /visualize_news/ HTTP/1.1" 200 38049
