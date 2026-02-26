@@ -59,6 +59,32 @@
         </div>
     </div>
 
+    <!-- Export Options -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fw-semibold"><i class="fas fa-download me-2"></i>Download Files:</span>
+                            <button class="btn btn-sm btn-success" onclick="downloadTxt()">
+                                <i class="fas fa-file-alt me-1"></i> Download TXT
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="downloadCsv()">
+                                <i class="fas fa-file-csv me-1"></i> Download CSV
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearAllFeedback()">
+                                <i class="fas fa-trash me-1"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Row 1: Dashboard Charts -->
     <div class="row mb-4">
         <!-- Pie Chart -->
@@ -104,7 +130,7 @@
                             <i class="fas fa-smile text-success fa-2x"></i>
                         </div>
                         <div>
-                            <h5 class="mb-0 text-success">Positive Comments</h5>
+                            <h5 class="mb-0 text-success">Positive Comments (Label: 1)</h5>
                             <div class="small text-muted">Supportive and constructive feedback</div>
                         </div>
                     </div>
@@ -126,7 +152,7 @@
                             <i class="fas fa-frown text-danger fa-2x"></i>
                         </div>
                         <div>
-                            <h5 class="mb-0 text-danger">Negative Comments</h5>
+                            <h5 class="mb-0 text-danger">Negative Comments (Label: 0)</h5>
                             <div class="small text-muted">Critical or dissatisfied feedback</div>
                         </div>
                     </div>
@@ -148,7 +174,7 @@
                             <i class="fas fa-meh text-primary fa-2x"></i>
                         </div>
                         <div>
-                            <h5 class="mb-0 text-primary">Neutral Comments</h5>
+                            <h5 class="mb-0 text-primary">Neutral Comments (Label: 2)</h5>
                             <div class="small text-muted">Informational or factual statements</div>
                         </div>
                     </div>
@@ -174,13 +200,14 @@
                             <h5 class="mb-0"><i class="fas fa-comment-dots me-2 text-primary"></i>Analyzed Comments</h5>
                             <div class="small text-muted" id="activeFilters">
                                 Showing all {{ chart_data.comments_data|length }} comments • 
-                                <span class="text-success">{{ chart_data.sentiment_counts.positive }} positive</span> • 
-                                <span class="text-danger">{{ chart_data.sentiment_counts.negative }} negative</span> • 
-                                <span class="text-primary">{{ chart_data.sentiment_counts.neutral }} neutral</span>
+                                <span class="text-success">{{ chart_data.sentiment_counts.positive }} positive (1)</span> • 
+                                <span class="text-danger">{{ chart_data.sentiment_counts.negative }} negative (0)</span> • 
+                                <span class="text-primary">{{ chart_data.sentiment_counts.neutral }} neutral (2)</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-primary rounded-pill me-2" id="commentsCount">{{ chart_data.comments_data|length }}</span>
+                            <span class="badge bg-info rounded-pill" id="feedbackCount">0 entries</span>
                         </div>
                     </div>
                 </div>
@@ -190,9 +217,10 @@
                         {% for comment in chart_data.comments_data %}
                         <div class="comment-item border-bottom p-3" 
                              data-sentiment="{{ comment.sentiment|lower }}"
-                             data-author="{{ comment.author|lower|default:'unknown' }}"
+                             data-author="{{ comment.author|default:'unknown' }}"
                              data-timestamp="{{ comment.timestamp }}"
-                             data-comment="{{ comment.highlighted_comment|striptags|lower }}">
+                             data-comment-id="{{ forloop.counter }}"
+                             data-comment="{{ comment.highlighted_comment|striptags|escape }}">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="d-flex align-items-center">
                                     <div class="me-3">
@@ -207,24 +235,46 @@
                                 <div class="d-flex align-items-center gap-2">
                                     {% if comment.sentiment|lower == 'positive' %}
                                     <span class="badge bg-success">
-                                        <i class="fas fa-smile me-1"></i> Positive
+                                        <i class="fas fa-smile me-1"></i> Positive (1)
                                     </span>
                                     {% elif comment.sentiment|lower == 'negative' %}
                                     <span class="badge bg-danger">
-                                        <i class="fas fa-frown me-1"></i> Negative
+                                        <i class="fas fa-frown me-1"></i> Negative (0)
                                     </span>
                                     {% else %}
                                     <span class="badge bg-primary">
-                                        <i class="fas fa-meh me-1"></i> Neutral
+                                        <i class="fas fa-meh me-1"></i> Neutral (2)
                                     </span>
                                     {% endif %}
                                 </div>
                             </div>
                             
                             <!-- COMMENT TEXT DISPLAY -->
-                            <div class="comment-text mt-3 mb-0 p-3 bg-light rounded">
+                            <div class="comment-text mt-3 mb-3 p-3 bg-light rounded" lang="ne">
                                 {{ comment.highlighted_comment|safe|linebreaks }}
                             </div>
+                            
+                            <!-- Feedback Buttons - Now each creates a separate entry for the same comment -->
+                            <div class="d-flex justify-content-end gap-2 mt-2">
+                                <button class="btn btn-sm btn-outline-success feedback-btn" 
+                                        onclick="addFeedback('{{ forloop.counter }}', 'positive', '1', this)"
+                                        title="Add as Positive (Label: 1)">
+                                    <i class="fas fa-smile me-1"></i> Add Positive (1)
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger feedback-btn" 
+                                        onclick="addFeedback('{{ forloop.counter }}', 'negative', '0', this)"
+                                        title="Add as Negative (Label: 0)">
+                                    <i class="fas fa-frown me-1"></i> Add Negative (0)
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary feedback-btn" 
+                                        onclick="addFeedback('{{ forloop.counter }}', 'neutral', '2', this)"
+                                        title="Add as Neutral (Label: 2)">
+                                    <i class="fas fa-meh me-1"></i> Add Neutral (2)
+                                </button>
+                            </div>
+                            
+                            <!-- Display existing entries for this comment -->
+                            <div class="mt-3 existing-entries" id="entries-for-{{ forloop.counter }}"></div>
                         </div>
                         {% empty %}
                         <div class="text-center py-5 text-muted">
@@ -242,6 +292,23 @@
                             <h5 class="text-muted mb-2">No matching comments found</h5>
                             <p class="text-muted small mb-0">Try adjusting your search criteria or filters</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Saved Entries Summary -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>All Saved Entries</h5>
+                </div>
+                <div class="card-body">
+                    <div id="feedbackHistory">
+                        <!-- All saved entries will be displayed here -->
+                        <p class="text-muted text-center mb-0">No entries saved yet. Click the buttons to add.</p>
                     </div>
                 </div>
             </div>
@@ -279,6 +346,52 @@
     {% endif %}
 </div>
 
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editEntryId">
+                <div class="mb-3">
+                    <label for="editCommentText" class="form-label">Comment Text</label>
+                    <textarea class="form-control" id="editCommentText" rows="4" style="font-family: 'Noto Sans', 'Hind', 'Nirmala UI', sans-serif;"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Sentiment Label</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="editSentiment" id="editPositive" value="1">
+                            <label class="form-check-label text-success" for="editPositive">
+                                Positive (1)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="editSentiment" id="editNegative" value="0">
+                            <label class="form-check-label text-danger" for="editNegative">
+                                Negative (0)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="editSentiment" id="editNeutral" value="2">
+                            <label class="form-check-label text-primary" for="editNeutral">
+                                Neutral (2)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Hidden data container for JavaScript -->
 {% if chart_data %}
 <div id="chartData" style="display: none;" 
@@ -290,11 +403,8 @@
 {{ chart_data.sentiment_counts|json_script:"sentimentData" }}
 {% endif %}
 
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
-<script src="../static/js/comment-chart.js"></script>
-
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-<script src="../static/js/comment-visualize.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 // Global variables
@@ -302,6 +412,14 @@ let allComments = [];
 let currentPieChart = null;
 let currentBarChart = null;
 let currentSentimentFilter = 'all';
+let feedbackEntries = [];
+
+// Label mapping: Negative = 0, Positive = 1, Neutral = 2
+const labelMap = {
+    'positive': '1',
+    'neutral': '2',
+    'negative': '0'
+};
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -335,6 +453,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup sentiment filter buttons
     setupSentimentFilters();
+    
+    // Load feedback from localStorage
+    loadFeedback();
 });
 
 // Setup sentiment filter buttons
@@ -447,6 +568,564 @@ function updateCommentsDisplay(comments, sentimentFilter = 'all') {
         }
         activeFilters.textContent = filterText;
     }
+    
+    // Update feedback count
+    updateFeedbackCount();
+}
+
+// Add feedback to collection - Now allows multiple entries for the same comment
+function addFeedback(commentId, sentiment, label, button) {
+    const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+    
+    if (!commentItem) {
+        alert('Comment not found.');
+        return;
+    }
+    
+    // Get the comment text and clean it
+    let commentText = decodeURIComponent(commentItem.dataset.comment || 'No comment text');
+    
+    // Remove extra whitespace and clean the text
+    commentText = commentText.replace(/\s+/g, ' ').trim();
+    
+    // Create a unique ID for this entry
+    const entryId = Date.now() + Math.floor(Math.random() * 1000);
+    
+    // Store text and label - each click creates a NEW entry
+    const entry = {
+        id: entryId,
+        commentId: commentId, // Store which original comment this came from
+        text: commentText,
+        label: label, // 0 for negative, 1 for positive, 2 for neutral
+        sentiment: sentiment,
+        timestamp: new Date().toLocaleString()
+    };
+    
+    // Add to feedback array (each click adds a new entry)
+    feedbackEntries.push(entry);
+    
+    // Save to localStorage
+    localStorage.setItem('feedbackEntries', JSON.stringify(feedbackEntries));
+    
+    // Update display
+    displayFeedback();
+    displayCommentEntries(commentId);
+    updateFeedbackCount();
+    
+    // Show success message
+    showAddSuccess(sentiment, label);
+    
+    // Visual feedback on the button
+    if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Added!';
+        button.classList.remove('btn-outline-success', 'btn-outline-danger', 'btn-outline-primary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            if (sentiment === 'positive') {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-success');
+            } else if (sentiment === 'negative') {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-danger');
+            } else {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-primary');
+            }
+        }, 1500);
+    }
+    
+    console.log('Added entry:', entry);
+    console.log('Total entries:', feedbackEntries.length);
+}
+
+// Display entries for a specific comment
+function displayCommentEntries(commentId) {
+    const container = document.getElementById(`entries-for-${commentId}`);
+    if (!container) return;
+    
+    // Get entries for this comment
+    const entries = feedbackEntries.filter(entry => entry.commentId == commentId);
+    
+    if (entries.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '<div class="mt-2 p-2 bg-light rounded"><small class="text-muted">Saved entries for this comment:</small><div class="d-flex flex-wrap gap-2 mt-1">';
+    
+    entries.forEach(entry => {
+        let badgeClass = '';
+        if (entry.sentiment === 'positive') badgeClass = 'success';
+        else if (entry.sentiment === 'negative') badgeClass = 'danger';
+        else badgeClass = 'primary';
+        
+        html += `<span class="badge bg-${badgeClass} me-1 mb-1" style="cursor: pointer;" onclick="viewEntry(${entry.id})" title="Click to view/edit">
+                    ${entry.sentiment} (${entry.label})
+                 </span>`;
+    });
+    
+    html += '</div></div>';
+    container.innerHTML = html;
+}
+
+// Delete a single entry
+function deleteEntry(id) {
+    if (confirm('Are you sure you want to delete this entry?')) {
+        // Find the entry to get its commentId
+        const entry = feedbackEntries.find(e => e.id === id);
+        const commentId = entry ? entry.commentId : null;
+        
+        // Filter out the entry with the given id
+        feedbackEntries = feedbackEntries.filter(entry => entry.id !== id);
+        
+        // Save to localStorage
+        localStorage.setItem('feedbackEntries', JSON.stringify(feedbackEntries));
+        
+        // Update display
+        displayFeedback();
+        if (commentId) {
+            displayCommentEntries(commentId);
+        }
+        updateFeedbackCount();
+        
+        // Show success message
+        showDeleteSuccess();
+    }
+}
+
+// Open edit modal with entry data
+function editEntry(id) {
+    const entry = feedbackEntries.find(e => e.id === id);
+    if (!entry) return;
+    
+    // Set form values
+    document.getElementById('editEntryId').value = entry.id;
+    document.getElementById('editCommentText').value = entry.text;
+    
+    // Set radio button based on label
+    document.querySelectorAll('input[name="editSentiment"]').forEach(radio => {
+        radio.checked = radio.value === entry.label;
+    });
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    modal.show();
+}
+
+// Save edited entry
+function saveEdit() {
+    const id = parseInt(document.getElementById('editEntryId').value);
+    const newText = document.getElementById('editCommentText').value.trim();
+    const selectedLabel = document.querySelector('input[name="editSentiment"]:checked')?.value;
+    
+    if (!newText) {
+        alert('Comment text cannot be empty.');
+        return;
+    }
+    
+    if (!selectedLabel) {
+        alert('Please select a sentiment label.');
+        return;
+    }
+    
+    // Find and update the entry
+    const index = feedbackEntries.findIndex(e => e.id === id);
+    if (index !== -1) {
+        // Determine sentiment from label
+        let sentiment = 'neutral';
+        if (selectedLabel === '1') sentiment = 'positive';
+        else if (selectedLabel === '0') sentiment = 'negative';
+        
+        const commentId = feedbackEntries[index].commentId;
+        
+        feedbackEntries[index] = {
+            ...feedbackEntries[index],
+            text: newText,
+            label: selectedLabel,
+            sentiment: sentiment,
+            timestamp: new Date().toLocaleString() + ' (edited)'
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('feedbackEntries', JSON.stringify(feedbackEntries));
+        
+        // Update display
+        displayFeedback();
+        displayCommentEntries(commentId);
+        updateFeedbackCount();
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+        modal.hide();
+        
+        // Show success message
+        showEditSuccess();
+    }
+}
+
+// Download TXT file with format: text,label (one per line, NO HEADERS)
+function downloadTxt() {
+    if (feedbackEntries.length === 0) {
+        alert('No entries to download. Add some feedback first.');
+        return;
+    }
+    
+    // Create TXT content with format: text,label (no headers)
+    let txtContent = '';
+    
+    feedbackEntries.forEach(entry => {
+        // Handle text that might contain commas or quotes
+        let text = entry.text;
+        
+        // Escape quotes
+        text = text.replace(/"/g, '""');
+        
+        // If text contains comma or newline, wrap in quotes
+        if (text.includes(',') || text.includes('\n')) {
+            txtContent += `"${text}",${entry.label}\n`;
+        } else {
+            txtContent += `${text},${entry.label}\n`;
+        }
+    });
+    
+    // Create blob with UTF-8 BOM for proper Unicode support (Nepali text)
+    const blob = new Blob(['\uFEFF' + txtContent], { 
+        type: 'text/plain;charset=utf-8' 
+    });
+    
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sentiment_data_${Date.now()}.txt`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showDownloadSuccess('TXT');
+}
+
+// Download CSV file with format: text,label (with headers)
+function downloadCsv() {
+    if (feedbackEntries.length === 0) {
+        alert('No entries to download. Add some feedback first.');
+        return;
+    }
+    
+    // CSV Headers
+    const headers = ['text', 'label'];
+    
+    // Escape CSV field function for proper formatting
+    const escapeCsvField = (field) => {
+        if (field === null || field === undefined) return '';
+        const stringField = String(field);
+        
+        // Replace any problematic characters
+        let escaped = stringField;
+        
+        // Escape double quotes by replacing " with ""
+        escaped = escaped.replace(/"/g, '""');
+        
+        // If field contains comma, newline, or double quote, wrap in quotes
+        if (escaped.includes(',') || escaped.includes('\n') || escaped.includes('"')) {
+            return '"' + escaped + '"';
+        }
+        return escaped;
+    };
+    
+    // Create CSV content with headers
+    let csvContent = headers.join(',') + '\n';
+    
+    feedbackEntries.forEach(entry => {
+        const row = [
+            escapeCsvField(entry.text),
+            escapeCsvField(entry.label)
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+    
+    // Create blob with UTF-8 BOM for proper Unicode support (Nepali text)
+    const blob = new Blob(['\uFEFF' + csvContent], { 
+        type: 'text/csv;charset=utf-8' 
+    });
+    
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sentiment_data_${Date.now()}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showDownloadSuccess('CSV');
+}
+
+// Clear all feedback
+function clearAllFeedback() {
+    if (feedbackEntries.length === 0) {
+        alert('No entries to clear.');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to clear all saved entries? This cannot be undone.')) {
+        // Clear the array
+        feedbackEntries = [];
+        
+        // Remove from localStorage
+        localStorage.removeItem('feedbackEntries');
+        
+        // Update display
+        displayFeedback();
+        // Clear all comment-specific displays
+        allComments.forEach(comment => {
+            const commentId = comment.dataset.commentId;
+            displayCommentEntries(commentId);
+        });
+        updateFeedbackCount();
+        
+        // Show success message
+        showClearSuccess();
+        
+        console.log('All entries cleared. localStorage removed.');
+    }
+}
+
+// Load feedback from localStorage
+function loadFeedback() {
+    const saved = localStorage.getItem('feedbackEntries');
+    if (saved) {
+        try {
+            feedbackEntries = JSON.parse(saved);
+            displayFeedback();
+            // Display entries for each comment
+            allComments.forEach(comment => {
+                const commentId = comment.dataset.commentId;
+                displayCommentEntries(commentId);
+            });
+            updateFeedbackCount();
+            console.log('Loaded entries from localStorage:', feedbackEntries.length);
+        } catch (e) {
+            console.error('Error loading feedback:', e);
+            feedbackEntries = [];
+            // Clear invalid data from localStorage
+            localStorage.removeItem('feedbackEntries');
+        }
+    } else {
+        console.log('No saved entries in localStorage');
+        feedbackEntries = [];
+        displayFeedback();
+        updateFeedbackCount();
+    }
+}
+
+// Display all feedback history
+function displayFeedback() {
+    const historyContainer = document.getElementById('feedbackHistory');
+    if (!historyContainer) return;
+    
+    if (feedbackEntries.length === 0) {
+        historyContainer.innerHTML = '<p class="text-muted text-center mb-0">No entries saved yet. Click the buttons to add.</p>';
+        return;
+    }
+    
+    let html = '<div class="feedback-list">';
+    
+    // Show all entries
+    feedbackEntries.slice().reverse().forEach((entry, index) => {
+        let sentimentClass = '';
+        let sentimentIcon = '';
+        let sentimentText = '';
+        
+        if (entry.sentiment === 'positive') {
+            sentimentClass = 'success';
+            sentimentIcon = 'fa-smile';
+            sentimentText = 'Positive';
+        } else if (entry.sentiment === 'negative') {
+            sentimentClass = 'danger';
+            sentimentIcon = 'fa-frown';
+            sentimentText = 'Negative';
+        } else {
+            sentimentClass = 'primary';
+            sentimentIcon = 'fa-meh';
+            sentimentText = 'Neutral';
+        }
+        
+        html += `
+            <div class="feedback-entry border-bottom py-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex: 1;">
+                        <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+                            <span class="badge bg-${sentimentClass} me-2" style="font-size: 0.9rem; padding: 6px 12px;">
+                                <i class="fas ${sentimentIcon} me-1"></i> ${sentimentText} (${entry.label})
+                            </span>
+                            <small class="text-muted">Comment #${entry.commentId}</small>
+                            <small class="text-muted">${entry.timestamp}</small>
+                        </div>
+                        <div class="mt-2 p-2 bg-light rounded" style="font-family: 'Noto Sans', 'Hind', 'Nirmala UI', sans-serif;">
+                            ${entry.text}
+                        </div>
+                    </div>
+                    <div class="ms-3 d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editEntry(${entry.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${entry.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    historyContainer.innerHTML = html;
+}
+
+// Update feedback count badge
+function updateFeedbackCount() {
+    const feedbackCount = document.getElementById('feedbackCount');
+    if (feedbackCount) {
+        feedbackCount.textContent = `${feedbackEntries.length} entries`;
+        
+        if (feedbackEntries.length > 0) {
+            feedbackCount.classList.remove('bg-info');
+            feedbackCount.classList.add('bg-success');
+        } else {
+            feedbackCount.classList.remove('bg-success');
+            feedbackCount.classList.add('bg-info');
+        }
+    }
+}
+
+// View entry details
+function viewEntry(id) {
+    editEntry(id); // Reuse edit functionality
+}
+
+// Show add success message
+function showAddSuccess(sentiment, label) {
+    const message = document.createElement('div');
+    message.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    message.style.zIndex = '9999';
+    message.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+                <strong>Added!</strong><br>
+                <small>Entry saved as ${sentiment} (label: ${label})</small>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 2000);
+}
+
+// Show delete success message
+function showDeleteSuccess() {
+    const message = document.createElement('div');
+    message.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    message.style.zIndex = '9999';
+    message.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+                <strong>Deleted!</strong><br>
+                <small>Entry has been deleted.</small>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 2000);
+}
+
+// Show edit success message
+function showEditSuccess() {
+    const message = document.createElement('div');
+    message.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    message.style.zIndex = '9999';
+    message.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+                <strong>Updated!</strong><br>
+                <small>Entry has been updated.</small>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 2000);
+}
+
+// Show download success message
+function showDownloadSuccess(format) {
+    const message = document.createElement('div');
+    message.className = 'alert alert-info alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    message.style.zIndex = '9999';
+    message.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-download me-2"></i>
+            <div>
+                <strong>Downloaded!</strong><br>
+                <small>${format} file with ${feedbackEntries.length} entries in text,label format</small>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 2000);
+}
+
+// Show clear success message
+function showClearSuccess() {
+    const message = document.createElement('div');
+    message.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    message.style.zIndex = '9999';
+    message.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-trash me-2"></i>
+            <div>
+                <strong>Cleared!</strong><br>
+                <small>All entries have been cleared from memory and localStorage.</small>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 2000);
 }
 
 // Create pie chart
@@ -458,7 +1137,7 @@ function createPieChart(positive, negative, neutral) {
     currentPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
+            labels: ['Positive (1)', 'Negative (0)', 'Neutral (2)'],
             datasets: [{
                 data: [positive, negative, neutral],
                 backgroundColor: [
@@ -476,8 +1155,8 @@ function createPieChart(positive, negative, neutral) {
             }]
         },
         options: {
-            responsive: false,
-            maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: true,
             cutout: '65%',
             plugins: {
                 legend: {
@@ -509,7 +1188,7 @@ function createBarChart(positive, negative, neutral, total) {
     currentBarChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
+            labels: ['Positive (1)', 'Negative (0)', 'Neutral (2)'],
             datasets: [{
                 label: 'Number of Comments',
                 data: [positive, negative, neutral],
@@ -529,7 +1208,7 @@ function createBarChart(positive, negative, neutral, total) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
                     display: false
@@ -557,7 +1236,7 @@ function createBarChart(positive, negative, neutral, total) {
                 x: {
                     title: {
                         display: true,
-                        text: 'Sentiment'
+                        text: 'Sentiment (Label)'
                     }
                 }
             }
@@ -565,6 +1244,9 @@ function createBarChart(positive, negative, neutral, total) {
     });
 }
 </script>
+
+<!-- Add Bootstrap JS for modal -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
 :root {
@@ -699,6 +1381,7 @@ body {
     background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid rgba(0, 0, 0, 0.1);
+    font-family: 'Noto Sans', 'Hind', 'Nirmala UI', 'Microsoft New Tai Lue', sans-serif;
 }
 
 .comment-text p {
@@ -707,6 +1390,34 @@ body {
 
 .comment-text p:last-child {
     margin-bottom: 0;
+}
+
+/* Feedback Buttons */
+.feedback-btn {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.feedback-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-btn.btn-outline-success:hover {
+    background: #198754;
+    color: white;
+}
+
+.feedback-btn.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.feedback-btn.btn-outline-primary:hover {
+    background: #0d6efd;
+    color: white;
 }
 
 /* Sentiment Badges */
@@ -813,6 +1524,75 @@ body {
     animation-delay: 0.2s;
 }
 
+/* Feedback count badge */
+#feedbackCount {
+    transition: all 0.3s ease;
+}
+
+/* Feedback history */
+.feedback-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.feedback-entry {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.feedback-entry:hover {
+    background: rgba(67, 97, 238, 0.05);
+}
+
+/* Existing entries container */
+.existing-entries {
+    border-top: 1px dashed #dee2e6;
+}
+
+/* Text truncate */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Success animation */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.alert-success, .alert-info, .alert-warning {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .dashboard-header {
@@ -848,6 +1628,11 @@ body {
         min-width: 140px;
         padding: 10px 16px;
         font-size: 0.9rem;
+    }
+    
+    .feedback-btn {
+        padding: 2px 8px;
+        font-size: 0.7rem;
     }
 }
 </style>

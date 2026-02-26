@@ -1014,3 +1014,134 @@ INFO 2026-02-24 14:47:14 "GET /get-markers/ HTTP/1.1" 200 8414
 INFO 2026-02-24 14:47:17 "GET /get-markers/?category=speech_event HTTP/1.1" 200 700
 INFO 2026-02-24 14:47:20 "GET /report_sentiment HTTP/1.1" 200 36355
 INFO 2026-02-24 14:47:26 "GET /visualize_news/ HTTP/1.1" 200 38049
+INFO 2026-02-24 14:48:07 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-24 14:48:08 Watching for file changes with StatReloader
+INFO 2026-02-24 16:25:02 Watching for file changes with StatReloader
+INFO 2026-02-24 16:25:41 "GET / HTTP/1.1" 200 14103
+WARNING 2026-02-24 16:25:41 Not Found: /favicon.ico
+WARNING 2026-02-24 16:25:41 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-24 16:25:48 "POST / HTTP/1.1" 302 0
+INFO 2026-02-24 16:25:48 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-24 16:25:59 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 16:31:50 "GET /listing_keyboard/ HTTP/1.1" 200 49484
+INFO 2026-02-24 16:32:06 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 16:32:11 "POST /autofeed_keyboard/ HTTP/1.1" 200 226
+INFO 2026-02-24 16:32:16 "GET /viewAutoNews/ HTTP/1.1" 200 145695
+INFO 2026-02-24 16:33:50 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-24 16:34:35 "POST /autofeed_keyboard/ HTTP/1.1" 200 195
+INFO 2026-02-24 16:34:49 "GET /viewAutoNews/ HTTP/1.1" 200 161925
+INFO 2026-02-24 16:35:02 "GET /log_out/ HTTP/1.1" 302 0
+INFO 2026-02-24 16:35:02 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-25 10:06:10 Watching for file changes with StatReloader
+INFO 2026-02-25 10:06:38 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-25 10:06:38 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-25 10:06:38 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-25 10:06:46 "POST / HTTP/1.1" 302 0
+INFO 2026-02-25 10:06:46 "GET /adding_new/ HTTP/1.1" 200 35422
+WARNING 2026-02-25 10:06:47 Not Found: /favicon.ico
+WARNING 2026-02-25 10:06:47 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-25 10:07:23 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-25 10:07:23 "GET /static/project_images/paschimnepal.jpg HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/onlinetv.png HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/osnepal.png HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/eadarsha.jpg HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/newsofnepal.png HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/arthasarokar.png HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:23 "GET /static/project_images/rajdhanidaily.jpg HTTP/1.1" 304 0
+INFO 2026-02-25 10:07:53 "GET /viewAutoNews/ HTTP/1.1" 200 162105
+INFO 2026-02-25 10:09:36 "GET /fetch_keyboard/ HTTP/1.1" 200 60181
+INFO 2026-02-25 10:09:36 "GET /static/js/sweetalert.js HTTP/1.1" 304 0
+INFO 2026-02-25 10:16:36 "POST /autofeed_keyboard/ HTTP/1.1" 200 221
+INFO 2026-02-25 10:16:39 "GET /viewAutoNews/ HTTP/1.1" 200 153926
+INFO 2026-02-25 10:17:31 "GET /sites-monitor HTTP/1.1" 200 109534
+INFO 2026-02-25 10:18:38 "GET /sites-monitor HTTP/1.1" 200 109521
+INFO 2026-02-25 10:19:45 "GET /sites-monitor HTTP/1.1" 200 109521
+INFO 2026-02-25 15:36:39 Watching for file changes with StatReloader
+INFO 2026-02-25 15:36:56 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-25 15:36:56 "GET /static/css/all.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:36:56 "GET /static/css/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:36:56 "GET /static/css/fontawesome.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:36:56 "GET /static/js/sweetalert.js HTTP/1.1" 304 0
+INFO 2026-02-25 15:36:56 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 304 0
+WARNING 2026-02-25 15:36:56 Not Found: /favicon.ico
+WARNING 2026-02-25 15:36:56 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-25 15:37:05 "POST / HTTP/1.1" 302 0
+INFO 2026-02-25 15:37:05 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-25 15:37:05 "GET /static/js/boostrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2026-02-25 15:37:09 "GET /log_out/ HTTP/1.1" 302 0
+INFO 2026-02-25 15:37:09 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-25 15:47:16 Watching for file changes with StatReloader
+INFO 2026-02-25 15:47:18 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-25 15:47:18 "GET /static/css/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:47:18 "GET /static/css/fontawesome.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:47:18 "GET /static/css/all.min.css HTTP/1.1" 304 0
+INFO 2026-02-25 15:47:18 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 304 0
+WARNING 2026-02-25 15:47:18 Not Found: /favicon.ico
+WARNING 2026-02-25 15:47:18 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-25 15:47:27 "POST / HTTP/1.1" 302 0
+INFO 2026-02-25 15:47:27 "GET /adding_new/ HTTP/1.1" 200 35422
+INFO 2026-02-25 15:47:27 "GET /static/js/boostrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2026-02-25 16:16:21 "GET /analyze_comment/ HTTP/1.1" 200 42622
+INFO 2026-02-25 16:16:21 "GET /static/js/comment-chart.js HTTP/1.1" 200 80605
+INFO 2026-02-25 16:16:21 "GET /static/js/comment-visualize.js HTTP/1.1" 200 208534
+INFO 2026-02-25 16:16:30 "POST /analyze_comment/ HTTP/1.1" 200 616225
+INFO 2026-02-25 16:18:10 "GET /dashboard/ HTTP/1.1" 200 40137
+INFO 2026-02-25 16:18:11 "GET /dashboard/ HTTP/1.1" 200 40137
+INFO 2026-02-25 16:18:15 - Broken pipe from ('127.0.0.1', 49241)
+INFO 2026-02-25 16:18:34 "GET /analyze_comment/ HTTP/1.1" 200 42622
+INFO 2026-02-25 16:18:39 "POST /analyze_comment/ HTTP/1.1" 200 616225
+INFO 2026-02-25 16:20:18 "GET /central_news/ HTTP/1.1" 200 117686
+INFO 2026-02-25 16:20:18 "GET /media/threat_alerts/Screenshot_2026-02-14_114840_QaqLEYM.png HTTP/1.1" 304 0
+INFO 2026-02-25 16:20:23 "GET /log_out/ HTTP/1.1" 302 0
+INFO 2026-02-25 16:20:23 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-25 16:21:03 Watching for file changes with StatReloader
+INFO 2026-02-26 10:50:30 Watching for file changes with StatReloader
+INFO 2026-02-26 10:51:33 code 400, message Bad request version ('J\x9b—\x80')
+ERROR 2026-02-26 10:51:33 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2026-02-26 10:51:33 code 400, message Bad request version ('\x00')
+ERROR 2026-02-26 10:51:33 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2026-02-26 10:51:36 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-26 10:51:37 "GET /static/js/sweetalert.js HTTP/1.1" 200 79894
+INFO 2026-02-26 10:51:37 "GET /static/css/all.min.css HTTP/1.1" 200 125646
+INFO 2026-02-26 10:51:37 "GET /static/css/fontawesome.min.css HTTP/1.1" 200 134424
+INFO 2026-02-26 10:51:37 "GET /static/css/bootstrap.min.css HTTP/1.1" 200 312361
+INFO 2026-02-26 10:51:37 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156532
+INFO 2026-02-26 10:51:37 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-26 10:51:37 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-26 10:52:13 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-26 10:52:13 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-26 10:52:13 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-26 12:55:51 Watching for file changes with StatReloader
+INFO 2026-02-26 12:55:59 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-26 12:55:59 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-26 12:55:59 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-26 12:55:59 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-26 12:56:06 "POST / HTTP/1.1" 302 0
+INFO 2026-02-26 12:56:06 "GET /adding_new/ HTTP/1.1" 200 35425
+WARNING 2026-02-26 12:56:06 Not Found: /favicon.ico
+WARNING 2026-02-26 12:56:06 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-26 12:56:09 "GET /analyze_comment/ HTTP/1.1" 200 42625
+INFO 2026-02-26 12:56:15 "POST /analyze_comment/ HTTP/1.1" 200 616228
+INFO 2026-02-26 13:03:23 "GET /analyze_comment/ HTTP/1.1" 200 47666
+INFO 2026-02-26 13:03:28 "POST /analyze_comment/ HTTP/1.1" 200 623291
+INFO 2026-02-26 13:10:19 "GET /analyze_comment/ HTTP/1.1" 200 47648
+INFO 2026-02-26 13:10:24 "POST /analyze_comment/ HTTP/1.1" 200 624390
+INFO 2026-02-26 13:11:36 "GET /analyze_comment/ HTTP/1.1" 200 42625
+INFO 2026-02-26 13:11:40 "POST /analyze_comment/ HTTP/1.1" 200 616228
+INFO 2026-02-26 13:16:07 "GET /analyze_comment/ HTTP/1.1" 200 51008
+INFO 2026-02-26 13:16:15 "POST /analyze_comment/ HTTP/1.1" 200 765087
+INFO 2026-02-26 13:17:05 "GET /analyze_comment/ HTTP/1.1" 200 51008
+INFO 2026-02-26 13:17:10 "POST /analyze_comment/ HTTP/1.1" 200 765087
+INFO 2026-02-26 13:19:15 "GET /analyze_comment/ HTTP/1.1" 200 51008
+INFO 2026-02-26 13:19:20 "POST /analyze_comment/ HTTP/1.1" 200 765087
+INFO 2026-02-26 13:24:40 "GET /analyze_comment/ HTTP/1.1" 200 50563
+INFO 2026-02-26 13:24:45 "POST /analyze_comment/ HTTP/1.1" 200 1027222
+INFO 2026-02-26 13:31:33 "GET /analyze_comment/ HTTP/1.1" 200 50563
+INFO 2026-02-26 13:31:41 "POST /analyze_comment/ HTTP/1.1" 200 1027222
+INFO 2026-02-26 13:38:18 "POST /analyze_comment/ HTTP/1.1" 200 1060002
+INFO 2026-02-26 13:44:46 "GET /analyze_comment/ HTTP/1.1" 200 56269
+INFO 2026-02-26 13:44:52 "POST /analyze_comment/ HTTP/1.1" 200 1045230
+INFO 2026-02-26 13:55:48 "GET /analyze_comment/ HTTP/1.1" 200 55219
+INFO 2026-02-26 13:56:23 "POST /analyze_comment/ HTTP/1.1" 200 1027348
+INFO 2026-02-26 14:11:52 "GET /analyze_comment/ HTTP/1.1" 200 55219
+INFO 2026-02-26 14:11:57 "POST /analyze_comment/ HTTP/1.1" 200 1027348
