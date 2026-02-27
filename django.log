@@ -1145,3 +1145,134 @@ INFO 2026-02-26 13:55:48 "GET /analyze_comment/ HTTP/1.1" 200 55219
 INFO 2026-02-26 13:56:23 "POST /analyze_comment/ HTTP/1.1" 200 1027348
 INFO 2026-02-26 14:11:52 "GET /analyze_comment/ HTTP/1.1" 200 55219
 INFO 2026-02-26 14:11:57 "POST /analyze_comment/ HTTP/1.1" 200 1027348
+INFO 2026-02-26 14:18:31 "GET /analyze_comment/ HTTP/1.1" 200 54938
+INFO 2026-02-26 14:18:39 "POST /analyze_comment/ HTTP/1.1" 200 1050293
+INFO 2026-02-26 14:19:05 "GET /analyze_comment/ HTTP/1.1" 200 54938
+INFO 2026-02-26 14:19:11 "POST /analyze_comment/ HTTP/1.1" 200 1050293
+INFO 2026-02-26 14:20:23 "GET /analyze_comment/ HTTP/1.1" 200 57041
+INFO 2026-02-26 14:20:27 "POST /analyze_comment/ HTTP/1.1" 200 1060002
+INFO 2026-02-26 14:21:10 "GET /analyze_comment/ HTTP/1.1" 200 55219
+INFO 2026-02-26 14:21:14 "POST /analyze_comment/ HTTP/1.1" 200 1027348
+INFO 2026-02-26 14:21:31 "GET /analyze_comment/ HTTP/1.1" 200 56269
+INFO 2026-02-26 14:21:36 "POST /analyze_comment/ HTTP/1.1" 200 1045230
+INFO 2026-02-26 14:27:57 "GET /analyze_comment/ HTTP/1.1" 200 55514
+INFO 2026-02-26 14:28:04 "POST /analyze_comment/ HTTP/1.1" 200 1054442
+INFO 2026-02-26 14:36:13 "GET /analyze_comment/ HTTP/1.1" 200 55373
+INFO 2026-02-26 14:36:33 "POST /analyze_comment/ HTTP/1.1" 200 1059593
+INFO 2026-02-26 14:50:13 "GET /analyze_comment/ HTTP/1.1" 200 56033
+INFO 2026-02-26 14:50:19 "POST /analyze_comment/ HTTP/1.1" 200 1060253
+INFO 2026-02-26 14:51:36 "GET /analyze_comment/ HTTP/1.1" 200 56033
+INFO 2026-02-26 14:51:43 "POST /analyze_comment/ HTTP/1.1" 200 1060253
+WARNING 2026-02-26 14:51:49 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-02-26 14:51:49 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 12604
+WARNING 2026-02-26 14:51:49 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1849
+WARNING 2026-02-26 14:51:51 "GET /static/css/bootstrap.min.css.map HTTP/1.1" 404 1834
+INFO 2026-02-26 14:51:53 "POST /analyze_comment/ HTTP/1.1" 200 1060253
+WARNING 2026-02-26 14:51:53 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-02-26 14:51:53 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 12604
+INFO 2026-02-26 14:51:53 "GET /static/css/bootstrap.min.css HTTP/1.1" 200 312361
+INFO 2026-02-26 14:51:53 "GET /static/css/all.min.css HTTP/1.1" 200 125646
+INFO 2026-02-26 14:51:53 "GET /static/js/sweetalert.js HTTP/1.1" 200 79894
+INFO 2026-02-26 14:51:53 "GET /static/js/boostrap.bundle.min.js HTTP/1.1" 200 92623
+WARNING 2026-02-26 14:51:53 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1849
+INFO 2026-02-26 14:51:53 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156532
+WARNING 2026-02-26 14:51:53 "GET /static/css/bootstrap.min.css.map HTTP/1.1" 404 1834
+WARNING 2026-02-26 14:51:56 Not Found: /favicon.ico
+WARNING 2026-02-26 14:51:56 "GET /favicon.ico HTTP/1.1" 404 12493
+WARNING 2026-02-26 14:52:56 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-02-26 14:52:56 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 12604
+WARNING 2026-02-26 14:52:56 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1849
+WARNING 2026-02-26 14:52:58 "GET /static/css/bootstrap.min.css.map HTTP/1.1" 404 1834
+INFO 2026-02-26 14:56:24 "GET /analyze_comment/ HTTP/1.1" 200 56570
+INFO 2026-02-26 14:56:28 "POST /analyze_comment/ HTTP/1.1" 200 1060790
+INFO 2026-02-26 14:57:58 "GET /analyze_comment/ HTTP/1.1" 200 56570
+INFO 2026-02-26 14:58:06 "POST /analyze_comment/ HTTP/1.1" 200 1060790
+INFO 2026-02-26 15:58:12 "GET /analyze_comment/ HTTP/1.1" 200 56570
+INFO 2026-02-26 15:58:17 "POST /analyze_comment/ HTTP/1.1" 200 1071111
+INFO 2026-02-26 16:06:29 "GET /analyze_comment/ HTTP/1.1" 200 64084
+INFO 2026-02-26 16:06:35 "POST /analyze_comment/ HTTP/1.1" 200 1078652
+WARNING 2026-02-26 16:09:06 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-02-26 16:09:06 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 12604
+WARNING 2026-02-26 16:09:06 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1849
+WARNING 2026-02-26 16:09:08 "GET /static/css/bootstrap.min.css.map HTTP/1.1" 404 1834
+INFO 2026-02-26 16:09:45 "GET /analyze_comment/ HTTP/1.1" 200 64084
+WARNING 2026-02-26 16:09:45 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2026-02-26 16:09:45 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 12604
+WARNING 2026-02-26 16:09:45 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1849
+WARNING 2026-02-26 16:09:45 "GET /static/css/bootstrap.min.css.map HTTP/1.1" 404 1834
+INFO 2026-02-26 16:09:51 "POST /analyze_comment/ HTTP/1.1" 200 1081298
+INFO 2026-02-26 16:13:06 "GET /analyze_comment/ HTTP/1.1" 200 64084
+INFO 2026-02-26 16:13:11 "POST /analyze_comment/ HTTP/1.1" 200 1078652
+INFO 2026-02-26 16:15:27 "GET /analyze_comment/ HTTP/1.1" 200 64084
+INFO 2026-02-26 16:15:31 "POST /analyze_comment/ HTTP/1.1" 200 1081298
+INFO 2026-02-26 16:16:35 "GET /analyze_comment/ HTTP/1.1" 200 64084
+INFO 2026-02-26 16:16:40 "POST /analyze_comment/ HTTP/1.1" 200 1078652
+INFO 2026-02-26 16:24:18 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-26 16:24:23 "POST /analyze_comment/ HTTP/1.1" 200 1136141
+INFO 2026-02-26 16:24:44 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-26 16:24:51 "POST /analyze_comment/ HTTP/1.1" 200 1136141
+INFO 2026-02-26 16:25:40 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-26 16:25:45 "POST /analyze_comment/ HTTP/1.1" 200 1136141
+INFO 2026-02-26 16:32:25 "GET /analyze_comment/ HTTP/1.1" 200 75892
+INFO 2026-02-26 16:32:30 "POST /analyze_comment/ HTTP/1.1" 200 1163112
+INFO 2026-02-26 16:32:58 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-26 16:33:03 "POST /analyze_comment/ HTTP/1.1" 200 1136141
+INFO 2026-02-26 16:33:38 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-26 16:33:43 "POST /analyze_comment/ HTTP/1.1" 200 1136141
+INFO 2026-02-26 16:55:44 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-26 16:55:44 "GET /static/css/fontawesome.min.css HTTP/1.1" 200 134424
+WARNING 2026-02-26 16:55:44 Not Found: /favicon.ico
+WARNING 2026-02-26 16:55:44 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-26 16:55:45 Watching for file changes with StatReloader
+INFO 2026-02-27 10:18:45 Watching for file changes with StatReloader
+INFO 2026-02-27 10:19:29 "GET / HTTP/1.1" 200 14103
+INFO 2026-02-27 10:19:30 "GET /static/css/fontawesome.min.css HTTP/1.1" 200 134424
+INFO 2026-02-27 10:19:30 "GET /static/css/all.min.css HTTP/1.1" 200 125646
+INFO 2026-02-27 10:19:30 "GET /static/css/bootstrap.min.css HTTP/1.1" 200 312361
+INFO 2026-02-27 10:19:30 "GET /static/js/sweetalert.js HTTP/1.1" 200 79894
+INFO 2026-02-27 10:19:30 "GET /static/css/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156532
+INFO 2026-02-27 10:19:30 "GET /favicon.ico HTTP/1.1" 302 0
+INFO 2026-02-27 10:19:30 "GET /login/ HTTP/1.1" 200 14103
+INFO 2026-02-27 10:19:38 "POST / HTTP/1.1" 302 0
+INFO 2026-02-27 10:19:38 "GET /adding_new/ HTTP/1.1" 200 35425
+INFO 2026-02-27 10:19:38 "GET /static/js/boostrap.bundle.min.js HTTP/1.1" 200 92623
+WARNING 2026-02-27 10:19:38 Not Found: /favicon.ico
+WARNING 2026-02-27 10:19:38 "GET /favicon.ico HTTP/1.1" 404 12493
+INFO 2026-02-27 10:19:45 "GET /url_catch HTTP/1.1" 200 30077
+INFO 2026-02-27 10:19:47 "GET /files_sharing/ HTTP/1.1" 200 50242
+INFO 2026-02-27 10:19:51 "GET /dashboard/ HTTP/1.1" 200 40140
+INFO 2026-02-27 10:19:53 "GET /central_news/ HTTP/1.1" 200 117689
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_1_2A3Zlp8.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/Screenshot_10.png HTTP/1.1" 200 258707
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_1_1VTXkaF.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_1_EiZtWnD.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/Screenshot_2026-02-14_114840_QaqLEYM.png HTTP/1.1" 200 135584
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_APyww3J.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_0C1S2HF.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_WppcnWn.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_cSZ9VHE.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/onlinekhabar_1.png HTTP/1.1" 200 6528
+INFO 2026-02-27 10:19:53 "GET /media/threat_alerts/kp-oli_MZDFPE7D7z.jpg HTTP/1.1" 200 41043
+INFO 2026-02-27 10:19:55 "GET /files_sharing/ HTTP/1.1" 200 50242
+INFO 2026-02-27 10:19:56 "GET /adding_new/ HTTP/1.1" 200 35425
+INFO 2026-02-27 10:19:57 - Broken pipe from ('127.0.0.1', 58653)
+INFO 2026-02-27 10:24:29 "GET /adding_new/ HTTP/1.1" 200 35425
+INFO 2026-02-27 10:24:33 "GET /analyze_comment/ HTTP/1.1" 200 67586
+INFO 2026-02-27 10:24:38 "POST /analyze_comment/ HTTP/1.1" 200 592390
+INFO 2026-02-27 10:32:24 "GET /analyze_comment/ HTTP/1.1" 200 67586
+INFO 2026-02-27 10:32:35 "POST /analyze_comment/ HTTP/1.1" 200 592390
+INFO 2026-02-27 10:33:18 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-27 10:33:23 "POST /analyze_comment/ HTTP/1.1" 200 557915
+INFO 2026-02-27 10:34:49 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-27 10:34:49 Watching for file changes with StatReloader
+INFO 2026-02-27 10:34:54 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-27 10:34:59 "POST /analyze_comment/ HTTP/1.1" 200 557915
+INFO 2026-02-27 10:39:19 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-27 10:39:20 Watching for file changes with StatReloader
+INFO 2026-02-27 10:39:52 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-02-27 10:39:52 Watching for file changes with StatReloader
+INFO 2026-02-27 10:39:57 "GET /analyze_comment/ HTTP/1.1" 200 66159
+INFO 2026-02-27 10:40:18 "POST /analyze_comment/ HTTP/1.1" 200 557915
+INFO 2026-02-27 10:46:46 "GET /analyze_comment/ HTTP/1.1" 200 68480
+INFO 2026-02-27 10:46:50 "POST /analyze_comment/ HTTP/1.1" 200 868642

@@ -2131,7 +2131,7 @@ def parse_comments_from_text(text):
     """
     Parse comments from either JSON format or the original text format.
     Supports both:
-    1. JSON format with 'commenter' and 'text' fields
+    1. JSON format with 'commenter', 'text', and 'profile_url' fields
     2. Original text format with timestamps like '2d', '3h'
     """
     comments = []
@@ -2143,19 +2143,53 @@ def parse_comments_from_text(text):
         # If it's a list of comments
         if isinstance(data, list):
             for item in data:
-                comment_text = item.get('text', '')
+                # Get comment text from various possible field names
+                comment_text = item.get('text', '') or item.get('comment', '') or item.get('message', '')
+                
                 if comment_text:  # Only process if there's actual text
                     danger_info = is_dangerous_comment(comment_text)
                     sentiment = predict_sentiment(comment_text)
                     
+                    # Get profile URL from various possible field names
+                    profile_url = item.get('profile_url', '') or item.get('profileUrl', '') or item.get('url', '') or ''
+                    
+                    # Clean profile URL if it contains extra parameters
+                    if profile_url and '?comment_id=' in profile_url:
+                        # Keep the full URL as it contains the comment ID
+                        # But we can still use it for profile access
+                        pass
+                    
                     comments.append({
-                        'author': item.get('commenter', 'Unknown'),
+                        'author': item.get('commenter', item.get('author', item.get('username', 'Unknown'))),
                         'comment': comment_text,
-                        'timestamp': item.get('timestamp', ''),
+                        'timestamp': item.get('timestamp', item.get('time', item.get('date', ''))),
+                        'profile_url': profile_url,
                         'sentiment': sentiment,
                         **danger_info
                     })
             return comments
+            
+        # If it's a single comment object
+        elif isinstance(data, dict):
+            comment_text = data.get('text', '') or data.get('comment', '') or data.get('message', '')
+            
+            if comment_text:
+                danger_info = is_dangerous_comment(comment_text)
+                sentiment = predict_sentiment(comment_text)
+                
+                # Get profile URL from various possible field names
+                profile_url = data.get('profile_url', '') or data.get('profileUrl', '') or data.get('url', '') or ''
+                
+                comments.append({
+                    'author': data.get('commenter', data.get('author', data.get('username', 'Unknown'))),
+                    'comment': comment_text,
+                    'timestamp': data.get('timestamp', data.get('time', data.get('date', ''))),
+                    'profile_url': profile_url,
+                    'sentiment': sentiment,
+                    **danger_info
+                })
+            return comments
+            
     except (json.JSONDecodeError, TypeError):
         # If JSON parsing fails, fall back to original text format
         pass
@@ -2178,6 +2212,7 @@ def parse_comments_from_text(text):
                     'author': author,
                     'comment': comment,
                     'timestamp': line,
+                    'profile_url': '',  # No profile URL in text format
                     'sentiment': sentiment,
                     **danger_info
                 })
@@ -2197,6 +2232,7 @@ def parse_comments_from_text(text):
             'author': author,
             'comment': comment,
             'timestamp': '',  # No timestamp for last comment
+            'profile_url': '',  # No profile URL in text format
             'sentiment': sentiment,
             **danger_info
         })
@@ -2211,22 +2247,21 @@ def prepare_chart_data(comments):
             'suspicious_comments': 0,
             'clean_comments': 0,
             'suspicious_rate': 0,
-
-            # Corrected sentiment counts (typo fixes)
             'sentiment_counts': {
                 'positive': 0,
                 'negative': 0,
-                'neutral': 0  # Fixed spelling
+                'neutral': 0
             },
-
             'category_counts': {
                 'violence': 0,
                 'threats': 0,
                 'dehumanizing': 0,
-                'contextual_threat': 0
+                'contextual_threat': 0,
+                'military': 0,
+                'mobilization': 0
             },
             'score_distribution': {
-                '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5_plus': 0  # CHANGED: '5+' to '5_plus'
+                '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5_plus': 0
             },
             'comments_data': []
         }
@@ -2241,17 +2276,19 @@ def prepare_chart_data(comments):
         'violence': 0,
         'threats': 0,
         'dehumanizing': 0,
-        'contextual_threat': 0
+        'contextual_threat': 0,
+        'military': 0,
+        'mobilization': 0
     }
 
-    # Danger score distribution - CHANGED: '5+' to '5_plus'
+    # Danger score distribution
     score_distribution = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5_plus': 0}
 
-    # Corrected sentiment counts
+    # Sentiment counts
     sentiment_counts = {
         'positive': 0,
         'negative': 0,
-        'neutral': 0  # Fixed spelling
+        'neutral': 0
     }
 
     for comment in comments:
@@ -2276,21 +2313,24 @@ def prepare_chart_data(comments):
                 'dehumanize': 'dehumanizing',
                 'contextual': 'contextual_threat',
                 'contextual_threat': 'contextual_threat',
-                'context': 'contextual_threat'
+                'context': 'contextual_threat',
+                'military': 'military',
+                'mobilization': 'mobilization'
             }
             
             if category in category_mapping:
                 mapped_category = category_mapping[category]
-                category_counts[mapped_category] += 1
+                if mapped_category in category_counts:
+                    category_counts[mapped_category] += 1
 
-        # Count danger scores - CHANGED: '5+' to '5_plus'
+        # Count danger scores
         score = comment.get('danger_score', 0)
         if score >= 5:
-            score_distribution['5_plus'] += 1  # CHANGED HERE
+            score_distribution['5_plus'] += 1
         else:
             score_distribution[str(score)] += 1
 
-        # Count sentiment - handle different possible formats
+        # Count sentiment
         sentiment = comment.get('sentiment', 'neutral')
         
         # Convert to lowercase string for consistency
@@ -2305,7 +2345,7 @@ def prepare_chart_data(comments):
                 sentiment = 'positive'
             elif sentiment in ['neg', 'negatve']:
                 sentiment = 'negative'
-            elif sentiment in ['neut', 'neural', 'nutral']:  # Fix for "neural" typo
+            elif sentiment in ['neut', 'neural', 'nutral']:
                 sentiment = 'neutral'
         else:
             sentiment = 'neutral'
@@ -2318,7 +2358,7 @@ def prepare_chart_data(comments):
 
     # Prepare comments data
     comments_data = []
-    for comment in comments:
+    for i, comment in enumerate(comments):
         # Normalize sentiment for display
         display_sentiment = comment.get('sentiment', 'neutral')
         if isinstance(display_sentiment, int):
@@ -2344,10 +2384,15 @@ def prepare_chart_data(comments):
             elif isinstance(match, str):
                 processed_matches.append([match, ''])
         
+        # Get profile URL
+        profile_url = comment.get('profile_url', '')
+        
         comments_data.append({
+            'id': i + 1,
             'author': str(comment.get('author', 'Unknown')),
+            'profile_url': profile_url,  # IMPORTANT: Include profile_url here
             'timestamp': str(comment.get('timestamp', 'Unknown')),
-            'sentiment': display_sentiment,  # Use normalized sentiment
+            'sentiment': display_sentiment,
             'is_dangerous': bool(comment.get('is_dangerous', False)),
             'danger_score': int(comment.get('danger_score', 0)),
             'highlighted_comment': str(comment.get('highlighted_comment', '')),
@@ -2364,7 +2409,6 @@ def prepare_chart_data(comments):
         'score_distribution': score_distribution,
         'comments_data': comments_data
     }
-
 
 # def commentAnalyze(request):
 #     comments = []
@@ -2421,6 +2465,7 @@ def commentAnalyze(request):
                 
                 # Parse comments using the universal function
                 comments = parse_comments_from_text(text)
+                print(111111111111111111111, comments)
                 uploaded = True
                 
                 # Prepare chart data
