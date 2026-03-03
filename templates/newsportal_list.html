@@ -502,6 +502,131 @@
             </div>
         </div>
 
+        <!-- News of Merokarnali Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/merokarnali.png' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">karnali News Nepal</h5>
+                        <p class="text-muted small mb-3">Nepal karnali, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('merokarnali', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of HamroPahuch Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/pahuch.webp' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 65px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">HamroPahuch News Nepal</h5>
+                        <p class="text-muted small mb-3">HamroPahuch, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('hamropahuch', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of NepaliRaibar Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/nepaliraibar.webp' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 65px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Raibar News Nepal</h5>
+                        <p class="text-muted small mb-3">NepaliRaibar, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('raibar', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of Shilapaper Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/shilapaper.png' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 65px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2"Shilapaper News Nepal</h5>
+                        <p class="text-muted small mb-3">Shilapaper, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('shilapaper', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+
         <!-- Online Khabar Card -->
         <!-- <div class="col-md-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm">
@@ -624,6 +749,9 @@ function getSourceName(source) {
         'dnews': 'dnews',
         'hetaudatoday': 'hetaudatoday',
         'chitwan': 'chitwan',
+        'hamropahuch': 'hamropahuch',
+        'raibar': 'raibar',
+        'shilapaper': 'shilapaper',
         'all': 'All Sources'
     };
     return names[source] || source;

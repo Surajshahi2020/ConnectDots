@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Paschimnepal RSS Feed Scraper - पश्चिम नेपाल
+Shilapaper RSS Feed Scraper - शिलापेपर
 """
 import requests
 import xml.etree.ElementTree as ET
@@ -14,8 +14,8 @@ import os
 
 from collect.models import DangerousKeyword, AutoNewsArticle
 
-def keyboard_paschimnepal_to_json(request):
-    """Paschimnepal RSS scraper"""
+def keyboard_shilapaper_to_json(request):
+    """Shilapaper RSS scraper"""
 
     if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
         return json.dumps({
@@ -27,13 +27,11 @@ def keyboard_paschimnepal_to_json(request):
             "articles": []
         })
 
-    feed_url = "https://paschimnepal.com/feed/"
+    feed_url = "https://shilapaper.com/feed"
     TODAY = datetime.now()
-    # Get last 4 days of news (change this to 30 if you want more history)
-    DAYS_TO_FETCH = 4
-    CUTOFF_DATE = TODAY - timedelta(days=DAYS_TO_FETCH)
+    FOUR_DAYS_AGO = TODAY - timedelta(days=30)
 
-    print(f"\n🚀 PASCHIMNEPAL RSS SCRAPER - {TODAY.strftime('%Y-%m-%d')} (last {DAYS_TO_FETCH} days)")
+    print(f"\n🚀 SHILAPAPER SCRAPER - {TODAY.strftime('%Y-%m-%d')} (last {4} days)")
     print(f"📡 RSS Feed URL: {feed_url}")
 
     headers = {
@@ -44,7 +42,7 @@ def keyboard_paschimnepal_to_json(request):
     all_articles = []
 
     # ============ DEFAULT IMAGE HANDLING ============
-    DEFAULT_IMAGE_PATH = "/static/project_images/paschimnepal.jpg"
+    DEFAULT_IMAGE_PATH = "/static/project_images/shilapaper.png"
     print(f"🖼️ Using default image for all articles: {DEFAULT_IMAGE_PATH}")
 
     # Get keywords
@@ -73,7 +71,7 @@ def keyboard_paschimnepal_to_json(request):
 
     def is_article_within_date_range(pub_date):
         if pub_date:
-            return pub_date >= CUTOFF_DATE
+            return pub_date >= FOUR_DAYS_AGO
         return True
 
     def parse_date(date_str):
@@ -82,7 +80,7 @@ def keyboard_paschimnepal_to_json(request):
             return TODAY
 
         try:
-            # Format: Tue, 03 Mar 2026 05:05:44 +0000
+            # Format: Mon, 09 Feb 2026 05:09:16 +0000
             date_str = re.sub(r'\s+\+\d{4}$', '', date_str)
             return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S')
         except Exception as e:
@@ -119,18 +117,60 @@ def keyboard_paschimnepal_to_json(request):
         return text.strip()
 
     def extract_post_id_from_url(url):
-        """Extract post ID from Paschimnepal URL pattern"""
+        """Extract post ID from Shilapaper URL pattern"""
         if not url:
             return ""
-        # Pattern: https://paschimnepal.com/2026/03/69178/
-        id_match = re.search(r'/(\d+)/?$', url)
+        # Pattern: https://shilapaper.com/2026/02/16310.html
+        id_match = re.search(r'/(\d+)\.html$', url)
         if id_match:
             return id_match.group(1)
         return ""
 
+    def analyze_article_content(article, keywords_by_category, all_keywords_list):
+        """Analyze article content for keywords and return threat analysis"""
+        matched_keywords = []
+        matched_categories = set()
+        keywords_found = []
+
+        content = f"{article['title']} {article.get('summary', '')}".lower()
+
+        for keyword_info in all_keywords_list:
+            keyword = keyword_info['word']
+            category = keyword_info['category']
+
+            if keyword in content:
+                matched_keywords.append({'word': keyword, 'category': category})
+                matched_categories.add(category)
+                keywords_found.append(keyword)
+
+        unique_keywords = list(set(keywords_found))
+        total_matches = len(matched_keywords)
+
+        if total_matches >= 5:
+            threat_level = "high"
+            priority = "high"
+        elif total_matches >= 2:
+            threat_level = "medium"
+            priority = "medium"
+        elif total_matches >= 1:
+            threat_level = "low"
+            priority = "low"
+        else:
+            threat_level = "none"
+            priority = "none"
+
+        return {
+            "level": threat_level,
+            "priority": priority,
+            "keywords_found": unique_keywords[:20],
+            "total_keywords_matched": total_matches,
+            "categories": list(matched_categories),
+            "has_match": total_matches > 0
+        }
+
     # Fetch RSS feed
     try:
-        print(f"\n📡 Fetching RSS feed from Paschimnepal...")
+        print(f"\n📡 Fetching RSS feed from Shilapaper...")
         response = requests.get(feed_url, headers=headers, timeout=30)
 
         if response.status_code != 200:
@@ -186,7 +226,7 @@ def keyboard_paschimnepal_to_json(request):
 
                 # Creator/Author
                 creator_elem = item.find('dc:creator', namespaces)
-                author = "पश्चिम नेपाल"
+                author = "शिलापेपर"
                 if creator_elem is not None and creator_elem.text:
                     author = html.unescape(creator_elem.text).strip()
                     author = clean_summary(author)
@@ -233,6 +273,7 @@ def keyboard_paschimnepal_to_json(request):
                 image_url = DEFAULT_IMAGE_PATH
                 image_source = "default_static"
 
+                # Create base article data
                 article_data = {
                     'title': title[:500],
                     'url': url,
@@ -249,14 +290,15 @@ def keyboard_paschimnepal_to_json(request):
                     'has_image': True,
                     'image_source': image_source,
                     'image_optimized': False,
-                    'source': 'paschimnepal'
+                    'source': 'shilapaper'
                 }
 
+                # Add to collection if within date range
                 if is_article_within_date_range(pub_date):
                     article_data['discovered_at'] = datetime.now().isoformat()
                     all_articles.append(article_data)
                     preview_title = title[:50] if title else "No title"
-                    print(f"   ✅ Added: {preview_title}... (Date: {pub_date.strftime('%Y-%m-%d')}, Image: default)")
+                    print(f"   ✅ Added: {preview_title}... (Date: {pub_date.strftime('%Y-%m-%d')})")
                 else:
                     preview = title[:30] if title else "No title"
                     print(f"   ⏭️ Skipped old: {preview}... ({pub_date.strftime('%Y-%m-%d')})")
@@ -298,68 +340,30 @@ def keyboard_paschimnepal_to_json(request):
 
     print(f"📊 Unique articles: {len(unique_articles)}")
 
-    # Analyze articles for keywords
-    def analyze_article_content(article, keywords_by_category, all_keywords_list):
-        matched_keywords = []
-        matched_categories = set()
-        keywords_found = []
-
-        content = f"{article['title']} {article.get('summary', '')}".lower()
-
-        for keyword_info in all_keywords_list:
-            keyword = keyword_info['word']
-            category = keyword_info['category']
-
-            if keyword in content:
-                matched_keywords.append({'word': keyword, 'category': category})
-                matched_categories.add(category)
-                keywords_found.append(keyword)
-
-        unique_keywords = list(set(keywords_found))
-        total_matches = len(matched_keywords)
-
-        if total_matches >= 5:
-            threat_level = "high"
-            priority = "high"
-        elif total_matches >= 2:
-            threat_level = "medium"
-            priority = "medium"
-        elif total_matches >= 1:
-            threat_level = "low"
-            priority = "low"
-        else:
-            threat_level = "none"
-            priority = "none"
-
-        return {
-            "level": threat_level,
-            "priority": priority,
-            "keywords_found": unique_keywords[:20],
-            "total_keywords_matched": total_matches,
-            "categories": list(matched_categories),
-            "has_match": total_matches > 0
-        }
-
-    # Process ALL articles for keywords
+    # Analyze ALL articles for keywords and prepare for database
     processed_articles = []
     keyword_match_count = 0
 
     for article in unique_articles:
+        # Analyze content for keywords
         threat = analyze_article_content(article, keywords_by_category, all_keywords_list)
+
+        # Add threat analysis to article
         article['threat_analysis'] = threat
-        processed_articles.append(article)
 
         if threat['has_match']:
             keyword_match_count += 1
 
+        processed_articles.append(article)
+
     print(f"🔴 Articles with keyword matches: {keyword_match_count} out of {len(processed_articles)}")
 
-    # Save to database
+    # Save ALL articles to database (both matched and unmatched)
     saved_count = 0
     updated_count = 0
     error_count = 0
 
-    for article in processed_articles[:200]:
+    for article in processed_articles[:200]:  # Limit to 200 articles
         try:
             existing = AutoNewsArticle.objects.filter(
                 url=article['url'],
@@ -373,7 +377,7 @@ def keyboard_paschimnepal_to_json(request):
             # Use default image for all articles
             image_url = DEFAULT_IMAGE_PATH
 
-            source = 'paschimnepal'
+            source = 'shilapaper'
             date = article.get('pub_date', datetime.now()).strftime('%Y-%m-%d')[:20]
             content_length = len(article.get('summary', ''))
             priority = article['threat_analysis']['priority']
@@ -383,6 +387,7 @@ def keyboard_paschimnepal_to_json(request):
             categories_json = json.dumps(all_cats[:10], ensure_ascii=False)
 
             if existing:
+                # Update existing article
                 existing.title = title
                 existing.summary = summary
                 existing.image_url = image_url
@@ -395,6 +400,7 @@ def keyboard_paschimnepal_to_json(request):
                 updated_count += 1
                 print(f"   🔄 Updated: {title[:30]}... (Threat: {threat_level})")
             else:
+                # Create new article
                 AutoNewsArticle.objects.create(
                     title=title,
                     summary=summary,
@@ -421,15 +427,15 @@ def keyboard_paschimnepal_to_json(request):
     print(f"📊 All articles use default image: {DEFAULT_IMAGE_PATH}")
     print(f"💾 Saved: {saved_count} new, {updated_count} updated")
     print(f"❌ Errors: {error_count}")
-    print(f"📅 Date range: {CUTOFF_DATE.strftime('%Y-%m-%d')} to {TODAY.strftime('%Y-%m-%d')}")
+    print(f"📅 Date range: {FOUR_DAYS_AGO.strftime('%Y-%m-%d')} to {TODAY.strftime('%Y-%m-%d')}")
     print(f"{'='*60}")
 
-    alert_message = f"✅ Paschimnepal: Processed {len(unique_articles)} articles ({keyword_match_count} with keyword matches)"
+    alert_message = f"✅ Shilapaper: Processed {len(unique_articles)} articles ({keyword_match_count} with keyword matches)"
     if saved_count > 0 or updated_count > 0:
         alert_message += f" (Saved: {saved_count} new, Updated: {updated_count})"
 
     metadata = {
-        "source": "Paschimnepal",
+        "source": "Shilapaper",
         "scraped_at": datetime.now().isoformat(),
         "status": "success",
         "user": request.user.username,
@@ -437,14 +443,13 @@ def keyboard_paschimnepal_to_json(request):
         "articles_with_keywords": keyword_match_count,
         "articles_without_keywords": len(unique_articles) - keyword_match_count,
         "articles_with_default_image": len(unique_articles),
-        "articles_by_category": {},
         "database_save": {
             "new_articles_saved": saved_count,
             "existing_articles_updated": updated_count,
             "errors": error_count
         },
         "date_range": {
-            "start": CUTOFF_DATE.strftime('%Y-%m-%d'),
+            "start": FOUR_DAYS_AGO.strftime('%Y-%m-%d'),
             "end": TODAY.strftime('%Y-%m-%d')
         },
         "default_image_path": DEFAULT_IMAGE_PATH
@@ -452,21 +457,21 @@ def keyboard_paschimnepal_to_json(request):
 
     return json.dumps({
         "metadata": metadata,
-        "articles": processed_articles[:10],
+        "articles": processed_articles[:10],  # Return first 10 processed articles
         "status": "success",
         "alert_message": alert_message
     }, ensure_ascii=False)
 
 
-def fetch_paschimnepal_news(request):
+def fetch_shilapaper_news(request):
     """Main function to call from your keyboard view"""
     try:
-        result_json = keyboard_paschimnepal_to_json(request)
+        result_json = keyboard_shilapaper_to_json(request)
         result_data = json.loads(result_json)
 
         return {
             "status": result_data["metadata"]["status"],
-            "message": result_data.get("alert_message", "Paschimnepal fetch completed"),
+            "message": result_data.get("alert_message", "Shilapaper fetch completed"),
             "stats": {
                 "saved": result_data["metadata"]["database_save"]["new_articles_saved"],
                 "updated": result_data["metadata"]["database_save"]["existing_articles_updated"],
@@ -480,5 +485,5 @@ def fetch_paschimnepal_news(request):
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error in fetch_paschimnepal_news: {str(e)}"
+            "message": f"Error in fetch_shilapaper_news: {str(e)}"
         }

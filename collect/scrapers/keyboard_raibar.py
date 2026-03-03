@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Paschimnepal RSS Feed Scraper - पश्चिम नेपाल
+Nepaliraibar RSS Feed Scraper - नेपालीरैबार
 """
 import requests
 import xml.etree.ElementTree as ET
@@ -14,9 +14,9 @@ import os
 
 from collect.models import DangerousKeyword, AutoNewsArticle
 
-def keyboard_paschimnepal_to_json(request):
-    """Paschimnepal RSS scraper"""
-
+def keyboard_nepaliraibar_to_json(request):
+    """Nepaliraibar RSS scraper"""
+    
     if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
         return json.dumps({
             "metadata": {
@@ -26,113 +26,182 @@ def keyboard_paschimnepal_to_json(request):
             },
             "articles": []
         })
-
-    feed_url = "https://paschimnepal.com/feed/"
+    
+    feed_url = "https://nepaliraibar.com/feed/"
     TODAY = datetime.now()
-    # Get last 4 days of news (change this to 30 if you want more history)
-    DAYS_TO_FETCH = 4
-    CUTOFF_DATE = TODAY - timedelta(days=DAYS_TO_FETCH)
-
-    print(f"\n🚀 PASCHIMNEPAL RSS SCRAPER - {TODAY.strftime('%Y-%m-%d')} (last {DAYS_TO_FETCH} days)")
+    FOUR_DAYS_AGO = TODAY - timedelta(days=4)
+    
+    print(f"\n🚀 NEPALIRAIBAR SCRAPER - {TODAY.strftime('%Y-%m-%d')} (last {4} days)")
     print(f"📡 RSS Feed URL: {feed_url}")
-
+    
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/rss+xml, application/xml, text/xml, */*'
     }
-
+    
     all_articles = []
-
+    
     # ============ DEFAULT IMAGE HANDLING ============
-    DEFAULT_IMAGE_PATH = "/static/project_images/paschimnepal.jpg"
+    DEFAULT_IMAGE_PATH = "/static/project_images/nepaliraibar.webp"
+    
     print(f"🖼️ Using default image for all articles: {DEFAULT_IMAGE_PATH}")
-
+    
     # Get keywords
     try:
         keywords = DangerousKeyword.objects.filter(
-            is_active=True,
+            is_active=True, 
             created_by=request.user
         ).values('word', 'category')
         all_keywords_list = []
         keywords_by_category = {}
-
+        
         for kw in keywords:
             word = kw['word'].lower().strip()
             category = kw['category'].strip()
             all_keywords_list.append({'word': word, 'category': category})
-
+            
             if category not in keywords_by_category:
                 keywords_by_category[category] = []
             keywords_by_category[category].append(word)
-
+        
         print(f"🔑 Loaded {len(all_keywords_list)} keywords")
     except Exception as e:
         print(f"⚠️ Keyword fetch error: {e}")
         all_keywords_list = []
         keywords_by_category = {}
-
+    
     def is_article_within_date_range(pub_date):
         if pub_date:
-            return pub_date >= CUTOFF_DATE
+            return pub_date >= FOUR_DAYS_AGO
         return True
-
+    
     def parse_date(date_str):
         """Parse date from RSS feed"""
         if not date_str:
             return TODAY
-
+        
         try:
-            # Format: Tue, 03 Mar 2026 05:05:44 +0000
             date_str = re.sub(r'\s+\+\d{4}$', '', date_str)
             return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S')
         except Exception as e:
             print(f"Date parse error for '{date_str[:30]}': {e}")
             return TODAY
-
-    def clean_summary(text):
-        """Clean HTML and extra whitespace from summary"""
+    
+    def aggressive_clean(text):
+        """Aggressively clean all HTML artifacts from text"""
         if not text:
             return ""
-
-        # Remove HTML tags but keep content
-        text = re.sub(r'<.*?>', ' ', text)
-
-        # Remove "The post ... appeared first on ..." pattern
-        text = re.sub(r'The post.*?appeared first on.*?\.', '', text, flags=re.DOTALL)
-
-        # Remove extra whitespace
+        
+        # First, unescape HTML entities
+        text = html.unescape(text)
+        
+        # Remove all HTML tags completely
+        text = re.sub(r'<[^>]+>', ' ', text)
+        
+        # Remove all HTML/CSS/JS artifacts
+        artifacts = [
+            r'class="[^"]*"',
+            r'id="[^"]*"',
+            r'style="[^"]*"',
+            r'on\w+="[^"]*"',
+            r'data-[^=]*="[^"]*"',
+            r'data-turn-id="[^"]*"',
+            r'data-testid="[^"]*"',
+            r'data-scroll-anchor="[^"]*"',
+            r'data-message-id="[^"]*"',
+            r'data-message-model-slug="[^"]*"',
+            r'data-turn="[^"]*"',
+            r'tabindex="[^"]*"',
+            r'dir="[^"]*"',
+            r'\[\&hellip;\]',
+            r'Continue reading.*$',
+            r'The post.*?appeared first on.*?\.',
+            r'data-writing-block',
+            r'pointer-events-auto',
+            r'scroll-mt-[^"\s]+',
+            r'\[--shadow-height:[^\]]+\]',
+            r'has-data-writing-block',
+            r'agent-turn',
+            r'conversation-turn-\d+',
+            r'message-\w+-\w+-\w+-\w+-\w+',
+            r'--thread-content-margin:[^;]+;?',
+            r'@[^:]+:[^;]+;?',
+            r'calc\([^)]+\)',
+            r'var\(--[^)]+\)',
+        ]
+        
+        for pattern in artifacts:
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
+        
+        # Remove HTML comments
+        text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+        
+        # Remove empty brackets and braces
+        text = re.sub(r'\[\s*\]', '', text)
+        text = re.sub(r'\(\s*\)', '', text)
+        text = re.sub(r'\{\s*\}', '', text)
+        
+        # Remove multiple spaces
         text = re.sub(r'\s+', ' ', text)
-
-        return text.strip()
-
+        
+        # Remove leading/trailing spaces and special characters
+        text = text.strip()
+        text = re.sub(r'^\s*[>*\]\[\(\)\{\}]\s*', '', text)
+        
+        return text
+    
+    def clean_summary(text):
+        """Clean summary text"""
+        if not text:
+            return ""
+        return aggressive_clean(text)
+    
+    def extract_post_id_from_item(item):
+        """Extract post ID from Nepaliraibar's custom post-id element"""
+        try:
+            post_id_elem = item.find('.//post-id', namespaces={'com-wordpress': 'com-wordpress:feed-additions:1'})
+            if post_id_elem is not None and post_id_elem.text:
+                return post_id_elem.text.strip()
+            
+            link_elem = item.find('link')
+            if link_elem is not None and link_elem.text:
+                url = link_elem.text.strip()
+                id_match = re.search(r'/(\d+)/?$', url)
+                if id_match:
+                    return id_match.group(1)
+        except:
+            pass
+        return ""
+    
     def extract_clean_text_from_content(content):
-        """Extract clean text from content, removing HTML"""
+        """Extract clean text from content"""
         if not content:
             return ""
-
-        # Remove HTML tags
-        text = re.sub(r'<.*?>', ' ', content)
-
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
-
-        return text.strip()
-
-    def extract_post_id_from_url(url):
-        """Extract post ID from Paschimnepal URL pattern"""
-        if not url:
-            return ""
-        # Pattern: https://paschimnepal.com/2026/03/69178/
-        id_match = re.search(r'/(\d+)/?$', url)
-        if id_match:
-            return id_match.group(1)
-        return ""
-
+        
+        # Aggressively clean
+        text = aggressive_clean(content)
+        
+        # Look for Nepali text patterns (to ensure we keep the content)
+        nepali_pattern = r'[\u0900-\u097F]{2,}'
+        nepali_matches = re.findall(nepali_pattern, text)
+        
+        if nepali_matches:
+            # Reconstruct text focusing on Nepali content
+            cleaned_parts = []
+            for match in nepali_matches:
+                if len(match) > 3:  # Only take substantial Nepali words
+                    cleaned_parts.append(match)
+            
+            if cleaned_parts:
+                text = ' '.join(cleaned_parts)
+        
+        return text[:1000]
+    
     # Fetch RSS feed
     try:
-        print(f"\n📡 Fetching RSS feed from Paschimnepal...")
+        print(f"\n📡 Fetching RSS feed from Nepaliraibar...")
         response = requests.get(feed_url, headers=headers, timeout=30)
-
+        
         if response.status_code != 200:
             return json.dumps({
                 "metadata": {
@@ -142,40 +211,37 @@ def keyboard_paschimnepal_to_json(request):
                 },
                 "articles": []
             })
-
-        # Parse XML
+        
         root = ET.fromstring(response.content)
-
-        # Handle namespaces
+        
         namespaces = {
             'content': 'http://purl.org/rss/1.0/modules/content/',
             'dc': 'http://purl.org/dc/elements/1.1/',
             'media': 'http://search.yahoo.com/mrss/',
             'feed-additions': 'com-wordpress:feed-additions:1'
         }
-
-        # Find channel
+        
         channel = root.find('channel')
         if channel is None:
             channel = root
-
-        # Find all items
+        
         items = channel.findall('item')
         print(f"📄 Found {len(items)} articles in RSS feed")
-
+        
         for idx, item in enumerate(items):
             try:
                 print(f"\n   📄 Processing article {idx+1}/{len(items)}")
-
+                
                 # Title
                 title_elem = item.find('title')
-                title = html.unescape(title_elem.text).strip() if title_elem is not None else ""
-                title = clean_summary(title)
-
+                title = ""
+                if title_elem is not None and title_elem.text:
+                    title = aggressive_clean(html.unescape(title_elem.text))
+                
                 # Link
                 link_elem = item.find('link')
                 url = link_elem.text.strip() if link_elem is not None else ""
-
+                
                 # Publication date
                 pubDate_elem = item.find('pubDate')
                 pub_date = TODAY
@@ -183,56 +249,50 @@ def keyboard_paschimnepal_to_json(request):
                 if pubDate_elem is not None and pubDate_elem.text:
                     date_text = pubDate_elem.text
                     pub_date = parse_date(date_text)
-
+                
                 # Creator/Author
                 creator_elem = item.find('dc:creator', namespaces)
-                author = "पश्चिम नेपाल"
+                author = "नेपालीरैबार"
                 if creator_elem is not None and creator_elem.text:
-                    author = html.unescape(creator_elem.text).strip()
-                    author = clean_summary(author)
-
-                # Description
-                description_elem = item.find('description')
+                    author = aggressive_clean(html.unescape(creator_elem.text))
+                
+                # Get description and content
                 summary = title
-
+                
+                # Try to get clean content from description
+                description_elem = item.find('description')
                 if description_elem is not None and description_elem.text:
                     desc_text = html.unescape(description_elem.text)
-
-                    # Clean summary
-                    clean_desc = clean_summary(desc_text)
+                    clean_desc = extract_clean_text_from_content(desc_text)
                     if clean_desc and len(clean_desc) > len(summary):
-                        summary = clean_desc[:1000]
-
-                # Get full content for better summary
+                        summary = clean_desc
+                
+                # Try to get clean content from content:encoded
                 content_elem = item.find('content:encoded', namespaces)
                 if content_elem is not None and content_elem.text:
                     full_content = html.unescape(content_elem.text)
-
-                    # Extract clean text from content
                     clean_content = extract_clean_text_from_content(full_content)
                     if len(clean_content) > len(summary):
-                        summary = clean_content[:1000]
-
+                        summary = clean_content
+                
                 # Get categories
                 categories = []
                 for cat in item.findall('category'):
                     if cat.text:
-                        cat_text = html.unescape(cat.text).strip()
-                        cat_text = re.sub(r'<!\[CDATA\[(.*?)\]\]>', r'\1', cat_text)
-                        cat_text = clean_summary(cat_text)
-                        if cat_text:
+                        cat_text = aggressive_clean(html.unescape(cat.text))
+                        if cat_text and len(cat_text) > 2:
                             categories.append(cat_text)
-
-                # Get post ID from URL
-                post_id = extract_post_id_from_url(url)
-
+                
+                # Get post ID
+                post_id = extract_post_id_from_item(item)
+                
                 # Determine main category
                 main_category = categories[0] if categories else 'समाचार'
-
-                # Use default image for ALL articles
+                
+                # Use default image
                 image_url = DEFAULT_IMAGE_PATH
                 image_source = "default_static"
-
+                
                 article_data = {
                     'title': title[:500],
                     'url': url,
@@ -249,24 +309,26 @@ def keyboard_paschimnepal_to_json(request):
                     'has_image': True,
                     'image_source': image_source,
                     'image_optimized': False,
-                    'source': 'paschimnepal'
+                    'source': 'nepaliraibar'
                 }
-
+                
                 if is_article_within_date_range(pub_date):
                     article_data['discovered_at'] = datetime.now().isoformat()
                     all_articles.append(article_data)
+                    
+                    # Print clean preview
                     preview_title = title[:50] if title else "No title"
-                    print(f"   ✅ Added: {preview_title}... (Date: {pub_date.strftime('%Y-%m-%d')}, Image: default)")
+                    print(f"   ✅ Added: {preview_title}... (Date: {pub_date.strftime('%Y-%m-%d')})")
                 else:
                     preview = title[:30] if title else "No title"
                     print(f"   ⏭️ Skipped old: {preview}... ({pub_date.strftime('%Y-%m-%d')})")
-
+                
             except Exception as e:
                 print(f"   ⚠️ Error parsing item: {e}")
                 continue
-
+        
         print(f"\n📊 After date filter: {len(all_articles)} articles")
-
+        
     except ET.ParseError as e:
         print(f"❌ XML Parse Error: {e}")
         return json.dumps({
@@ -287,7 +349,7 @@ def keyboard_paschimnepal_to_json(request):
             },
             "articles": []
         })
-
+    
     # Remove duplicates
     unique_articles = []
     seen_urls = set()
@@ -295,29 +357,30 @@ def keyboard_paschimnepal_to_json(request):
         if article['url'] not in seen_urls:
             seen_urls.add(article['url'])
             unique_articles.append(article)
-
+    
     print(f"📊 Unique articles: {len(unique_articles)}")
-
+    print(f"📊 All articles use default image: {DEFAULT_IMAGE_PATH}")
+    
     # Analyze articles for keywords
     def analyze_article_content(article, keywords_by_category, all_keywords_list):
         matched_keywords = []
         matched_categories = set()
         keywords_found = []
-
+        
         content = f"{article['title']} {article.get('summary', '')}".lower()
-
+        
         for keyword_info in all_keywords_list:
             keyword = keyword_info['word']
             category = keyword_info['category']
-
+            
             if keyword in content:
                 matched_keywords.append({'word': keyword, 'category': category})
                 matched_categories.add(category)
                 keywords_found.append(keyword)
-
+        
         unique_keywords = list(set(keywords_found))
         total_matches = len(matched_keywords)
-
+        
         if total_matches >= 5:
             threat_level = "high"
             priority = "high"
@@ -330,7 +393,7 @@ def keyboard_paschimnepal_to_json(request):
         else:
             threat_level = "none"
             priority = "none"
-
+        
         return {
             "level": threat_level,
             "priority": priority,
@@ -339,41 +402,42 @@ def keyboard_paschimnepal_to_json(request):
             "categories": list(matched_categories),
             "has_match": total_matches > 0
         }
-
-    # Process ALL articles for keywords
-    processed_articles = []
-    keyword_match_count = 0
-
+    
+    # Match keywords
+    matched_articles = []
+    category_stats = {}
+    
     for article in unique_articles:
         threat = analyze_article_content(article, keywords_by_category, all_keywords_list)
-        article['threat_analysis'] = threat
-        processed_articles.append(article)
-
         if threat['has_match']:
-            keyword_match_count += 1
-
-    print(f"🔴 Articles with keyword matches: {keyword_match_count} out of {len(processed_articles)}")
-
+            article['threat_analysis'] = threat
+            matched_articles.append(article)
+            
+            cat = article['category_display']
+            category_stats[cat] = category_stats.get(cat, 0) + 1
+    
+    print(f"🔴 Matched articles: {len(matched_articles)}")
+    
     # Save to database
     saved_count = 0
     updated_count = 0
     error_count = 0
-
-    for article in processed_articles[:200]:
+    
+    for article in matched_articles[:200]:
         try:
             existing = AutoNewsArticle.objects.filter(
                 url=article['url'],
                 created_by=request.user
             ).first()
-
+            
             title = article['title'][:500]
             summary = article.get('summary', article['title'])[:1000]
             url = article['url'][:1000]
-
-            # Use default image for all articles
+            
+            # Use default image
             image_url = DEFAULT_IMAGE_PATH
-
-            source = 'paschimnepal'
+            
+            source = 'nepaliraibar'
             date = article.get('pub_date', datetime.now()).strftime('%Y-%m-%d')[:20]
             content_length = len(article.get('summary', ''))
             priority = article['threat_analysis']['priority']
@@ -381,7 +445,7 @@ def keyboard_paschimnepal_to_json(request):
             keywords = json.dumps(article['threat_analysis']['keywords_found'], ensure_ascii=False)
             all_cats = article.get('all_categories', [article['category_display']])
             categories_json = json.dumps(all_cats[:10], ensure_ascii=False)
-
+            
             if existing:
                 existing.title = title
                 existing.summary = summary
@@ -393,7 +457,7 @@ def keyboard_paschimnepal_to_json(request):
                 existing.categories = categories_json
                 existing.save()
                 updated_count += 1
-                print(f"   🔄 Updated: {title[:30]}... (Threat: {threat_level})")
+                print(f"   🔄 Updated: {title[:30]}...")
             else:
                 AutoNewsArticle.objects.create(
                     title=title,
@@ -410,63 +474,61 @@ def keyboard_paschimnepal_to_json(request):
                     created_by=request.user
                 )
                 saved_count += 1
-                print(f"   ✅ Saved: {title[:30]}... (Threat: {threat_level})")
-
+                print(f"   ✅ Saved: {title[:30]}...")
+                
         except Exception as e:
             error_count += 1
             print(f"   ⚠️ Save error: {e}")
-
+    
     print(f"\n📊 Total RSS articles: {len(unique_articles)}")
-    print(f"🔴 Articles with keyword matches: {keyword_match_count}")
+    print(f"🔴 Matched articles: {len(matched_articles)}")
     print(f"📊 All articles use default image: {DEFAULT_IMAGE_PATH}")
     print(f"💾 Saved: {saved_count} new, {updated_count} updated")
-    print(f"❌ Errors: {error_count}")
-    print(f"📅 Date range: {CUTOFF_DATE.strftime('%Y-%m-%d')} to {TODAY.strftime('%Y-%m-%d')}")
+    print(f"📅 Date range: {FOUR_DAYS_AGO.strftime('%Y-%m-%d')} to {TODAY.strftime('%Y-%m-%d')}")
     print(f"{'='*60}")
-
-    alert_message = f"✅ Paschimnepal: Processed {len(unique_articles)} articles ({keyword_match_count} with keyword matches)"
+    
+    alert_message = f"✅ Nepaliraibar: Found {len(matched_articles)} matching articles (all using default image)"
     if saved_count > 0 or updated_count > 0:
         alert_message += f" (Saved: {saved_count} new, Updated: {updated_count})"
-
+    
     metadata = {
-        "source": "Paschimnepal",
+        "source": "Nepaliraibar",
         "scraped_at": datetime.now().isoformat(),
         "status": "success",
         "user": request.user.username,
         "total_articles_scraped": len(unique_articles),
-        "articles_with_keywords": keyword_match_count,
-        "articles_without_keywords": len(unique_articles) - keyword_match_count,
-        "articles_with_default_image": len(unique_articles),
-        "articles_by_category": {},
+        "articles_with_keywords": len(matched_articles),
+        "articles_with_default_image": len(matched_articles),
+        "articles_by_category": category_stats,
         "database_save": {
             "new_articles_saved": saved_count,
             "existing_articles_updated": updated_count,
             "errors": error_count
         },
         "date_range": {
-            "start": CUTOFF_DATE.strftime('%Y-%m-%d'),
+            "start": FOUR_DAYS_AGO.strftime('%Y-%m-%d'),
             "end": TODAY.strftime('%Y-%m-%d')
         },
         "default_image_path": DEFAULT_IMAGE_PATH
     }
-
+    
     return json.dumps({
         "metadata": metadata,
-        "articles": processed_articles[:10],
+        "articles": matched_articles[:10],
         "status": "success",
         "alert_message": alert_message
     }, ensure_ascii=False)
 
 
-def fetch_paschimnepal_news(request):
+def fetch_nepaliraibar_news(request):
     """Main function to call from your keyboard view"""
     try:
-        result_json = keyboard_paschimnepal_to_json(request)
+        result_json = keyboard_nepaliraibar_to_json(request)
         result_data = json.loads(result_json)
-
+        
         return {
             "status": result_data["metadata"]["status"],
-            "message": result_data.get("alert_message", "Paschimnepal fetch completed"),
+            "message": result_data.get("alert_message", "Nepaliraibar fetch completed"),
             "stats": {
                 "saved": result_data["metadata"]["database_save"]["new_articles_saved"],
                 "updated": result_data["metadata"]["database_save"]["existing_articles_updated"],
@@ -476,9 +538,9 @@ def fetch_paschimnepal_news(request):
             },
             "data": result_data
         }
-
+        
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error in fetch_paschimnepal_news: {str(e)}"
+            "message": f"Error in fetch_nepaliraibar_news: {str(e)}"
         }

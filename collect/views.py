@@ -62,6 +62,10 @@ from collect.scrapers.keyboard_dnews import keyboard_dnewsnepal_to_json
 from collect.scrapers.keyboard_hetauda import keyboard_hetaudatoday_to_json
 from collect.scrapers.keyboard_chitwan import keyboard_chitwansamachar_to_json
 from collect.scrapers.keyboard_nuwakot import keyboard_onlinenuwakot_to_json
+from collect.scrapers.keyboard_karnali import keyboard_merokarnali_to_json
+from collect.scrapers.keyboard_pahuch import keyboard_hamropahuch_to_json
+from collect.scrapers.keyboard_raibar import keyboard_nepaliraibar_to_json
+from collect.scrapers.keyboard_shilapaper import keyboard_shilapaper_to_json
 
 from django.urls import reverse  # Add this import
 from django.db.models import Q
@@ -70,8 +74,6 @@ from utils.sentiment import predict_sentiment
 from django.utils.dateparse import parse_date
 from utils.permission import check_access
 import requests
-
-
 
 def loginLogic(request):
     if request.method == 'POST':
@@ -2774,6 +2776,11 @@ def keyboard_AutoFeed(request):
             'hetaudatoday': keyboard_hetaudatoday_to_json,
             'chitwan': keyboard_chitwansamachar_to_json,
             'nuwakot': keyboard_onlinenuwakot_to_json,
+            'merokarnali': keyboard_merokarnali_to_json,
+            'hamropahuch': keyboard_hamropahuch_to_json,
+            'raibar': keyboard_nepaliraibar_to_json,
+            'shilapaper': keyboard_shilapaper_to_json,
+
             # Add more sources here as you create their scraper functions
         }
         

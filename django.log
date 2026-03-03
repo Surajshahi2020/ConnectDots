@@ -1784,3 +1784,389 @@ INFO 2026-03-03 13:07:56 Watching for file changes with StatReloader
 INFO 2026-03-03 13:08:01 "GET /viewAutoNews/ HTTP/1.1" 200 79409
 INFO 2026-03-03 13:08:05 "GET /fetch_keyboard/ HTTP/1.1" 200 66778
 INFO 2026-03-03 13:08:05 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:26:42 Watching for file changes with StatReloader
+INFO 2026-03-03 13:26:55 "GET /fetch_keyboard/ HTTP/1.1" 200 68417
+INFO 2026-03-03 13:26:55 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 13:26:55 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 13:26:55 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:26:55 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:26:56 "GET /static/project_images/merokarnali.png HTTP/1.1" 200 82860
+INFO 2026-03-03 13:27:46 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:27:46 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:28:17 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 13:28:18 Watching for file changes with StatReloader
+INFO 2026-03-03 13:30:27 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 13:30:29 Watching for file changes with StatReloader
+INFO 2026-03-03 13:30:51 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 13:30:52 Watching for file changes with StatReloader
+INFO 2026-03-03 13:30:58 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 13592
+INFO 2026-03-03 13:30:58 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:31:05 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:31:05 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:31:05 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:31:09 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 13:31:14 "GET /viewAutoNews/ HTTP/1.1" 200 103521
+INFO 2026-03-03 13:32:11 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:32:13 Watching for file changes with StatReloader
+INFO 2026-03-03 13:32:23 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:32:24 Watching for file changes with StatReloader
+INFO 2026-03-03 13:32:31 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:32:33 Watching for file changes with StatReloader
+INFO 2026-03-03 13:32:40 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 14669
+INFO 2026-03-03 13:32:40 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:32:45 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 13127
+INFO 2026-03-03 13:32:46 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 13:32:46 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10591
+INFO 2026-03-03 13:32:46 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:32:54 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 13:32:55 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:32:55 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:32:58 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 13:33:01 "GET /viewAutoNews/ HTTP/1.1" 200 61904
+INFO 2026-03-03 13:33:07 "GET /viewAutoNews/ HTTP/1.1" 200 61904
+INFO 2026-03-03 13:33:18 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 12483
+INFO 2026-03-03 13:33:18 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:33:19 "GET /admin/collect/autonewsarticle/4745/change/ HTTP/1.1" 200 23201
+INFO 2026-03-03 13:33:19 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:36:15 "GET /viewAutoNews/ HTTP/1.1" 200 61904
+INFO 2026-03-03 13:36:20 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 12483
+INFO 2026-03-03 13:36:20 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:36:27 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 11241
+INFO 2026-03-03 13:36:28 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 13:36:28 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10591
+INFO 2026-03-03 13:36:28 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:36:34 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 13:37:42 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:37:43 Watching for file changes with StatReloader
+INFO 2026-03-03 13:37:48 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 13:37:51 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:37:51 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:37:51 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 13:37:51 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:37:51 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:37:55 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 13:37:58 "GET /viewAutoNews/ HTTP/1.1" 200 61904
+INFO 2026-03-03 13:38:12 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 12483
+INFO 2026-03-03 13:38:12 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:38:14 "GET /admin/collect/autonewsarticle/4748/change/ HTTP/1.1" 200 23201
+INFO 2026-03-03 13:38:14 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:40:01 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:40:02 Watching for file changes with StatReloader
+INFO 2026-03-03 13:40:15 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 12483
+INFO 2026-03-03 13:40:15 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:40:20 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 11241
+INFO 2026-03-03 13:40:21 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 13:40:21 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10591
+INFO 2026-03-03 13:40:21 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:40:26 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 13:40:28 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:40:28 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:40:31 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 13:40:34 "GET /viewAutoNews/ HTTP/1.1" 200 61904
+INFO 2026-03-03 13:42:43 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_karnali.py changed, reloading.
+INFO 2026-03-03 13:42:44 Watching for file changes with StatReloader
+INFO 2026-03-03 13:42:49 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 12483
+INFO 2026-03-03 13:42:49 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:42:54 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 11241
+INFO 2026-03-03 13:42:55 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 13:42:56 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10591
+INFO 2026-03-03 13:42:56 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 13:43:05 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 13:43:15 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 13:43:15 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:43:15 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 13:43:15 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 13:43:18 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 13:43:21 "GET /viewAutoNews/ HTTP/1.1" 200 61787
+INFO 2026-03-03 13:44:07 "GET /fetch_keyboard/ HTTP/1.1" 200 68413
+INFO 2026-03-03 14:11:03 "GET /fetch_keyboard/ HTTP/1.1" 200 71679
+INFO 2026-03-03 14:11:03 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:03 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:03 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:03 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:03 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:04 "GET /static/project_images/pahuch.webp HTTP/1.1" 200 232678
+INFO 2026-03-03 14:11:45 "GET /fetch_keyboard/ HTTP/1.1" 200 71679
+INFO 2026-03-03 14:11:45 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:11:47 "GET /fetch_keyboard/ HTTP/1.1" 200 71679
+INFO 2026-03-03 14:12:21 "GET /fetch_keyboard/ HTTP/1.1" 200 70044
+INFO 2026-03-03 14:12:21 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:12:39 "GET /fetch_keyboard/ HTTP/1.1" 200 70046
+INFO 2026-03-03 14:12:39 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:12:52 "GET /fetch_keyboard/ HTTP/1.1" 200 70046
+INFO 2026-03-03 14:13:05 "GET /fetch_keyboard/ HTTP/1.1" 200 70046
+INFO 2026-03-03 14:13:05 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:15:44 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:15:46 Watching for file changes with StatReloader
+INFO 2026-03-03 14:16:20 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:16:21 Watching for file changes with StatReloader
+INFO 2026-03-03 14:16:29 "GET /fetch_keyboard/ HTTP/1.1" 200 70084
+INFO 2026-03-03 14:16:29 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:16:29 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:16:41 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:16:43 Watching for file changes with StatReloader
+INFO 2026-03-03 14:16:49 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:16:50 Watching for file changes with StatReloader
+INFO 2026-03-03 14:16:54 "GET /fetch_keyboard/ HTTP/1.1" 200 70084
+INFO 2026-03-03 14:17:04 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 14:17:13 "GET /viewAutoNews/ HTTP/1.1" 200 97240
+WARNING 2026-03-03 14:17:13 "GET /static/project_images/hamropahuch.png HTTP/1.1" 404 1849
+INFO 2026-03-03 14:18:12 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_pahuch.py changed, reloading.
+INFO 2026-03-03 14:18:13 Watching for file changes with StatReloader
+INFO 2026-03-03 14:18:19 "GET /viewAutoNews/ HTTP/1.1" 200 97236
+WARNING 2026-03-03 14:18:19 "GET /static/project_images/hamropahuch.png HTTP/1.1" 404 1849
+INFO 2026-03-03 14:18:25 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 14355
+INFO 2026-03-03 14:18:25 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:18:27 "GET /admin/collect/autonewsarticle/4758/change/ HTTP/1.1" 200 24315
+INFO 2026-03-03 14:18:27 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:18:41 "POST /admin/collect/autonewsarticle/4758/change/ HTTP/1.1" 200 24449
+INFO 2026-03-03 14:18:41 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:18:48 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 14355
+INFO 2026-03-03 14:18:48 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:18:55 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 12873
+INFO 2026-03-03 14:18:57 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:18:57 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10591
+INFO 2026-03-03 14:18:57 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:19:01 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 14:19:03 "GET /fetch_keyboard/ HTTP/1.1" 200 70084
+INFO 2026-03-03 14:19:03 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:19:06 "POST /autofeed_keyboard/ HTTP/1.1" 200 224
+INFO 2026-03-03 14:19:09 "GET /viewAutoNews/ HTTP/1.1" 200 73231
+INFO 2026-03-03 14:19:24 "GET /fetch_keyboard/ HTTP/1.1" 200 70084
+INFO 2026-03-03 14:19:24 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:26:28 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:26:30 Watching for file changes with StatReloader
+INFO 2026-03-03 14:27:02 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:27:04 Watching for file changes with StatReloader
+INFO 2026-03-03 14:27:13 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:27:14 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:27:14 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:27:14 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:27:14 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:27:14 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 200 17288
+INFO 2026-03-03 14:27:27 "POST /autofeed_keyboard/ HTTP/1.1" 200 219
+INFO 2026-03-03 14:27:34 "GET /viewAutoNews/ HTTP/1.1" 200 159356
+WARNING 2026-03-03 14:27:35 "GET /static/project_images/nepaliraibar.png HTTP/1.1" 404 1852
+INFO 2026-03-03 14:29:05 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_raibar.py changed, reloading.
+INFO 2026-03-03 14:29:07 Watching for file changes with StatReloader
+INFO 2026-03-03 14:29:17 "GET /viewAutoNews/ HTTP/1.1" 200 159350
+WARNING 2026-03-03 14:29:17 "GET /static/project_images/nepaliraibar.png HTTP/1.1" 404 1852
+INFO 2026-03-03 14:29:17 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:29:26 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:29:26 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:29:26 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:29:38 "GET /viewAutoNews/ HTTP/1.1" 200 159360
+WARNING 2026-03-03 14:29:38 "GET /static/project_images/nepaliraibar.png HTTP/1.1" 404 1852
+INFO 2026-03-03 14:29:56 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_raibar.py changed, reloading.
+INFO 2026-03-03 14:29:57 Watching for file changes with StatReloader
+INFO 2026-03-03 14:30:02 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 17078
+INFO 2026-03-03 14:30:02 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:30:04 "GET /admin/collect/autonewsarticle/4772/change/ HTTP/1.1" 200 23054
+INFO 2026-03-03 14:30:04 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:30:07 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 17078
+INFO 2026-03-03 14:30:07 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:30:11 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 15174
+INFO 2026-03-03 14:30:12 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:30:12 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 14:30:13 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:30:19 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10443
+INFO 2026-03-03 14:30:19 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:30:30 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 14:30:32 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:30:32 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:30:32 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:30:37 "POST /autofeed_keyboard/ HTTP/1.1" 200 219
+INFO 2026-03-03 14:30:40 "GET /viewAutoNews/ HTTP/1.1" 200 123932
+INFO 2026-03-03 14:33:18 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_raibar.py changed, reloading.
+INFO 2026-03-03 14:33:19 Watching for file changes with StatReloader
+INFO 2026-03-03 14:33:26 "GET /viewAutoNews/ HTTP/1.1" 200 123932
+INFO 2026-03-03 14:33:26 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:33:31 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 15206
+INFO 2026-03-03 14:33:31 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:33:38 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 13542
+INFO 2026-03-03 14:33:40 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:33:40 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 14:33:40 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:33:45 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 14:33:47 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:33:47 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:33:47 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:33:51 "POST /autofeed_keyboard/ HTTP/1.1" 200 219
+INFO 2026-03-03 14:33:54 "GET /viewAutoNews/ HTTP/1.1" 200 124032
+INFO 2026-03-03 14:36:14 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_raibar.py changed, reloading.
+INFO 2026-03-03 14:36:15 Watching for file changes with StatReloader
+INFO 2026-03-03 14:36:20 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 15204
+INFO 2026-03-03 14:36:20 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:36:25 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 13540
+INFO 2026-03-03 14:36:26 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:36:26 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 14:36:26 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:36:33 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 14:36:35 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:36:35 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:36:35 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:36:39 "POST /autofeed_keyboard/ HTTP/1.1" 200 219
+INFO 2026-03-03 14:36:42 "GET /viewAutoNews/ HTTP/1.1" 200 125410
+INFO 2026-03-03 14:37:14 "GET /fetch_keyboard/ HTTP/1.1" 200 71743
+INFO 2026-03-03 14:38:53 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 15204
+INFO 2026-03-03 14:38:53 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:38:58 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 13540
+INFO 2026-03-03 14:38:59 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:38:59 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 14:38:59 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:43:34 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:43:36 Watching for file changes with StatReloader
+INFO 2026-03-03 14:43:45 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:43:45 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:43:45 "GET /static/project_images/shilapaper.png HTTP/1.1" 200 52353
+INFO 2026-03-03 14:43:56 "POST /autofeed_keyboard/ HTTP/1.1" 200 223
+INFO 2026-03-03 14:43:59 "GET /viewAutoNews/ HTTP/1.1" 200 125410
+INFO 2026-03-03 14:44:22 "GET /viewAutoNews/ HTTP/1.1" 200 125410
+INFO 2026-03-03 14:44:22 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:44:22 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:44:26 "POST /autofeed_keyboard/ HTTP/1.1" 200 223
+INFO 2026-03-03 14:45:15 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 14:45:16 Watching for file changes with StatReloader
+INFO 2026-03-03 14:45:22 "POST /autofeed_keyboard/ HTTP/1.1" 200 223
+INFO 2026-03-03 14:45:49 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:45:51 Watching for file changes with StatReloader
+INFO 2026-03-03 14:45:58 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:45:58 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:45:58 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:45:59 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:46:02 "POST /autofeed_keyboard/ HTTP/1.1" 200 109
+INFO 2026-03-03 14:46:10 "POST /autofeed_keyboard/ HTTP/1.1" 200 109
+INFO 2026-03-03 14:46:41 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:46:42 Watching for file changes with StatReloader
+INFO 2026-03-03 14:46:50 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:46:51 Watching for file changes with StatReloader
+INFO 2026-03-03 14:46:55 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:46:55 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:46:59 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 14:47:02 "GET /viewAutoNews/ HTTP/1.1" 200 125410
+INFO 2026-03-03 14:49:39 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:49:39 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:49:39 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:49:39 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:49:44 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 14:53:22 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:53:23 Watching for file changes with StatReloader
+INFO 2026-03-03 14:54:00 C:\Users\cyber\Desktop\ConnectDots\collect\views.py changed, reloading.
+INFO 2026-03-03 14:54:02 Watching for file changes with StatReloader
+INFO 2026-03-03 14:54:13 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:54:13 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 14:54:13 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:54:13 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:54:13 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 14:54:13 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:54:19 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 15204
+INFO 2026-03-03 14:54:19 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:54:24 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 13540
+INFO 2026-03-03 14:54:25 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 14:54:25 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 14:54:25 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 14:54:34 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 14:54:37 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 14:55:27 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 14:55:27 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 14:55:30 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 14:55:33 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:00:03 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:00:04 Watching for file changes with StatReloader
+INFO 2026-03-03 15:00:09 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:00:11 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:00:11 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:00:11 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 15:00:11 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:00:11 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:00:11 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:00:14 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 15:00:17 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:01:30 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:01:31 Watching for file changes with StatReloader
+INFO 2026-03-03 15:01:37 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:01:41 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:01:45 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 15:01:48 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:01:55 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:01:57 Watching for file changes with StatReloader
+INFO 2026-03-03 15:02:03 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:02:07 "POST /autofeed_keyboard/ HTTP/1.1" 200 223
+INFO 2026-03-03 15:02:17 "GET /viewAutoNews/ HTTP/1.1" 200 79672
+INFO 2026-03-03 15:03:11 "POST /autofeed_keyboard/ HTTP/1.1" 200 196
+INFO 2026-03-03 15:06:23 "GET /viewAutoNews/ HTTP/1.1" 200 117362
+INFO 2026-03-03 15:07:05 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_paschim.py changed, reloading.
+INFO 2026-03-03 15:07:07 Watching for file changes with StatReloader
+INFO 2026-03-03 15:07:13 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 49008
+INFO 2026-03-03 15:07:13 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:07:18 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 42664
+INFO 2026-03-03 15:07:23 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 15:07:23 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 15:07:23 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:07:30 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:07:35 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:07:35 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:07:35 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:07:35 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:07:35 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:08:17 "POST /autofeed_keyboard/ HTTP/1.1" 200 196
+INFO 2026-03-03 15:08:28 "GET /viewAutoNews/ HTTP/1.1" 200 117362
+INFO 2026-03-03 15:08:49 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:08:49 "GET /static/project_images/onlinenuwakot.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:09:06 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:09:08 Watching for file changes with StatReloader
+INFO 2026-03-03 15:09:11 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:09:12 Watching for file changes with StatReloader
+INFO 2026-03-03 15:09:31 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:09:33 Watching for file changes with StatReloader
+INFO 2026-03-03 15:09:45 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:09:46 Watching for file changes with StatReloader
+INFO 2026-03-03 15:14:21 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_paschim.py changed, reloading.
+INFO 2026-03-03 15:14:22 Watching for file changes with StatReloader
+INFO 2026-03-03 15:14:27 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 47031
+INFO 2026-03-03 15:14:27 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:14:35 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 40987
+INFO 2026-03-03 15:14:42 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 15:14:42 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 15:14:42 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:14:49 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:14:49 "GET /static/project_images/pahuch.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:14:49 "GET /static/project_images/nepaliraibar.webp HTTP/1.1" 304 0
+INFO 2026-03-03 15:14:49 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:14:54 "POST /autofeed_keyboard/ HTTP/1.1" 200 193
+INFO 2026-03-03 15:14:57 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:14:59 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:15:00 "GET /viewAutoNews/ HTTP/1.1" 200 38433
+INFO 2026-03-03 15:15:34 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:15:45 "POST /autofeed_keyboard/ HTTP/1.1" 200 225
+INFO 2026-03-03 15:15:48 "GET /viewAutoNews/ HTTP/1.1" 200 124804
+WARNING 2026-03-03 15:15:48 "GET /static/project_images/paschimnepal.png HTTP/1.1" 404 1852
+INFO 2026-03-03 15:16:37 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_paschim.py changed, reloading.
+INFO 2026-03-03 15:16:38 Watching for file changes with StatReloader
+INFO 2026-03-03 15:16:46 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 15824
+INFO 2026-03-03 15:16:46 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:16:50 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 200 14160
+INFO 2026-03-03 15:16:53 "POST /admin/collect/autonewsarticle/ HTTP/1.1" 302 0
+INFO 2026-03-03 15:16:53 "GET /admin/collect/autonewsarticle/ HTTP/1.1" 200 10592
+INFO 2026-03-03 15:16:53 "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-03-03 15:16:59 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:16:59 "GET /static/project_images/chitwan.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:17:06 "POST /autofeed_keyboard/ HTTP/1.1" 200 225
+INFO 2026-03-03 15:17:16 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:17:16 "GET /static/project_images/hetauda.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 15:17:18 "GET /viewAutoNews/ HTTP/1.1" 200 124804
+INFO 2026-03-03 15:18:12 C:\Users\cyber\Desktop\ConnectDots\collect\scrapers\keyboard_shilapaper.py changed, reloading.
+INFO 2026-03-03 15:18:14 Watching for file changes with StatReloader
+INFO 2026-03-03 15:18:19 "GET /viewAutoNews/ HTTP/1.1" 200 124794
+INFO 2026-03-03 15:18:20 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:18:20 "GET /static/project_images/Dhadingnews.jpg HTTP/1.1" 304 0
+INFO 2026-03-03 15:18:20 "GET /static/project_images/merokarnali.png HTTP/1.1" 304 0
+INFO 2026-03-03 15:18:23 "POST /autofeed_keyboard/ HTTP/1.1" 200 223
+INFO 2026-03-03 15:18:26 "GET /viewAutoNews/ HTTP/1.1" 200 166670
+INFO 2026-03-03 15:18:35 "GET /fetch_keyboard/ HTTP/1.1" 200 73411
+INFO 2026-03-03 15:18:35 "GET /static/project_images/shilapaper.png HTTP/1.1" 304 0
