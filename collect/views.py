@@ -58,7 +58,10 @@ from collect.scrapers.eAdarsha import keyboard_eadarsha_to_json
 from collect.scrapers.keyboard_arthasarokar import keyboard_arthasarokar_to_json
 from collect.scrapers.keyboard_newsofnepal import keyboard_newsofnepal_to_json
 from collect.scrapers.keyboard_rajdhanidaily import keyboard_rajdhanidaily_to_json
-
+from collect.scrapers.keyboard_dnews import keyboard_dnewsnepal_to_json
+from collect.scrapers.keyboard_hetauda import keyboard_hetaudatoday_to_json
+from collect.scrapers.keyboard_chitwan import keyboard_chitwansamachar_to_json
+from collect.scrapers.keyboard_nuwakot import keyboard_onlinenuwakot_to_json
 
 from django.urls import reverse  # Add this import
 from django.db.models import Q
@@ -2767,6 +2770,10 @@ def keyboard_AutoFeed(request):
             'arthasarokar': keyboard_arthasarokar_to_json,
             'newsofnepal': keyboard_newsofnepal_to_json,
             'rajdhanidaily': keyboard_rajdhanidaily_to_json,
+            'dnews': keyboard_dnewsnepal_to_json,
+            'hetaudatoday': keyboard_hetaudatoday_to_json,
+            'chitwan': keyboard_chitwansamachar_to_json,
+            'nuwakot': keyboard_onlinenuwakot_to_json,
             # Add more sources here as you create their scraper functions
         }
         

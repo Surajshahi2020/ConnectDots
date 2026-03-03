@@ -378,6 +378,130 @@
             </div>
         </div>
 
+        <!-- News of DNews Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/Dhadingnews.jpg' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">News of Dhading</h5>
+                        <p class="text-muted small mb-3">Nepal Dhaging, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('dnews', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of Hetauda Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/hetauda.jpg' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: auto;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Hetauda News Nepal</h5>
+                        <p class="text-muted small mb-3">Nepal Hetauda, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('hetaudatoday', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of Chitwan Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/chitwan.png' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Chitwan News Nepal</h5>
+                        <p class="text-muted small mb-3">Nepal Chitwan, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('chitwan', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- News of Nuwakot Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <img src="{% static 'project_images/onlinenuwakot.png' %}" 
+                                alt="News of Nepal" 
+                                class="news-source-img"
+                                style="height: 60px; width: 250px;"
+                                onerror="this.onerror=null; this.src='https://via.placeholder.com/60x60?text=News+of+Nepal';">
+                        </div>
+                        <h5 class="fw-bold mb-2">Nuwakot News Nepal</h5>
+                        <p class="text-muted small mb-3">Nepal Nuwakot, news, update</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">समाचार</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">National</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary w-100 py-2 text-white" 
+                            id="newsofnepalBtn" 
+                            onclick="fetchSource('nuwakot', this)">
+                        <i class="fas fa-download me-2"></i>
+                        Fetch News
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
         <!-- Online Khabar Card -->
         <!-- <div class="col-md-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm">
@@ -497,6 +621,9 @@ function getSourceName(source) {
         'onlinetvnepal': 'onlinetvnepal',
         'osnepal': 'osnepal',
         'eadarsha': 'eadarsha',
+        'dnews': 'dnews',
+        'hetaudatoday': 'hetaudatoday',
+        'chitwan': 'chitwan',
         'all': 'All Sources'
     };
     return names[source] || source;

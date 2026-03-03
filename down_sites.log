@@ -34,3 +34,53 @@ INFO 2026-02-25 10:18:38 RECOVERED - Nepal Government Email | URL: https://mail.
 INFO 2026-02-25 10:19:45 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 98ms | Status Code: 200 | Attempts: 2
 INFO 2026-02-25 16:18:14 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 75ms | Status Code: 200 | Attempts: 2
 INFO 2026-02-27 10:19:57 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 77ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 09:59:14 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 1571ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 09:59:26 RECOVERED - president | URL: https://president.gov.np/ | Response Time: 3168ms | Status Code: 200 | Attempts: 3
+INFO 2026-03-03 10:00:41 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 152ms | Status Code: 200 | Attempts: 3
+INFO 2026-03-03 10:00:56 DOWN - president | URL: https://president.gov.np/ | Error: Timeout after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:02:06 RECOVERED - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Response Time: 3010ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 10:02:07 RECOVERED - nagarik app | URL: https://nagarikapp.gov.np/ | Response Time: 71ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 10:02:09 RECOVERED - nagarik app | URL: https://nagarikapp.gov.np/ | Response Time: 476ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 10:02:09 RECOVERED - president | URL: https://president.gov.np/ | Response Time: 4110ms | Status Code: 200 | Attempts: 2
+INFO 2026-03-03 10:47:52 DOWN - ministry of defense | URL: https://mod.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - nepal police | URL: https://www.nepalpolice.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - Ministry of Home Affairs | URL: https://www.moha.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - president | URL: https://president.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - Armed Police Force | URL: https://www.apf.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - public procurement | URL: https://ppmo.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - office of prime minister and council of ministers | URL: https://opmcm.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - National Security Council Secretariat | URL: https://nscsec.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - Ministry Of Foreign Affairs | URL: https://mofa.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:52 DOWN - vice president of nepal | URL: https://vpn.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - Ministry of Home Affairs | URL: https://www.moha.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - public procurement | URL: https://ppmo.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - ministry of defense | URL: https://mod.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - vice president of nepal | URL: https://vpn.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - office of prime minister and council of ministers | URL: https://opmcm.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - president | URL: https://president.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - National Security Council Secretariat | URL: https://nscsec.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - Ministry Of Foreign Affairs | URL: https://mofa.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - nepal police | URL: https://www.nepalpolice.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:55 DOWN - Armed Police Force | URL: https://www.apf.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - nagarik app | URL: https://nagarikapp.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - communications & IT | URL: https://mocit.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - customs | URL: https://customs.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - investigation of abuse of authority | URL: https://ciaa.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - transport office thulobharyang | URL: https://thulobharyanglicense.bagamati.gov.np | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - National ID(NID) | URL: https://enrollment.donidcr.gov.np/PreEnrollment/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - passport | URL: https://nepalpassport.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - Department of Transportation managmenet | URL: https://dotm.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:47:58 DOWN - Nepali Army Website | URL: https://nepalarmy.mil.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - Nepal Government Email | URL: https://mail.nepal.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - nagarik app | URL: https://nagarikapp.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - Nepali Army Website | URL: https://nepalarmy.mil.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - communications & IT | URL: https://mocit.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - customs | URL: https://customs.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - National ID(NID) | URL: https://enrollment.donidcr.gov.np/PreEnrollment/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - Department of Transportation managmenet | URL: https://dotm.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - investigation of abuse of authority | URL: https://ciaa.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - transport office thulobharyang | URL: https://thulobharyanglicense.bagamati.gov.np | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:01 DOWN - passport | URL: https://nepalpassport.gov.np/ | Error: Connection failed after 3 attempts | Attempts: 3 | Status Code: N/A | Response Time: N/Ams
+INFO 2026-03-03 10:48:10 RECOVERED - central bureau of statistics | URL: https://nsonepal.gov.np/ | Response Time: 5596ms | Status Code: 200 | Attempts: 3
+INFO 2026-03-03 10:48:10 RECOVERED - central bureau of statistics | URL: https://nsonepal.gov.np/ | Response Time: 5618ms | Status Code: 200 | Attempts: 2

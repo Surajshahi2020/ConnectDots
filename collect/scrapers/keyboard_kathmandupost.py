@@ -20,7 +20,11 @@ def keyboard_kathmandu_post_to_json(request):
     # --------------------------------------------------------------------------
     # Time settings
     TODAY = datetime.now()
-    TWO_DAYS_AGO = TODAY - timedelta(days=4)
+    FOUR_DAYS_AGO = TODAY - timedelta(days=4)
+    
+    # Debug date range
+    send_to_websocket(f"📅 Today's date: {TODAY.strftime('%Y-%m-%d')}")
+    send_to_websocket(f"📅 Looking for articles after: {FOUR_DAYS_AGO.strftime('%Y-%m-%d')}")
     
     # Settings
     DELAY = 3
@@ -243,15 +247,40 @@ def keyboard_kathmandu_post_to_json(request):
             return [], {}
     
     def format_date_from_url(url):
-        """Extract and format date from Kathmandu Post URL"""
+        """Extract and format date from Kathmandu Post URL - FIXED VERSION"""
         try:
+            # Kathmandu Post URL pattern: https://kathmandupost.com/national/2025/02/28/title-of-article
+            # The date is always in format YYYY/MM/DD after the category
+            
+            # Split URL by /
             parts = url.split('/')
-            if len(parts) >= 5:
-                year, month, day = parts[2], parts[3], parts[4]
-                date_obj = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
-                return date_obj
-        except:
-            pass
+            
+            # Look for the date pattern (4-digit year followed by 2-digit month and day)
+            for i, part in enumerate(parts):
+                # Check if this part looks like a year (4 digits, between 2020-2026)
+                if part.isdigit() and len(part) == 4 and 2020 <= int(part) <= 2026:
+                    # Check if next two parts are month and day
+                    if i + 2 < len(parts):
+                        month_part = parts[i + 1]
+                        day_part = parts[i + 2]
+                        
+                        if (month_part.isdigit() and len(month_part) == 2 and 
+                            day_part.isdigit() and len(day_part) == 2):
+                            
+                            year = int(part)
+                            month = int(month_part)
+                            day = int(day_part)
+                            
+                            # Validate month and day
+                            if 1 <= month <= 12 and 1 <= day <= 31:
+                                date_obj = datetime(year, month, day)
+                                
+                                # Debug date extraction
+                                print(f"📅 Extracted date from URL: {date_obj.strftime('%Y-%m-%d')} from {url[:80]}")
+                                return date_obj
+        except Exception as e:
+            print(f"Date extraction error for {url[:50]}: {str(e)[:50]}")
+        
         return None
     
     def fetch_article_content(article, session):
@@ -265,37 +294,65 @@ def keyboard_kathmandu_post_to_json(request):
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Get date from URL or page
+            # Get date from URL first (most reliable)
             pub_date = format_date_from_url(article['url'])
             
+            # If URL method fails, try page metadata
             if not pub_date:
-                date_elem = soup.select_one('time, .published-date, .article-date, meta[property="article:published_time"]')
-                if date_elem:
-                    date_str = date_elem.get('datetime', '') or date_elem.get('content', '') or date_elem.get_text(strip=True)
-                    date_match = re.search(r'(\d{4}-\d{2}-\d{2})', date_str)
-                    if date_match:
+                # Try meta tags
+                meta_date = soup.find('meta', {'property': 'article:published_time'})
+                if meta_date and meta_date.get('content'):
+                    date_str = meta_date['content'].split('T')[0]  # Get YYYY-MM-DD part
+                    try:
+                        pub_date = datetime.strptime(date_str, '%Y-%m-%d')
+                        print(f"📅 Extracted date from meta: {pub_date.strftime('%Y-%m-%d')}")
+                    except:
+                        pass
+                
+                # Try time tags
+                if not pub_date:
+                    time_tag = soup.find('time')
+                    if time_tag and time_tag.get('datetime'):
+                        date_str = time_tag['datetime'].split('T')[0]
                         try:
-                            pub_date = datetime.strptime(date_match.group(1), '%Y-%m-%d')
+                            pub_date = datetime.strptime(date_str, '%Y-%m-%d')
+                            print(f"📅 Extracted date from time tag: {pub_date.strftime('%Y-%m-%d')}")
                         except:
                             pass
             
-            # Filter by date
-            if pub_date and pub_date < TWO_DAYS_AGO:
-                return None
+            # CRITICAL: Date filtering
+            if pub_date:
+                # Compare dates (ignore time)
+                pub_date_only = pub_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                cutoff_date = FOUR_DAYS_AGO.replace(hour=0, minute=0, second=0, microsecond=0)
+                
+                if pub_date_only < cutoff_date:
+                    print(f"⏭️ SKIPPING old article: {pub_date.strftime('%Y-%m-%d')} is before {cutoff_date.strftime('%Y-%m-%d')}")
+                    return None
+                elif pub_date_only > TODAY.replace(hour=0, minute=0, second=0, microsecond=0):
+                    print(f"⚠️ Future date detected: {pub_date.strftime('%Y-%m-%d')}, using today instead")
+                    pub_date = TODAY
+                else:
+                    print(f"✅ Article within date range: {pub_date.strftime('%Y-%m-%d')}")
+            else:
+                # If we absolutely cannot determine the date, log warning and include
+                print(f"⚠️ WARNING: Could not determine date for article, including with today's date")
+                pub_date = TODAY
             
             # Get content
             content = ""
             content_selectors = [
                 "div[class*='content']", "article div.text", ".description",
                 ".article-content", ".story-content", ".news-content",
-                "div.detail-content", ".main-content", "article"
+                "div.detail-content", ".main-content", "article",
+                ".body-content", ".story-body"
             ]
             
             for selector in content_selectors:
                 elem = soup.select_one(selector)
                 if elem:
                     # Remove unwanted elements
-                    for unwanted in elem.select('.advertisement, .related-news, .comments, script, style, .social-share'):
+                    for unwanted in elem.select('.advertisement, .related-news, .comments, script, style, .social-share, .newsletter, .subscribe'):
                         unwanted.decompose()
                     
                     paragraphs = elem.find_all('p')
@@ -303,7 +360,7 @@ def keyboard_kathmandu_post_to_json(request):
                         text_parts = []
                         for p in paragraphs[:20]:
                             text = p.get_text(strip=True)
-                            if len(text) > 30 and not text.startswith(('ADVERTISEMENT', 'SPONSORED')):
+                            if len(text) > 30 and not text.startswith(('ADVERTISEMENT', 'SPONSORED', 'RELATED', 'READ ALSO')):
                                 text_parts.append(text)
                         
                         if text_parts:
@@ -321,7 +378,8 @@ def keyboard_kathmandu_post_to_json(request):
                     "meta[name='twitter:image']",
                     ".article-image img",
                     ".main-image img",
-                    "figure img"
+                    "figure img",
+                    ".story-image img"
                 ]
                 
                 for selector in img_selectors:
@@ -337,7 +395,7 @@ def keyboard_kathmandu_post_to_json(request):
                 'title': article['title'],
                 'content': content,
                 'image_url': image_url,
-                'date': pub_date.strftime('%Y-%m-%d') if pub_date else TODAY.strftime('%Y-%m-%d'),
+                'date': pub_date.strftime('%Y-%m-%d'),
                 'category': article.get('category', 'General'),
                 'summary': article.get('summary', '')
             }
@@ -356,6 +414,7 @@ def keyboard_kathmandu_post_to_json(request):
         update_progress("Fetching content", 0, len(articles))
         
         results = []
+        skipped_by_date = 0
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -372,9 +431,11 @@ def keyboard_kathmandu_post_to_json(request):
                 result = future.result()
                 if result:
                     results.append(result)
+                else:
+                    skipped_by_date += 1
         
         update_progress("Fetching content", len(articles), len(articles), 
-                       f"✅ Fetched {len(results)} articles")
+                       f"✅ Fetched {len(results)} articles (skipped {skipped_by_date} by date filter)")
         current_step += 1
         return results
     
@@ -551,7 +612,7 @@ def keyboard_kathmandu_post_to_json(request):
         print("\n" + "=" * 60)
         send_to_websocket("🚀 STARTING KATHMANDU POST SCRAPER")
         send_to_websocket(f"👤 User: {request.user.username if request.user.is_authenticated else 'Unknown'}")
-        send_to_websocket(f"📅 Date range: Last 4 days")
+        send_to_websocket(f"📅 Date range: Last 4 days (from {FOUR_DAYS_AGO.strftime('%Y-%m-%d')} to {TODAY.strftime('%Y-%m-%d')})")
         send_to_websocket("=" * 60)
         
         overall_start = time.time()
@@ -576,7 +637,7 @@ def keyboard_kathmandu_post_to_json(request):
         # 4. Check duplicates
         duplicate_urls, existing_articles = check_duplicates(article_links, request)
         
-        # 5. Fetch content
+        # 5. Fetch content (with date filtering)
         articles_to_fetch = [a for a in article_links if a['url'] not in duplicate_urls]
         articles_with_content = fetch_all_articles(articles_to_fetch, session)
         
@@ -615,7 +676,7 @@ def keyboard_kathmandu_post_to_json(request):
         send_to_websocket(f"⏱️ Total time: {total_time}s")
         send_to_websocket(f"📊 Articles found: {len(article_links)}")
         send_to_websocket(f"📊 Existing in DB: {len(duplicate_urls)}")
-        send_to_websocket(f"📊 New articles fetched: {len(articles_with_content)}")
+        send_to_websocket(f"📊 New articles fetched (after date filter): {len(articles_with_content)}")
         send_to_websocket(f"🔒 Security articles: {len(filtered_articles)}")
         send_to_websocket(f"💾 New saves: {saved_count}")
         send_to_websocket(f"🔄 Updates: {updated_count}")
@@ -637,7 +698,11 @@ def keyboard_kathmandu_post_to_json(request):
                 "time_taken": total_time,
                 "user_keywords_count": len(keyword_dict),
                 "user": request.user.username if request.user.is_authenticated else "unknown",
-                "scraped_at": datetime.now().isoformat()
+                "scraped_at": datetime.now().isoformat(),
+                "date_range": {
+                    "from": FOUR_DAYS_AGO.strftime('%Y-%m-%d'),
+                    "to": TODAY.strftime('%Y-%m-%d')
+                }
             },
             "articles": final_articles
         }, ensure_ascii=False)
